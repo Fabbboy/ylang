@@ -22,9 +22,8 @@ ConsoleReporter::ConsoleReporter(ReportCache &cache, std::ostream &os)
 
 void ConsoleReporter::report(const Diagnostic &diag) {
   printHeader(diag);
-  for (const auto &label : diag.labels()) {
+  for (const auto &label : diag.labels())
     printLabel(label);
-  }
 }
 
 void ConsoleReporter::printHeader(const Diagnostic &diag) {
@@ -60,6 +59,12 @@ void ConsoleReporter::printSnippet(const Label &label,
   auto linesSpan = srcCache.linesSpan();
   std::size_t startIdx = startLineOpt->get().line - 1;
   std::size_t endIdx = endLineOpt->get().line - 1;
+  std::size_t firstCol = loc.start - startLineOpt->get().start;
+
+  os_ << " --> " << loc.file->filename << ':' << startLineOpt->get().line
+      << ':' << firstCol + 1 << '\n';
+  os_ << "  |" << '\n';
+
   for (std::size_t idx = startIdx; idx <= endIdx; ++idx) {
     const Line &line = linesSpan[idx];
     std::string_view lineView(source.data() + line.start,
@@ -81,8 +86,6 @@ void ConsoleReporter::printSnippet(const Label &label,
       colEnd -= cut;
     }
 
-    os_ << " --> " << loc.file->filename << ':' << line.line << ':'
-        << colStart + 1 << '\n';
     std::string lineNumStr = std::to_string(line.line);
     os_ << lineNumStr << " | " << lineView << '\n';
     os_ << std::string(lineNumStr.size(), ' ') << " | "
