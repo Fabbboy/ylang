@@ -6,6 +6,8 @@ Line::Line(std::size_t start, std::size_t stop, std::size_t line)
     : start(start), stop(stop), line(line) {}
 
 bool Line::isWithin(std::size_t offset) const {
+  if (start == stop)
+    return offset == start;
   return offset >= start && offset < stop;
 }
 

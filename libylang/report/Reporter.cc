@@ -50,7 +50,8 @@ void ConsoleReporter::printSnippet(const Label &label,
                                    const SourceCache &srcCache) {
   const auto &loc = label.loc;
   auto startLineOpt = srcCache.getLine(loc.start);
-  auto endLineOpt = srcCache.getLine(loc.stop ? loc.stop - 1 : loc.stop);
+  std::size_t stop = loc.stop ? loc.stop : loc.start + 1;
+  auto endLineOpt = srcCache.getLine(stop - 1);
   if (!startLineOpt || !endLineOpt) {
     os_ << " -> " << loc.file->filename << ':' << loc.start + 1 << '\n';
     return;
@@ -65,7 +66,7 @@ void ConsoleReporter::printSnippet(const Label &label,
                              line.stop - line.start);
     std::size_t colStart = (idx == startIdx) ? loc.start - line.start : 0;
     std::size_t colEnd =
-        (idx == endIdx) ? loc.stop - line.start : line.stop - line.start;
+        (idx == endIdx) ? stop - line.start : line.stop - line.start;
 
     constexpr std::size_t WIDTH = 80;
     std::size_t cut = 0;
