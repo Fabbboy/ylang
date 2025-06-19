@@ -4,6 +4,7 @@
 #include "report/Reporter.h"
 #include <iostream>
 #include <string_view>
+#include <vector>
 
 using namespace ylang::parsing;
 using namespace ylang::report;
@@ -25,7 +26,9 @@ int main() {
   do {
     token = lexer.next();
     if (token.type == Token::Type::Unknown) {
-      BasicDiagnostic diag(Severity::Error, "unexpected character", token.location);
+      BasicDiagnostic diag(
+          Severity::Error, "unexpected character",
+          std::vector<Label>{Label{token.location, ""}});
       reporter.report(diag);
     }
   } while (token.type != Token::Type::Eof);

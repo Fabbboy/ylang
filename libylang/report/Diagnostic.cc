@@ -2,8 +2,9 @@
 
 namespace ylang::report {
 
-BasicDiagnostic::BasicDiagnostic(Severity sev, std::string msg, parsing::Location loc)
-    : sev_(sev), msg_(std::move(msg)), loc_(std::move(loc)) {}
+BasicDiagnostic::BasicDiagnostic(Severity sev, std::string msg,
+                                 std::vector<Label> labels)
+    : sev_(sev), msg_(std::move(msg)), labels_(std::move(labels)) {}
 
 } // namespace ylang::report
 

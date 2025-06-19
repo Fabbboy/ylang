@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
+#include <span>
 #include <unordered_map>
 #include <vector>
 
@@ -36,7 +37,9 @@ private:
 
 public:
   SourceCache(std::shared_ptr<parsing::Source> source);
-  [[nodiscard]] const Line *getLine(std::size_t offset) const;
+  [[nodiscard]] std::optional<std::reference_wrapper<const Line>>
+  getLine(std::size_t offset) const;
+  [[nodiscard]] std::span<const Line> linesSpan() const { return lines; }
 };
 
 class ReportCache {
@@ -48,7 +51,9 @@ public:
   ReportCache() = default;
 
   void addSource(std::shared_ptr<parsing::Source> source);
-  [[nodiscard]] const SourceCache *getSource(std::string_view filename) const;
+  [[nodiscard]]
+  std::optional<std::reference_wrapper<const SourceCache>>
+  getSource(std::string_view filename) const;
 };
 
 } // namespace ylang::report
