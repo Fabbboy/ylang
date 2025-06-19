@@ -1,3 +1,5 @@
+#pragma once
+
 #include "parsing/Manager.h"
 #include <cstddef>
 #include <memory>
