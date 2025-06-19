@@ -1,6 +1,10 @@
-set(LOCAL_SOURCES 
-  Cache.h 
+set(LOCAL_SOURCES
+  Cache.h
   Cache.cc
+  Diagnostic.h
+  Diagnostic.cc
+  Reporter.h
+  Reporter.cc
 )
 
 set(LOCAL_SOURCES_WITH_PATH)

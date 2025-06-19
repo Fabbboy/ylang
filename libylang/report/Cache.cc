@@ -6,6 +6,8 @@ Line::Line(std::size_t start, std::size_t stop, std::size_t line)
     : start(start), stop(stop), line(line) {}
 
 bool Line::isWithin(std::size_t offset) const {
+  if (start == stop)
+    return offset == start;
   return offset >= start && offset < stop;
 }
 
@@ -39,7 +41,7 @@ std::optional<std::reference_wrapper<const Line>>
 SourceCache::getLine(std::size_t offset) const {
   for (const auto &line : lines) {
     if (line.isWithin(offset)) {
-      return std::cref(line);
+      return line;
     }
   }
   return std::nullopt;
@@ -53,10 +55,10 @@ void ReportCache::addSource(std::shared_ptr<parsing::Source> source) {
 }
 
 std::optional<std::reference_wrapper<const SourceCache>>
-ReportCache::getSource(std::string_view filename) {
+ReportCache::getSource(std::string_view filename) const {
   auto it = cache.find(filename);
   if (it != cache.end()) {
-    return std::cref(it->second);
+    return it->second;
   }
   return std::nullopt;
 }
