@@ -2,7 +2,7 @@
 
 namespace ylang::parsing {
 Location::Location() : file(nullptr), range(0, 0) {}
-Location::Location(std::shared_ptr<Source> file, Range<std::size_t> range)
+Location::Location(std::shared_ptr<common::Source> file, common::Range<std::size_t> range)
     : file(std::move(file)), range(range) {}
 
 std::ostream &operator<<(std::ostream &os, const Location &loc) {

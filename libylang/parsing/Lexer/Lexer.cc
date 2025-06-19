@@ -4,13 +4,13 @@
 #include <parsing/Lexer/Lexer.h>
 
 namespace ylang::parsing {
-Lexer::Lexer(std::shared_ptr<Source> source_ptr)
+Lexer::Lexer(std::shared_ptr<common::Source> source_ptr)
     : source_ptr(std::move(source_ptr)), cache(std::nullopt), start(0), pos(0) {
   source = this->source_ptr->content;
 }
 
 Location Lexer::make_location() const {
-  return Location(source_ptr, Range<std::size_t>(start, pos));
+  return Location(source_ptr, common::Range<std::size_t>(start, pos));
 }
 
 std::string_view Lexer::make_lexeme() const {

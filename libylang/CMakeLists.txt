@@ -1,9 +1,6 @@
-set(SOURCES 
-  Range.h
-  Manager.h
-  Manager.cc
-)
+set(SOURCES )
 
+add_subdirectory(common)
 add_subdirectory(parsing)
 add_subdirectory(report)
 

@@ -5,7 +5,7 @@
 #include <string_view>
 #include <vector>
 
-namespace ylang::parsing {
+namespace ylang::common {
 
 struct Source {
 public:
@@ -25,4 +25,4 @@ public:
   std::shared_ptr<Source> addContent(std::string_view content,
                                      std::string_view filename);
 };
-} // namespace ylang::parsing
+} // namespace ylang::common

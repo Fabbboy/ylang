@@ -1,4 +1,4 @@
-#include "Manager.h"
+#include "common/Manager.h"
 #include "parsing/Lexer/Lexer.h"
 #include "report/Diagnostic.h"
 #include "report/Engine.h"
@@ -12,7 +12,7 @@ std::string_view SOURCE = R"(
 )";
 
 int main() {
-  Manager manager;
+  ylang::common::Manager manager;
   auto source = manager.addContent(SOURCE, "main.y");
 
   Lexer lexer(source);

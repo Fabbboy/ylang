@@ -1,7 +1,7 @@
 #pragma once
 
 #include <type_traits>
-namespace ylang {
+namespace ylang::common {
 template <typename T> class Range {
   static_assert(std::is_arithmetic<T>::value,
                 "Range can only be used with arithmetic types.");

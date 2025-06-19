@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Manager.h"
+#include "common/Manager.h"
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -12,7 +12,7 @@ namespace ylang::parsing {
 class Lexer {
 private:
   std::string_view source;
-  std::shared_ptr<Source> source_ptr;
+  std::shared_ptr<common::Source> source_ptr;
 
   std::optional<Token> cache;
 
@@ -35,7 +35,7 @@ private:
   Token lex_number();
 
 public:
-  Lexer(std::shared_ptr<Source> source_ptr);
+  Lexer(std::shared_ptr<common::Source> source_ptr);
 
   Token next();
 };

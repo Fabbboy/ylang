@@ -1,8 +1,8 @@
+#include <common/Manager.h>
 #include <memory>
-#include <Manager.h>
 #include <string_view>
 
-namespace ylang::parsing {
+namespace ylang::common {
 
 Source::Source(std::string_view content, std::string_view filename)
     : content(content), filename(filename) {}
@@ -15,4 +15,4 @@ std::shared_ptr<Source> Manager::addContent(std::string_view content,
   contents.push_back(source);
   return source;
 }
-} // namespace ylang::parsing
+} // namespace ylang::common
