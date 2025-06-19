@@ -6,3 +6,4 @@ BasicDiagnostic::BasicDiagnostic(Severity sev, std::string msg, parsing::Locatio
     : sev_(sev), msg_(std::move(msg)), loc_(std::move(loc)) {}
 
 } // namespace ylang::report
+

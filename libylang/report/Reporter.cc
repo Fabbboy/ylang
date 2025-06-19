@@ -1,5 +1,4 @@
-#include <iomanip>
-#include <iostream>
+#include <ostream>
 #include <report/Reporter.h>
 
 namespace ylang::report {
@@ -25,25 +24,23 @@ void TextReporter::report(const Diagnostic &diag) {
   if (!loc.file) {
     return;
   }
-  auto srcOpt = cache_.getSource(loc.file->filename);
-  if (!srcOpt) {
+  const auto *srcCache = cache_.getSource(loc.file->filename);
+  if (!srcCache) {
     os_ << " -> " << loc.file->filename << ':' << loc.start + 1 << '\n';
     return;
   }
-  const auto &srcCache = srcOpt->get();
-  auto lineOpt = srcCache.getLine(loc.start);
-  if (!lineOpt) {
+  const Line *line = srcCache->getLine(loc.start);
+  if (!line) {
     os_ << " -> " << loc.file->filename << ':' << loc.start + 1 << '\n';
     return;
   }
-  const Line &line = lineOpt->get();
-  std::string_view lineView(loc.file->content.data() + line.start,
-                            line.stop - line.start);
-  std::size_t colStart = loc.start - line.start;
-  std::size_t colEnd = loc.stop - line.start;
-  os_ << " --> " << loc.file->filename << ':' << line.line << ':' << colStart + 1
+  std::string_view lineView(loc.file->content.data() + line->start,
+                            line->stop - line->start);
+  std::size_t colStart = loc.start - line->start;
+  std::size_t colEnd = loc.stop - line->start;
+  os_ << " --> " << loc.file->filename << ':' << line->line << ':' << colStart + 1
       << '\n';
-  std::string lineNumStr = std::to_string(line.line);
+  std::string lineNumStr = std::to_string(line->line);
   os_ << lineNumStr << " | " << lineView << '\n';
   os_ << std::string(lineNumStr.size(), ' ') << " | "
       << std::string(colStart, ' ')
@@ -51,3 +48,4 @@ void TextReporter::report(const Diagnostic &diag) {
 }
 
 } // namespace ylang::report
+

@@ -2,13 +2,22 @@
 
 #include "parsing/Manager.h"
 #include <cstddef>
-#include <functional>
 #include <memory>
 #include <optional>
 #include <unordered_map>
 #include <vector>
 
 namespace ylang::report {
+
+struct StringHash {
+  using is_transparent = void;
+  std::size_t operator()(std::string_view v) const noexcept {
+    return std::hash<std::string_view>{}(v);
+  }
+  std::size_t operator()(const std::string &s) const noexcept {
+    return std::hash<std::string_view>{}(s);
+  }
+};
 struct Line {
 public:
   std::size_t start, stop;
@@ -27,20 +36,20 @@ private:
 
 public:
   SourceCache(std::shared_ptr<parsing::Source> source);
-  std::optional<std::reference_wrapper<const Line>>
-  getLine(std::size_t offset) const;
+  [[nodiscard]] const Line *getLine(std::size_t offset) const;
 };
 
 class ReportCache {
 private:
-  std::unordered_map<std::string_view, SourceCache> cache;
+  std::unordered_map<std::string, SourceCache, StringHash, std::equal_to<>>
+      cache;
 
 public:
   ReportCache() = default;
 
   void addSource(std::shared_ptr<parsing::Source> source);
-  std::optional<std::reference_wrapper<const SourceCache>>
-  getSource(std::string_view filename);
+  [[nodiscard]] const SourceCache *getSource(std::string_view filename) const;
 };
 
 } // namespace ylang::report
+

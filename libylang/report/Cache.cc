@@ -35,14 +35,13 @@ void SourceCache::construct() {
   }
 }
 
-std::optional<std::reference_wrapper<const Line>>
-SourceCache::getLine(std::size_t offset) const {
+const Line *SourceCache::getLine(std::size_t offset) const {
   for (const auto &line : lines) {
     if (line.isWithin(offset)) {
-      return std::cref(line);
+      return &line;
     }
   }
-  return std::nullopt;
+  return nullptr;
 }
 
 void ReportCache::addSource(std::shared_ptr<parsing::Source> source) {
@@ -52,12 +51,11 @@ void ReportCache::addSource(std::shared_ptr<parsing::Source> source) {
   }
 }
 
-std::optional<std::reference_wrapper<const SourceCache>>
-ReportCache::getSource(std::string_view filename) {
+const SourceCache *ReportCache::getSource(std::string_view filename) const {
   auto it = cache.find(filename);
   if (it != cache.end()) {
-    return std::cref(it->second);
+    return &it->second;
   }
-  return std::nullopt;
+  return nullptr;
 }
 } // namespace ylang::report

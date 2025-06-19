@@ -2,7 +2,6 @@
 
 #include "Cache.h"
 #include "Diagnostic.h"
-#include <iosfwd>
 #include <iostream>
 
 namespace ylang::report {
@@ -25,3 +24,4 @@ public:
 };
 
 } // namespace ylang::report
+
