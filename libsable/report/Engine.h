@@ -3,7 +3,7 @@
 #include "report/Diagnostic.h"
 #include <iostream>
 
-namespace ylang::report {
+namespace sable::report {
 class DiagnosticEngine {
 public:
   virtual ~DiagnosticEngine() = default;
@@ -21,4 +21,4 @@ public:
   void report(const Diagnostic &diag) override;
 };
 
-} // namespace ylang::report
+} // namespace sable::report

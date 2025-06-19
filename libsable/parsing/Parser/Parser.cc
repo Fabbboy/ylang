@@ -1,5 +1,5 @@
 #include <parsing/Parser/Parser.h>
 
-namespace ylang::parsing {
+namespace sable::parsing {
 Parser::Parser(Ast &ast) : ast(ast) {}
-} // namespace ylang::parsing
+} // namespace sable::parsing

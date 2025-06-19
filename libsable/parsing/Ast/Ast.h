@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ylang::parsing {
+namespace sable::parsing {
 struct Node {
 public:
   virtual ~Node() = default;
@@ -12,4 +12,4 @@ class Ast {
 public:
   Ast() = default;
 };
-} // namespace ylang::parsing
+} // namespace sable::parsing

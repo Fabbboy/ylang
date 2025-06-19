@@ -1,7 +1,7 @@
 #include <report/Diagnostic.h>
 #include <sstream>
 
-namespace ylang::report {
+namespace sable::report {
 std::ostream &operator<<(std::ostream &os, Severity severity) {
   switch (severity) {
 #define X(name)                                                                \
@@ -34,4 +34,4 @@ std::ostream &operator<<(std::ostream &os, const Diagnostic &diag) {
   os << diag.write();
   return os;
 }
-} // namespace ylang::report
+} // namespace sable::report

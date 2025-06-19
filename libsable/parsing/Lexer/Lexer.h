@@ -8,7 +8,7 @@
 #include <parsing/Lexer/Token.h>
 #include <string_view>
 
-namespace ylang::parsing {
+namespace sable::parsing {
 class Lexer {
 private:
   std::string_view source;
@@ -39,4 +39,4 @@ public:
 
   Token next();
 };
-} // namespace ylang::parsing
+} // namespace sable::parsing

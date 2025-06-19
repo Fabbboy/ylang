@@ -2,7 +2,7 @@
 #include <memory>
 #include <string_view>
 
-namespace ylang::common {
+namespace sable::common {
 
 Source::Source(std::string_view content, std::string_view filename)
     : content(content), filename(filename) {}
@@ -15,4 +15,4 @@ std::shared_ptr<Source> Manager::addContent(std::string_view content,
   contents.push_back(source);
   return source;
 }
-} // namespace ylang::common
+} // namespace sable::common

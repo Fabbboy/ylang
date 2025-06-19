@@ -3,7 +3,7 @@
 #include <parsing/Location.h>
 #include <string_view>
 
-namespace ylang::parsing {
+namespace sable::parsing {
 struct Token {
 public:
 #define KINDS                                                                  \
@@ -58,4 +58,4 @@ public:
   Token(Type type, Location location, std::string_view lexeme,
         std::optional<Data> data);
 };
-} // namespace ylang::parsing
+} // namespace sable::parsing

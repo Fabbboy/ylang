@@ -1,7 +1,7 @@
 #pragma once
 
 #include "parsing/Ast/Ast.h"
-namespace ylang::parsing {
+namespace sable::parsing {
 class Parser {
 private:
   Ast &ast;
@@ -9,4 +9,4 @@ private:
 public:
   Parser(Ast &ast);
 };
-} // namespace ylang::parsing
+} // namespace sable::parsing

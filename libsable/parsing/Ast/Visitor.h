@@ -1,8 +1,8 @@
 #pragma once
 
-namespace ylang::parsing {
+namespace sable::parsing {
 class AstVisitor {
 public:
   virtual ~AstVisitor() = default;
 };
-}; // namespace ylang::parsing
+}; // namespace sable::parsing

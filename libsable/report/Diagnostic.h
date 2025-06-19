@@ -3,7 +3,7 @@
 #include <optional>
 #include <ostream>
 #include <string>
-namespace ylang::report {
+namespace sable::report {
 #define SEVERITY_LEVELS                                                        \
   X(Info)                                                                      \
   X(Warning)                                                                   \
@@ -30,4 +30,4 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const Diagnostic &diag);
 };
 
-} // namespace ylang::report
+} // namespace sable::report

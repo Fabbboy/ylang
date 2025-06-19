@@ -1,7 +1,7 @@
 #pragma once
 
 #include <type_traits>
-namespace ylang::common {
+namespace sable::common {
 template <typename T> class Range {
   static_assert(std::is_arithmetic<T>::value,
                 "Range can only be used with arithmetic types.");
@@ -19,4 +19,4 @@ public:
 
   bool contains(T value) const { return value >= start && value < stop; }
 };
-} // namespace ylang
+} // namespace sable
