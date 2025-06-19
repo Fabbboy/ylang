@@ -7,6 +7,9 @@ set(LOCAL_SOURCES
 
   # Lexer
   Lexer/Token.h
+  Lexer/Token.cc
+  Lexer/Lexer.h 
+  Lexer/Lexer.cc
 )
 
 set(LOCAL_SOURCES_WITH_PATH)

@@ -1,12 +1,11 @@
 #pragma once
 
-#include <optional>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
 
 namespace ylang::parsing {
-using ContentId = std::size_t;
 
 struct Source {
 public:
@@ -18,13 +17,12 @@ public:
 
 struct Manager {
 private:
-  std::vector<Source> contents;
-  ContentId next_id;
+  std::vector<std::shared_ptr<Source>> contents;
 
 public:
   Manager();
 
-  ContentId add_content(Source &&source);
-  std::optional<const Source *> get_content(ContentId id) const;
+  std::shared_ptr<Source> addContent(std::string_view content,
+                                     std::string_view filename);
 };
 } // namespace ylang::parsing

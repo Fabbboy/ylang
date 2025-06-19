@@ -1,22 +1,18 @@
-#include <optional>
+#include <memory>
 #include <parsing/Manager.h>
+#include <string_view>
 
 namespace ylang::parsing {
 
 Source::Source(std::string_view content, std::string_view filename)
     : content(content), filename(filename) {}
 
-Manager::Manager() : next_id(0) {};
+Manager::Manager() : contents() {}
 
-ContentId Manager::add_content(Source &&source) {
-  contents.emplace_back(std::move(source));
-  return next_id++;
-}
-
-std::optional<const Source *> Manager::get_content(ContentId id) const {
-  if (id < next_id) {
-    return &contents[id];
-  }
-  return std::nullopt;
+std::shared_ptr<Source> Manager::addContent(std::string_view content,
+                                            std::string_view filename) {
+  std::shared_ptr<Source> source = std::make_shared<Source>(content, filename);
+  contents.push_back(source);
+  return source;
 }
 } // namespace ylang::parsing

@@ -2,7 +2,7 @@
 
 namespace ylang::parsing {
 
-Token::Token(Type type, Location location, std::string_view text)
-    : type(type), location(location), text(text) {}
+Token::Token(Type type, Location location, std::string_view lexeme)
+    : type(type), location(location), lexeme(lexeme) {}
 
 } // namespace ylang::parsing
