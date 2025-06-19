@@ -1,5 +1,7 @@
 #include "Manager.h"
 #include "parsing/Lexer/Lexer.h"
+#include "report/Diagnostic.h"
+#include "report/Engine.h"
 #include <iostream>
 #include <string_view>
 
@@ -21,4 +23,10 @@ int main() {
     std::cout << "Token: " << Token::type_to_string(token.type) << ", Lexeme: '"
               << token.lexeme << "', Location: " << token.location << std::endl;
   } while (token.type != Token::Type::Eof);
+
+  ylang::report::StreamWriter writer(std::cout);
+
+  ylang::report::Diagnostic diag(ylang::report::Severity::Info);
+  diag.withMessage("Lexing completed successfully.");
+  writer.report(diag);
 }
