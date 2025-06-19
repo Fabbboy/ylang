@@ -2,6 +2,7 @@
 
 #include "parsing/Manager.h"
 #include <cstddef>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <parsing/Lexer/Token.h>
@@ -21,7 +22,16 @@ private:
   Token lex();
   Location make_location() const;
   std::string_view make_lexeme() const;
-  Token make_token(Token::Type type) const;
+  Token make_token(Token::Type type,
+                   std::optional<Token::Data> data = std::nullopt) const;
+  std::optional<char> get_char(std::size_t offset = 0) const;
+  bool check_char(std::size_t offset, std::function<bool(char)> predicate) const;
+  inline void advance() { pos++; }
+
+private:
+  void skip_trivial();
+  Token lex_identifier();
+  Token lex_number();
 
 public:
   Lexer(std::shared_ptr<Source> source_ptr);
