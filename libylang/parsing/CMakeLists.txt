@@ -2,8 +2,6 @@ set(LOCAL_SOURCES
   # General
   Location.h
   Location.cc
-  Manager.h
-  Manager.cc
 
   # Lexer
   Lexer/Token.h

@@ -1,5 +1,5 @@
+#include "Manager.h"
 #include "parsing/Lexer/Lexer.h"
-#include "parsing/Manager.h"
 #include <iostream>
 #include <string_view>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "parsing/Manager.h"
+#include "Manager.h"
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -25,7 +25,8 @@ private:
   Token make_token(Token::Type type,
                    std::optional<Token::Data> data = std::nullopt) const;
   std::optional<char> get_char(std::size_t offset = 0) const;
-  bool check_char(std::size_t offset, std::function<bool(char)> predicate) const;
+  bool check_char(std::size_t offset,
+                  std::function<bool(char)> predicate) const;
   inline void advance() { pos++; }
 
 private:

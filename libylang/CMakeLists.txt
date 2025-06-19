@@ -1,5 +1,7 @@
 set(SOURCES 
   Range.h
+  Manager.h
+  Manager.cc
 )
 
 add_subdirectory(parsing)

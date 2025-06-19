@@ -1,5 +1,5 @@
 #include "Range.h"
-#include "parsing/Manager.h"
+#include "Manager.h"
 #include <cstddef>
 #include <memory>
 #include <ostream>

@@ -1,5 +1,5 @@
 #include <memory>
-#include <parsing/Manager.h>
+#include <Manager.h>
 #include <string_view>
 
 namespace ylang::parsing {
