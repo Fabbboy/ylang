@@ -1,5 +1,7 @@
 #include <parser/Location.h>
 
 namespace ylang::parser {
-Location::Location() : file(nullptr), start(0), stop(0) {}
+Location::Location() : file_id(0), start(0), stop(0) {}
+Location::Location(ContentId file_id, std::size_t start, std::size_t stop)
+    : file_id(file_id), start(start), stop(stop) {}
 } // namespace ylang::parser

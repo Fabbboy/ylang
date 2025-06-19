@@ -1,13 +1,13 @@
+#include "parser/Manager.h"
 #include <cstddef>
-#include <memory>
-#include <string>
 
 namespace ylang::parser {
 struct Location {
 public:
-  std::shared_ptr<const std::string> file;
+  ContentId file_id;
   std::size_t start, stop;
 
   Location();
+  Location(ContentId file_id, std::size_t start, std::size_t stop);
 };
 } // namespace ylang::parser

@@ -1,6 +1,8 @@
 set(LOCAL_SOURCES 
   Location.h
   Location.cc
+  Manager.h
+  Manager.cc
 )
 
 set(LOCAL_SOURCES_WITH_PATH)
