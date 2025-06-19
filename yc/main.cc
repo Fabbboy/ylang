@@ -1,8 +1,8 @@
 #include "parsing/Lexer/Lexer.h"
 #include "parsing/Manager.h"
 #include "report/Cache.h"
+#include "report/Diagnostic.h"
 #include "report/Reporter.h"
-#include <iostream>
 #include <string_view>
 #include <vector>
 
@@ -10,11 +10,7 @@ using namespace ylang::parsing;
 using namespace ylang::report;
 
 std::string_view SOURCE = R"(
-s
-s
-s
-s
-s
+  $
  int a = 123 @
 )";
 
@@ -31,12 +27,13 @@ int main() {
   do {
     token = lexer.next();
     if (token.type == Token::Type::Unknown) {
-      Location loc = token.location;
-      loc.start = 0; // simulate multiline or multi-character span
-      BasicDiagnostic diag(
-          Severity::Error, std::string("unexpected character"),
-          std::vector<Label>{Label{loc, ""}});
-      reporter.report(diag);
+      Label err_lbl;
+      err_lbl.loc = token.location;
+      err_lbl.message = "unknown token";
+      reporter.report(
+          BasicDiagnostic(Severity::Error, "Lexical error", {err_lbl}));
     }
   } while (token.type != Token::Type::Eof);
+
+  return 0;
 }
