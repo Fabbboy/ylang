@@ -10,7 +10,7 @@ Lexer::Lexer(std::shared_ptr<Source> source_ptr)
 }
 
 Location Lexer::make_location() const {
-  return Location(source_ptr, start, pos);
+  return Location(source_ptr, Range<std::size_t>(start, pos));
 }
 
 std::string_view Lexer::make_lexeme() const {

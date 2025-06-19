@@ -1,3 +1,4 @@
+#include "Range.h"
 #include "parsing/Manager.h"
 #include <cstddef>
 #include <memory>
@@ -7,10 +8,10 @@ namespace ylang::parsing {
 struct Location {
 public:
   std::shared_ptr<Source> file;
-  std::size_t start, stop;
+  Range<std::size_t> range;
 
   Location();
-  Location(std::shared_ptr<Source> file, std::size_t start, std::size_t stop);
+  Location(std::shared_ptr<Source> file, Range<std::size_t> range);
 
   friend std::ostream &operator<<(std::ostream &os, const Location &loc);
 };
