@@ -20,14 +20,14 @@ int main() {
   reportCache.addSource(source);
 
   Lexer lexer(source);
-  TextReporter reporter(reportCache);
+  ConsoleReporter reporter(reportCache);
 
   Token token;
   do {
     token = lexer.next();
     if (token.type == Token::Type::Unknown) {
       BasicDiagnostic diag(
-          Severity::Error, "unexpected character",
+          Severity::Error, std::string("unexpected character"),
           std::vector<Label>{Label{token.location, ""}});
       reporter.report(diag);
     }

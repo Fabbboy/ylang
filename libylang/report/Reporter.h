@@ -12,13 +12,16 @@ public:
   virtual void report(const Diagnostic &diag) = 0;
 };
 
-class TextReporter : public Reporter {
+class ConsoleReporter : public Reporter {
 private:
   ReportCache &cache_;
   std::ostream &os_;
+  void printHeader(const Diagnostic &diag);
+  void printLabel(const Label &label);
+  void printSnippet(const Label &label, const SourceCache &src);
 
 public:
-  TextReporter(ReportCache &cache, std::ostream &os = std::cerr);
+  ConsoleReporter(ReportCache &cache, std::ostream &os = std::cerr);
 
   void report(const Diagnostic &diag) override;
 };
