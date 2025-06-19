@@ -138,6 +138,20 @@ Token Lexer::lex() {
     return lex_identifier();
   case '0' ... '9':
     return lex_number();
+  case ',':
+    return make_token(Token::Type::Comma);
+  case ';':
+    return make_token(Token::Type::Semicolon);
+  case '+':
+    return make_token(Token::Type::Plus);
+  case '-':
+    return make_token(Token::Type::Minus);
+  case '*':
+    return make_token(Token::Type::Star);
+  case '/':
+    return make_token(Token::Type::Slash);
+  case '=':
+    return make_token(Token::Type::Assign);
   default:
     return make_token(Token::Type::Unknown);
   }

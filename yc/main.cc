@@ -6,7 +6,7 @@
 using namespace ylang::parsing;
 
 std::string_view SOURCE = R"(
-ng 2.2 22 
+ int a = 123;
 )";
 
 int main() {

@@ -13,7 +13,14 @@ public:
   K(FloatError)                                                                \
   K(Identifier)                                                                \
   K(Integer)                                                                   \
-  K(Float)
+  K(Float)                                                                     \
+  K(Comma)                                                                     \
+  K(Semicolon)                                                                 \
+  K(Plus)                                                                      \
+  K(Minus)                                                                     \
+  K(Star)                                                                      \
+  K(Slash)                                                                     \
+  K(Assign)
 
   enum class Type {
 #define K(name) name,
