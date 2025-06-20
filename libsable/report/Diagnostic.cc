@@ -49,7 +49,7 @@ std::ostream &Diagnostic::print(std::ostream &os, const Cache &cache) const {
   os << "\n";
 
   if (code) {
-    writeSpan(os, *code, cache, "");
+    writeSpan(os, *code, cache);
   }
 
   for (const auto &label : labels) {

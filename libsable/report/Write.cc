@@ -6,8 +6,7 @@
 namespace sable::report {
 
 void writeLine(std::ostream &os, const Span &span, const Line &line,
-               std::shared_ptr<common::Source> source,
-               std::string_view message) {
+               std::shared_ptr<common::Source> source) {
   os << " " << line.lineNumber << " | ";
   os << source->content.substr(line.start(), line.length());
   os << "\n   | ";
@@ -25,11 +24,10 @@ void writeLine(std::ostream &os, const Span &span, const Line &line,
     }
   }
 
-  os << " " << message << "\n";
+  os << "\n";
 }
 
-void writeSpan(std::ostream &os, const Span &span, const Cache &cache,
-               std::string_view message) {
+void writeSpan(std::ostream &os, const Span &span, const Cache &cache) {
   std::optional<const CacheEntry *> entry = cache.getEntry(span.source());
 
   if (!entry.has_value()) {
@@ -48,7 +46,7 @@ void writeSpan(std::ostream &os, const Span &span, const Cache &cache,
      << "]\n";
 
   for (const auto &l : lines) {
-    writeLine(os, span, l, entry.value()->source, message);
+    writeLine(os, span, l, entry.value()->source);
   }
 }
 
