@@ -2,31 +2,28 @@
 
 #include "common/Manager.h"
 #include "common/Range.h"
+#include "report/Span.h"
 #include <cstddef>
-#include <functional>
 #include <memory>
+#include <optional>
 #include <span>
 #include <unordered_map>
 #include <vector>
 
 namespace sable::report {
+
 struct Line {
-public:
   common::Range<std::size_t> range;
   std::size_t lineNumber;
 
   Line(common::Range<std::size_t> range, std::size_t lineNumber);
-  inline std::size_t start() const { return range.getStart(); }
-  inline std::size_t end() const { return range.getStop(); }
-  inline std::size_t length() const { return end() - start(); }
-
-  inline bool isWithin(common::Range<std::size_t> other) const {
-    return other.contains(start()) && other.contains(end() - 1);
-  }
+  std::size_t start() const;
+  std::size_t end() const;
+  std::size_t length() const;
+  bool isWithin(common::Range<std::size_t> other) const;
 };
 
 struct CacheEntry {
-public:
   std::shared_ptr<common::Source> source;
   std::vector<Line> lines;
 
@@ -35,44 +32,18 @@ public:
   std::span<const Line> getLines(common::Range<std::size_t> range) const;
 };
 
-template <typename S> class Cache {
-  static_assert(std::is_copy_constructible_v<S>,
-                "T must be copy constructible");
-  static_assert(std::is_copy_assignable_v<S>, "T must be copy assignable");
-  static_assert(std::is_default_constructible_v<std::hash<S>>,
-                "std::hash<T> must be defined");
-  static_assert(std::is_invocable_r_v<std::size_t, std::hash<S>, S>,
-                "std::hash<T> must be callable");
-  static_assert(std::is_convertible_v<
-                    decltype(std::declval<S>() == std::declval<S>()), bool>,
-                "T must support operator==");
-
+class Cache {
 private:
   const common::Manager &manager;
-  std::unordered_map<S, CacheEntry> entries;
+  std::unordered_map<Span, CacheEntry> entries;
 
 public:
-  explicit Cache(const common::Manager &manager) : manager(manager) {}
+  explicit Cache(const common::Manager &manager);
 
-  void addEntry(const S &span) {
-    auto it = entries.find(span);
-    if (it == entries.end()) {
-      std::shared_ptr<common::Source> source =
-          manager.getContent(span.source());
-      if (source) {
-        entries.emplace(span, CacheEntry(source));
-      }
-    }
-  }
+  void addEntry(const Span &span);
+  std::optional<const CacheEntry *> getEntry(const Span &span) const;
 
-  std::optional<const CacheEntry *> getEntry(const S &span) const {
-    auto it = entries.find(span);
-    if (it != entries.end()) {
-      return &it->second;
-    }
-    return std::nullopt;
-  }
-
-  inline const common::Manager &getManager() const { return manager; }
+  const common::Manager &getManager() const;
 };
+
 } // namespace sable::report

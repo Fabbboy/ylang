@@ -1,10 +1,15 @@
-set(LOCAL_SOURCES  
+set(LOCAL_SOURCES
   Diagnostic.h
+  Diagnostic.cc
   Engine.h
+  Engine.cc
   Span.h
+  Span.cc
   Label.h
+  Label.cc
   Write.h
-  Cache.h 
+  Write.cc
+  Cache.h
   Cache.cc
 )
 

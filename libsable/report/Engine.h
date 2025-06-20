@@ -2,30 +2,25 @@
 
 #include "report/Cache.h"
 #include "report/Diagnostic.h"
-#include <iostream>
 #include <ostream>
 
 namespace sable::report {
-template <typename S> class DiagnosticEngine {
+
+class DiagnosticEngine {
 public:
   virtual ~DiagnosticEngine() = default;
-
-  virtual void report(const Diagnostic<S> &diag) = 0;
+  virtual void report(const Diagnostic &diag) = 0;
 };
 
-template <typename S> class StreamWriter : public DiagnosticEngine<S> {
+class StreamWriter : public DiagnosticEngine {
 private:
   std::ostream &os;
-  const Cache<S> &cache;
+  const Cache &cache;
 
 public:
-  explicit StreamWriter(std::ostream &output_stream, const Cache<S> &manager)
-      : os(output_stream), cache(manager) {}
+  StreamWriter(std::ostream &output_stream, const Cache &manager);
 
-  void report(const Diagnostic<S> &diag) override {
-    diag.print(os, cache);
-    os << std::endl;
-  }
+  void report(const Diagnostic &diag) override;
 };
 
 } // namespace sable::report

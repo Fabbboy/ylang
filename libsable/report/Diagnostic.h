@@ -17,9 +17,9 @@
 
 namespace sable::report {
 
-#define SEVERITY_LEVELS                                                        \
-  X(Info, ANSI_BLUE)                                                           \
-  X(Warning, ANSI_YELLOW)                                                      \
+#define SEVERITY_LEVELS \
+  X(Info, ANSI_BLUE) \
+  X(Warning, ANSI_YELLOW) \
   X(Error, ANSI_RED)
 
 enum class Severity {
@@ -28,60 +28,23 @@ enum class Severity {
 #undef X
 };
 
-inline std::ostream &operator<<(std::ostream &os, Severity severity) {
-  switch (severity) {
-#define X(name, color)                                                         \
-  case Severity::name:                                                         \
-    os << color << #name << ANSI_RESET;                                        \
-    break;
-    SEVERITY_LEVELS
-#undef X
-  default:
-    os << "Unknown";
-    break;
-  }
-  return os;
-}
+std::ostream &operator<<(std::ostream &os, Severity severity);
 
-template <typename S> class Diagnostic {
-  static_assert(is_derived_from_span_v<S>,
-                "S must be derived from Span<T> for some type T");
-
+class Diagnostic {
 private:
   Severity severity;
   std::optional<std::string> message;
-  std::optional<S> code;
-  std::vector<Label<S>> labels;
+  std::optional<Span> code;
+  std::vector<Label> labels;
 
 public:
-  Diagnostic(Severity severity) : severity(severity) {}
+  explicit Diagnostic(Severity severity);
 
-  inline Diagnostic<S> &withMessage(const std::string &msg) {
-    message = msg;
-    return *this;
-  }
-  inline Diagnostic<S> &withCode(const S &span) {
-    code = span;
-    return *this;
-  }
-  inline Diagnostic<S> &withLabel(const Label<S> &label) {
-    labels.push_back(label);
-    return *this;
-  }
+  Diagnostic &withMessage(const std::string &msg);
+  Diagnostic &withCode(const Span &span);
+  Diagnostic &withLabel(const Label &label);
 
-  std::ostream &print(std::ostream &os, const Cache<S> &cache) const {
-    os << severity << ": ";
-    if (message) {
-      os << *message;
-    }
-    os << "\n";
-
-    if (code) {
-      SpanWrite<S>::write(os, *code, cache);
-    }
-
-    return os;
-  }
+  std::ostream &print(std::ostream &os, const Cache &cache) const;
 };
 
 } // namespace sable::report

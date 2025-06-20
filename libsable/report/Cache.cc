@@ -1,9 +1,18 @@
-#include <report/Cache.h>
+#include "report/Cache.h"
 #include <span>
 
 namespace sable::report {
+
 Line::Line(common::Range<std::size_t> range, std::size_t lineNumber)
     : range(std::move(range)), lineNumber(lineNumber) {}
+
+std::size_t Line::start() const { return range.getStart(); }
+std::size_t Line::end() const { return range.getStop(); }
+std::size_t Line::length() const { return end() - start(); }
+bool Line::isWithin(common::Range<std::size_t> other) const {
+  return other.contains(start()) && other.contains(end() - 1);
+}
+
 CacheEntry::CacheEntry(std::shared_ptr<common::Source> source)
     : source(std::move(source)) {
   if (!this->source) {
@@ -24,8 +33,7 @@ CacheEntry::CacheEntry(std::shared_ptr<common::Source> source)
   }
 }
 
-std::span<const Line>
-CacheEntry::getLines(common::Range<std::size_t> range) const {
+std::span<const Line> CacheEntry::getLines(common::Range<std::size_t> range) const {
   std::span<const Line> result;
   if (!source) {
     return result;
@@ -43,5 +51,28 @@ CacheEntry::getLines(common::Range<std::size_t> range) const {
 
   return result;
 }
+
+Cache::Cache(const common::Manager &manager) : manager(manager) {}
+
+void Cache::addEntry(const Span &span) {
+  auto it = entries.find(span);
+  if (it == entries.end()) {
+    std::shared_ptr<common::Source> source =
+        manager.getContent(span.source()).value_or(nullptr);
+    if (source) {
+      entries.emplace(span, CacheEntry(source));
+    }
+  }
+}
+
+std::optional<const CacheEntry *> Cache::getEntry(const Span &span) const {
+  auto it = entries.find(span);
+  if (it != entries.end()) {
+    return &it->second;
+  }
+  return std::nullopt;
+}
+
+const common::Manager &Cache::getManager() const { return manager; }
 
 } // namespace sable::report
