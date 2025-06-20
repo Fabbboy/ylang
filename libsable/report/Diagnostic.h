@@ -35,11 +35,13 @@ private:
   std::optional<std::string> message;
   std::optional<Span> code;
   std::vector<Label> labels;
+  std::optional<std::string> note;
 
 public:
   explicit Diagnostic(Severity severity);
 
-  Diagnostic &withMessage(const std::string &msg);
+  Diagnostic &withMessage(std::string_view msg);
+  Diagnostic &withNote(std::string_view note);
   Diagnostic &withCode(const Span &span);
   Diagnostic &withLabel(const Label &label);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/Manager.h"
+#include "report/Cache.h"
 #include "report/Span.h"
 #include <optional>
 #include <ostream>
@@ -17,7 +17,7 @@ public:
   explicit Label(Span span);
 
   Label &withMessage(const std::string &msg);
-  std::ostream &print(std::ostream &os, const common::Manager &manager) const;
+  std::ostream &print(std::ostream &os, const Cache &cache) const;
 };
 
 } // namespace sable::report

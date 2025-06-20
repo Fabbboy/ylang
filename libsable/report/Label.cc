@@ -1,4 +1,6 @@
 #include "report/Label.h"
+#include "report/Cache.h"
+#include "report/Write.h"
 
 namespace sable::report {
 
@@ -9,26 +11,8 @@ Label &Label::withMessage(const std::string &msg) {
   return *this;
 }
 
-std::ostream &Label::print(std::ostream &os, const common::Manager &manager) const {
-  os << span.source() << ":" << span.start() << ":" << span.end();
-  if (message) {
-    os << " --> " << *message;
-  }
-  if (span.length() > 0) {
-    auto file = manager.getContent(span.source());
-    if (file) {
-      os << " | " << file.value()->content.substr(span.start(), span.length());
-    } else {
-      os << " | <unknown content>";
-    }
-  }
-  os << "\n";
-  os << "  " << std::string(span.start(), ' ') << "^";
-  if (span.length() > 1) {
-    os << std::string(span.length() - 1, '~');
-  }
-  os << "\n";
-
+std::ostream &Label::print(std::ostream &os, const Cache &cache) const {
+  writeSpan(os, span, cache, message.value_or(""));
   return os;
 }
 

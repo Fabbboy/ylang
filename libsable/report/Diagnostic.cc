@@ -1,11 +1,15 @@
 #include "report/Diagnostic.h"
 #include "report/Write.h"
+#include <string_view>
 
 namespace sable::report {
 
 std::ostream &operator<<(std::ostream &os, Severity severity) {
   switch (severity) {
-#define X(name, color) case Severity::name: os << color << #name << ANSI_RESET; break;
+#define X(name, color)                                                         \
+  case Severity::name:                                                         \
+    os << color << #name << ANSI_RESET;                                        \
+    break;
     SEVERITY_LEVELS
 #undef X
   default:
@@ -17,8 +21,13 @@ std::ostream &operator<<(std::ostream &os, Severity severity) {
 
 Diagnostic::Diagnostic(Severity severity) : severity(severity) {}
 
-Diagnostic &Diagnostic::withMessage(const std::string &msg) {
+Diagnostic &Diagnostic::withMessage(std::string_view msg) {
   message = msg;
+  return *this;
+}
+
+Diagnostic &Diagnostic::withNote(std::string_view note) {
+  this->note = note;
   return *this;
 }
 
@@ -40,7 +49,11 @@ std::ostream &Diagnostic::print(std::ostream &os, const Cache &cache) const {
   os << "\n";
 
   if (code) {
-    SpanWrite::write(os, *code, cache);
+    writeSpan(os, *code, cache, "");
+  }
+
+  for (const auto &label : labels) {
+    label.print(os, cache);
   }
 
   return os;
