@@ -24,8 +24,6 @@ int main() {
   Token token;
   do {
     token = lexer.next();
-    std::cout << "Token: " << Token::type_to_string(token.type) << ", Lexeme: '"
-              << token.lexeme << "', Location: " << token.location << std::endl;
     if (token.type == Token::Type::Unknown) {
       sable::report::Diagnostic<sable::report::FileLocSpan> diag(
           sable::report::Severity::Error);

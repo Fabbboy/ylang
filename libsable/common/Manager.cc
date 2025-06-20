@@ -1,5 +1,6 @@
 #include <common/Manager.h>
 #include <memory>
+#include <optional>
 #include <string_view>
 
 namespace sable::common {
@@ -16,8 +17,7 @@ std::shared_ptr<Source> Manager::addContent(std::string_view content,
   return source;
 }
 
-//TODO: return optional
-std::shared_ptr<Source> Manager::getContent(std::string_view filename) const {
+std::optional<std::shared_ptr<Source>> Manager::getContent(std::string_view filename) const {
   for (const auto &source : contents) {
     if (source->filename == filename) {
       return source;

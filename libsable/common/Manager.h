@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -24,6 +25,7 @@ public:
 
   std::shared_ptr<Source> addContent(std::string_view content,
                                      std::string_view filename);
-  std::shared_ptr<Source> getContent(std::string_view filename) const;
+  std::optional<std::shared_ptr<Source>>
+  getContent(std::string_view filename) const;
 };
 } // namespace sable::common

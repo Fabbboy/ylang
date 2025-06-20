@@ -3,6 +3,7 @@
 #include "common/Manager.h"
 #include "report/Label.h"
 #include "report/Span.h"
+#include "report/Write.h"
 #include <optional>
 #include <ostream>
 #include <string>
@@ -74,7 +75,12 @@ public:
     if (message) {
       os << *message;
     }
-    
+    os << "\n";
+
+    if (code) {
+      SpanWrite<S>::write(os, *code, manager);
+    }
+
     return os;
   }
 };

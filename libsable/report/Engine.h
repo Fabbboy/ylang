@@ -3,6 +3,7 @@
 #include "common/Manager.h"
 #include "report/Diagnostic.h"
 #include <iostream>
+#include <ostream>
 
 namespace sable::report {
 template <typename S> class DiagnosticEngine {
@@ -22,7 +23,10 @@ public:
                         const common::Manager &manager)
       : os(output_stream), manager(manager) {}
 
-  void report(const Diagnostic<S> &diag) override { diag.print(os, manager); }
+  void report(const Diagnostic<S> &diag) override {
+    diag.print(os, manager);
+    os << std::endl;
+  }
 };
 
 } // namespace sable::report
