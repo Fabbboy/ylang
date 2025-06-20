@@ -1,7 +1,9 @@
 #include <report/Cache.h>
+#include <span>
 
 namespace sable::report {
-Line::Line(common::Range<std::size_t> range) : range(range) {}
+Line::Line(common::Range<std::size_t> range, std::size_t lineNumber)
+    : range(std::move(range)), lineNumber(lineNumber) {}
 CacheEntry::CacheEntry(std::shared_ptr<common::Source> source)
     : source(std::move(source)) {
   if (!this->source) {
@@ -14,11 +16,32 @@ CacheEntry::CacheEntry(std::shared_ptr<common::Source> source)
   std::size_t length = content.length();
   while (end < length) {
     if (content[end] == '\n') {
-      lines.emplace_back(common::Range<std::size_t>(start, end));
+      lines.emplace_back(common::Range<std::size_t>(start, end),
+                         lines.size() + 1);
       start = end + 1;
     }
     ++end;
   }
+}
+
+std::span<const Line>
+CacheEntry::getLines(common::Range<std::size_t> range) const {
+  std::span<const Line> result;
+  if (!source) {
+    return result;
+  }
+
+  for (const auto &line : lines) {
+    if (line.isWithin(range)) {
+      if (result.empty()) {
+        result = std::span<const Line>(&line, 1);
+      } else {
+        result = std::span<const Line>(result.data(), result.size() + 1);
+      }
+    }
+  }
+
+  return result;
 }
 
 } // namespace sable::report

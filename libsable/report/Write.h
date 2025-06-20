@@ -1,36 +1,44 @@
 #pragma once
 
 #include "common/Manager.h"
+#include "report/Cache.h"
 #include "report/Span.h"
+#include <cstddef>
+#include <memory>
 #include <ostream>
-#include <string_view>
+
 namespace sable::report {
-template <typename S> struct SpanWrite {
+static inline void writeLine(std::ostream &os, const Line &line,
+                             std::shared_ptr<common::Source> source) {
+  os << line.lineNumber << " | ";
+  os << source->content.substr(line.start(), line.length());
+  os << "\n";
+}
+
+template <typename S, typename Key> struct SpanWrite {
   static_assert(is_derived_from_span_v<S>, "S must be derived from Span");
-  static void write(std::ostream &os, const S &span,
-                    const common::Manager &manager) {
+  static void write(std::ostream &os, const S &span, const Cache<Key> &cache) {
     std::optional<std::shared_ptr<common::Source>> source =
-        manager.getContent(span.source());
+        cache.getManager().getContent(span.source());
 
     if (!source)
       return;
 
-    std::string_view content = source->get()->content;
-    std::string_view content_slice =
-        content.substr(span.start(), span.length());
+    std::span<const Line> lines =
+        cache.getLines(span.getStart(), span.getEnd());
+    if (lines.empty())
+      return;
 
-    os << "[" << source->get()->filename << ":" << span.start() << "-"
-       << span.end() << "]\n";
-    os << " | " << content_slice << "\n";
-    os << " | ";
-    for (std::size_t i = 0; i < span.start(); ++i) {
-      os << " ";
-    }
+    const Line &line = lines.front();
+    std::size_t line_start = line.start();
+    std::size_t column = span.getStart() - line_start + 1;
 
-    for (std::size_t i = 0; i < span.length(); ++i) {
-      os << "^";
+    os << "[" << span.source() << ":" << line.lineNumber << ":" << column
+       << "] ";
+
+    for (const auto &l : lines) {
+      write(os, l);
     }
-    os << "\n";
   }
 };
 } // namespace sable::report

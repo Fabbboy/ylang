@@ -3,7 +3,9 @@
 #include "common/Manager.h"
 #include "common/Range.h"
 #include <cstddef>
+#include <functional>
 #include <memory>
+#include <span>
 #include <unordered_map>
 #include <vector>
 
@@ -11,8 +13,16 @@ namespace sable::report {
 struct Line {
 public:
   common::Range<std::size_t> range;
+  std::size_t lineNumber;
 
-  Line(common::Range<std::size_t> range);
+  Line(common::Range<std::size_t> range, std::size_t lineNumber);
+  inline std::size_t start() const { return range.getStart(); }
+  inline std::size_t end() const { return range.getStop(); }
+  inline std::size_t length() const { return end() - start(); }
+
+  inline bool isWithin(common::Range<std::size_t> other) const {
+    return other.contains(start()) && other.contains(end() - 1);
+  }
 };
 
 struct CacheEntry {
@@ -21,6 +31,8 @@ public:
   std::vector<Line> lines;
 
   CacheEntry(std::shared_ptr<common::Source> source);
+
+  std::span<const Line> getLines(common::Range<std::size_t> range) const;
 };
 
 template <typename S> class Cache {
@@ -60,5 +72,7 @@ public:
     }
     return std::nullopt;
   }
+
+  inline const common::Manager &getManager() const { return manager; }
 };
 } // namespace sable::report

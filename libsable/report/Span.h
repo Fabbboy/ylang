@@ -42,6 +42,19 @@ public:
 template <typename T>
 inline constexpr bool is_derived_from_span_v = is_derived_from_span<T>::value;
 
+template <typename T> struct span_template_argument {
+private:
+  template <typename S> static S test(const sable::report::Span<S> *);
+
+  static void test(...);
+
+public:
+  using type = decltype(test(std::declval<T *>()));
+};
+
+template <typename T>
+using span_template_argument_t = typename span_template_argument<T>::type;
+
 class FileLocSpan : public Span<std::string_view> {
 private:
   std::string_view source_;

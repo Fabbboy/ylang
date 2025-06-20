@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/Manager.h"
+#include "report/Cache.h"
 #include "report/Diagnostic.h"
 #include <iostream>
 #include <ostream>
@@ -16,15 +16,14 @@ public:
 template <typename S> class StreamWriter : public DiagnosticEngine<S> {
 private:
   std::ostream &os;
-  const common::Manager &manager;
+  const Cache<S> &cache;
 
 public:
-  explicit StreamWriter(std::ostream &output_stream,
-                        const common::Manager &manager)
-      : os(output_stream), manager(manager) {}
+  explicit StreamWriter(std::ostream &output_stream, const Cache<S> &manager)
+      : os(output_stream), cache(manager) {}
 
   void report(const Diagnostic<S> &diag) override {
-    diag.print(os, manager);
+    diag.print(os, cache);
     os << std::endl;
   }
 };

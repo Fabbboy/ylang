@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/Manager.h"
+#include "report/Cache.h"
 #include "report/Label.h"
 #include "report/Span.h"
 #include "report/Write.h"
@@ -69,7 +69,7 @@ public:
     return *this;
   }
 
-  std::ostream &print(std::ostream &os, const common::Manager &manager) const {
+  std::ostream &print(std::ostream &os, const Cache<S> &manager) const {
     // no fallbacks
     os << severity << ": ";
     if (message) {
@@ -78,7 +78,7 @@ public:
     os << "\n";
 
     if (code) {
-      SpanWrite<S>::write(os, *code, manager);
+      SpanWrite<S, span_template_argument_t<S>>::write(os, *code, manager);
     }
 
     return os;
