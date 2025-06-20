@@ -2,6 +2,8 @@ set(LOCAL_SOURCES
   Diagnostic.h
   Engine.h
   Span.h
+  Label.h
+  Write.h
 )
 
 set(LOCAL_SOURCES_WITH_PATH)
