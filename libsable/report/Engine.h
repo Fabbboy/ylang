@@ -16,7 +16,7 @@ private:
   std::ostream &os;
 
 public:
-  explicit StreamWriter(std::ostream &output_stream);
+  explicit StreamWriter(std::ostream &output_stream) : os(output_stream) {}
 
   void report(const Diagnostic<S> &diag) override {}
 };

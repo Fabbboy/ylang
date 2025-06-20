@@ -2,7 +2,9 @@
 #include "parsing/Lexer/Lexer.h"
 #include "report/Diagnostic.h"
 #include "report/Engine.h"
+#include "report/Span.h"
 #include <iostream>
+#include <memory>
 #include <string_view>
 
 using namespace sable::parsing;
@@ -21,12 +23,18 @@ int main() {
   do {
     token = lexer.next();
     std::cout << "Token: " << Token::type_to_string(token.type) << ", Lexeme: '"
-              << token.lexeme << "', Location: "              << token.location << std::endl;
+              << token.lexeme << "', Location: " << token.location << std::endl;
   } while (token.type != Token::Type::Eof);
 
-  sable::report::StreamWriter writer(std::cout);
+  sable::report::StreamWriter<sable::report::FileLocSpan> writer(std::cout);
 
-  sable::report::Diagnostic diag(sable::report::Severity::Info);
+  sable::report::Diagnostic<sable::report::FileLocSpan> diag(
+      sable::report::Severity::Info);
   diag.withMessage("Lexing completed successfully.");
-  writer.report(diag);
+  sable::report::FileLocSpan span(
+      source->filename, sable::common::Range<std::size_t>(0, SOURCE.size()));
+
+  diag.withCode(
+      std::unique_ptr<sable::report::Span<sable::report::FileLocSpan>>(
+          new sable::report::FileLocSpan(span)));
 }

@@ -39,7 +39,7 @@ private:
   std::optional<std::unique_ptr<Span<S>>> code;
 
 public:
-  Diagnostic(Severity severity);
+  Diagnostic(Severity severity) : severity(severity) {}
 
   inline void withMessage(const std::string &msg) { message = msg; }
   inline void withCode(std::unique_ptr<Span<S>> &&span) {
