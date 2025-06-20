@@ -1,4 +1,5 @@
 #include "report/Diagnostic.h"
+#include "report/Write.h"
 
 namespace sable::report {
 

@@ -33,7 +33,8 @@ CacheEntry::CacheEntry(std::shared_ptr<common::Source> source)
   }
 }
 
-std::span<const Line> CacheEntry::getLines(common::Range<std::size_t> range) const {
+std::span<const Line>
+CacheEntry::getLines(common::Range<std::size_t> range) const {
   std::span<const Line> result;
   if (!source) {
     return result;
@@ -64,8 +65,9 @@ void Cache::addEntry(std::shared_ptr<common::Source> source) {
   }
 }
 
-std::optional<const CacheEntry *> Cache::getEntry(const Span &span) const {
-  auto it = entries.find(span.source());
+std::optional<const CacheEntry *>
+Cache::getEntry(std::string_view sourceName) const {
+  auto it = entries.find(sourceName);
   if (it != entries.end()) {
     return &it->second;
   }

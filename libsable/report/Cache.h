@@ -2,13 +2,12 @@
 
 #include "common/Manager.h"
 #include "common/Range.h"
-#include "report/Span.h"
 #include <cstddef>
 #include <memory>
 #include <optional>
 #include <span>
-#include <unordered_map>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace sable::report {
@@ -42,7 +41,7 @@ public:
   explicit Cache(const common::Manager &manager);
 
   void addEntry(std::shared_ptr<common::Source> source);
-  std::optional<const CacheEntry *> getEntry(const Span &span) const;
+  std::optional<const CacheEntry *> getEntry(std::string_view sourceName) const;
 
   const common::Manager &getManager() const;
 };

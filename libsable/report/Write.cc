@@ -10,7 +10,7 @@ void writeLine(std::ostream &os, const Line &line,
 }
 
 void SpanWrite::write(std::ostream &os, const Span &span, const Cache &cache) {
-  std::optional<const CacheEntry *> entry = cache.getEntry(span);
+  std::optional<const CacheEntry *> entry = cache.getEntry(span.source());
 
   if (!entry.has_value()) {
     return;
