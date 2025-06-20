@@ -34,7 +34,5 @@ int main() {
   sable::report::FileLocSpan span(
       source->filename, sable::common::Range<std::size_t>(0, SOURCE.size()));
 
-  diag.withCode(
-      std::unique_ptr<sable::report::Span<sable::report::FileLocSpan>>(
-          new sable::report::FileLocSpan(span)));
+  diag.withCode(std::make_unique<sable::report::FileLocSpan>(span));
 }

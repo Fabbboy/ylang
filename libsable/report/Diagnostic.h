@@ -5,7 +5,9 @@
 #include <optional>
 #include <ostream>
 #include <string>
+
 namespace sable::report {
+
 #define SEVERITY_LEVELS                                                        \
   X(Info)                                                                      \
   X(Warning)                                                                   \
@@ -33,18 +35,19 @@ inline std::ostream &operator<<(std::ostream &os, Severity severity) {
 }
 
 template <typename S> class Diagnostic {
+  static_assert(is_derived_from_span_v<S>,
+                "S must be derived from Span<T> for some type T");
+
 private:
   Severity severity;
   std::optional<std::string> message;
-  std::optional<std::unique_ptr<Span<S>>> code;
+  std::optional<std::unique_ptr<S>> code;
 
 public:
   Diagnostic(Severity severity) : severity(severity) {}
 
   inline void withMessage(const std::string &msg) { message = msg; }
-  inline void withCode(std::unique_ptr<Span<S>> &&span) {
-    code = std::move(span);
-  }
+  inline void withCode(std::unique_ptr<S> &&span) { code = std::move(span); }
 };
 
 } // namespace sable::report

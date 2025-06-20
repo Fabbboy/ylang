@@ -30,6 +30,18 @@ public:
   virtual std::size_t length() const { return end() - start(); }
 };
 
+template <typename T> struct is_derived_from_span {
+private:
+  template <typename U> static auto test(const Span<U> *) -> std::true_type;
+  static auto test(...) -> std::false_type;
+
+public:
+  static constexpr bool value = decltype(test(std::declval<T *>()))::value;
+};
+
+template <typename T>
+inline constexpr bool is_derived_from_span_v = is_derived_from_span<T>::value;
+
 class FileLocSpan : public Span<std::string_view> {
 private:
   std::string_view source_;
