@@ -1,8 +1,7 @@
 set(LOCAL_SOURCES  
   Diagnostic.h
-  Diagnostic.cc
   Engine.h
-  Engine.cc
+  Span.h
 )
 
 set(LOCAL_SOURCES_WITH_PATH)

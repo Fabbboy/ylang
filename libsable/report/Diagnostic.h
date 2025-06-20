@@ -1,5 +1,7 @@
 #pragma once
 
+#include "report/Span.h"
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <string>
@@ -14,20 +16,35 @@ enum class Severity {
   SEVERITY_LEVELS
 #undef X
 };
-std::ostream &operator<<(std::ostream &os, Severity severity);
 
-class Diagnostic {
+inline std::ostream &operator<<(std::ostream &os, Severity severity) {
+  switch (severity) {
+#define X(name)                                                                \
+  case Severity::name:                                                         \
+    os << #name;                                                               \
+    break;
+    SEVERITY_LEVELS
+#undef X
+  default:
+    os << "Unknown";
+    break;
+  }
+  return os;
+}
+
+template <typename S> class Diagnostic {
 private:
   Severity severity;
   std::optional<std::string> message;
+  std::optional<std::unique_ptr<Span<S>>> code;
 
 public:
   Diagnostic(Severity severity);
 
   inline void withMessage(const std::string &msg) { message = msg; }
-
-  std::string write() const;
-  friend std::ostream &operator<<(std::ostream &os, const Diagnostic &diag);
+  inline void withCode(std::unique_ptr<Span<S>> &&span) {
+    code = std::move(span);
+  }
 };
 
 } // namespace sable::report
