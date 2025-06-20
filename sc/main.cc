@@ -19,6 +19,7 @@ int main() {
   auto source = manager.addContent(SOURCE, "main.sable");
 
   sable::report::Cache cache(manager);
+  cache.addEntry(source);
 
   Lexer lexer(source);
   sable::report::StreamWriter writer(std::cout, cache);
