@@ -1,10 +1,11 @@
 #pragma once
 
+#include "report/Label.h"
 #include "report/Span.h"
-#include <memory>
 #include <optional>
 #include <ostream>
 #include <string>
+#include <vector>
 
 namespace sable::report {
 
@@ -41,13 +42,24 @@ template <typename S> class Diagnostic {
 private:
   Severity severity;
   std::optional<std::string> message;
-  std::optional<std::unique_ptr<S>> code;
+  std::optional<S> code;
+  std::vector<Label<S>> labels;
 
 public:
   Diagnostic(Severity severity) : severity(severity) {}
 
-  inline void withMessage(const std::string &msg) { message = msg; }
-  inline void withCode(std::unique_ptr<S> &&span) { code = std::move(span); }
+  inline Diagnostic<S> &withMessage(const std::string &msg) {
+    message = msg;
+    return *this;
+  }
+  inline Diagnostic<S> &withCode(const S &span) {
+    code = span;
+    return *this;
+  }
+  inline Diagnostic<S> &withLabel(const Label<S> &label) {
+    labels.push_back(label);
+    return *this;
+  }
 };
 
 } // namespace sable::report

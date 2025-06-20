@@ -33,6 +33,9 @@ int main() {
   diag.withMessage("Lexing completed successfully.");
   sable::report::FileLocSpan span(
       source->filename, sable::common::Range<std::size_t>(0, SOURCE.size()));
+  auto label =
+      sable::report::Label<sable::report::FileLocSpan>(span).withMessage(
+          "This is a sample diagnostic label.");
 
-  diag.withCode(std::make_unique<sable::report::FileLocSpan>(span));
+  diag.withCode(span).withLabel(label);
 }
