@@ -15,4 +15,14 @@ std::shared_ptr<Source> Manager::addContent(std::string_view content,
   contents.push_back(source);
   return source;
 }
+
+//TODO: return optional
+std::shared_ptr<Source> Manager::getContent(std::string_view filename) const {
+  for (const auto &source : contents) {
+    if (source->filename == filename) {
+      return source;
+    }
+  }
+  return nullptr;
+}
 } // namespace sable::common

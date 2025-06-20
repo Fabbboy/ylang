@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Manager.h"
 #include "report/Label.h"
 #include "report/Span.h"
 #include <optional>
@@ -59,6 +60,35 @@ public:
   inline Diagnostic<S> &withLabel(const Label<S> &label) {
     labels.push_back(label);
     return *this;
+  }
+
+  std::ostream &print(std::ostream &os, const common::Manager &manager) const {
+    os << "[" << severity << "] ";
+    if (message) {
+      os << *message;
+    }
+    os << "\n";
+
+    if (code) {
+      auto file = manager.getContent(code->source());
+      if (file) {
+        os << file->filename << ":" << code->start() << ":" << code->end()
+           << " | " << file->content.substr(code->start(), code->length())
+           << "\n";
+        os << "  " << std::string(code->start(), ' ') << "^";
+        if (code->length() > 1) {
+          os << std::string(code->length() - 1, '~');
+        }
+        os << "\n";
+      }
+    }
+    os << "\n";
+
+    for (const auto &label : labels) {
+      label.print(os, manager);
+    }
+
+    return os;
   }
 };
 
