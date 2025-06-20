@@ -73,9 +73,11 @@ void Cache::addEntry(std::shared_ptr<common::Source> source) {
   if (!source) {
     return;
   }
-  auto it = entries.find(source->filename);
+
+  std::string_view filename = source->filename;
+  auto it = entries.find(filename);
   if (it == entries.end()) {
-    entries.emplace(source->filename, CacheEntry(std::move(source)));
+    entries.emplace(filename, CacheEntry(source));
   }
 }
 

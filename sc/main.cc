@@ -27,6 +27,22 @@ int main() {
   Lexer lexer(source);
   sable::report::StreamWriter writer(std::cout, cache);
 
+  {
+    sable::report::Span span(source->filename,
+                             sable::common::Range<std::size_t>(0, 4));
+    sable::report::Diagnostic info(sable::report::Severity::Info);
+    info.withMessage("Demonstrating info diagnostic").withCode(span);
+    writer.report(info);
+  }
+
+  {
+    sable::report::Span span(source->filename,
+                             sable::common::Range<std::size_t>(13, 16));
+    sable::report::Diagnostic warn(sable::report::Severity::Warning);
+    warn.withMessage("This number looks suspicious").withCode(span);
+    writer.report(warn);
+  }
+
   Token token;
   do {
     token = lexer.next();
