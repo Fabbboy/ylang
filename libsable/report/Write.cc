@@ -44,7 +44,7 @@ void writeLine(std::ostream &os, const Span &span, const Line &line,
                std::shared_ptr<common::Source> source) {
   os << ' ' << line.lineNumber << " | "
      << source->content.substr(line.start(), line.length()) << '\n';
-  os << std::string(width + 2, ' ') << " | " << underline(span, line) << '\n';
+  os << std::string(width + 1, ' ') << " | " << underline(span, line) << '\n';
 }
 
 void writeSpan(std::ostream &os, const Span &span, const Cache &cache) {
