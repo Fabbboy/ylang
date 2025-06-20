@@ -6,8 +6,6 @@
 
 namespace sable::report {
 
-namespace {
-
 std::size_t digits(std::size_t num) {
   std::size_t d = 1;
   while (num >= 10) {
@@ -36,11 +34,8 @@ std::string underline(const Span &span, const Line &line) {
   return result;
 }
 
-} // namespace
-
 void writeLine(std::ostream &os, const Span &span, const Line &line,
-               std::size_t width,
-               std::shared_ptr<common::Source> source) {
+               std::size_t width, std::shared_ptr<common::Source> source) {
   os << ' ' << line.lineNumber << " | "
      << source->content.substr(line.start(), line.length()) << '\n';
   os << std::string(width + 1, ' ') << " | " << underline(span, line) << '\n';
