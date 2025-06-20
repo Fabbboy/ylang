@@ -1,7 +1,6 @@
 #include "report/Write.h"
 #include "report/Diagnostic.h"
 #include "report/Span.h"
-#include <algorithm>
 #include <cstddef>
 #include <string>
 
