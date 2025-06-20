@@ -41,7 +41,7 @@ private:
 public:
   explicit Cache(const common::Manager &manager);
 
-  void addEntry(const Span &span);
+  void addEntry(std::shared_ptr<common::Source> source);
   std::optional<const CacheEntry *> getEntry(const Span &span) const;
 
   const common::Manager &getManager() const;
