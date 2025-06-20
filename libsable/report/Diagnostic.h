@@ -8,24 +8,30 @@
 #include <string>
 #include <vector>
 
+#define ANSI_COLOR(color) "\033[" color "m"
+#define ANSI_RESET ANSI_COLOR("0")
+#define ANSI_RED ANSI_COLOR("31")
+#define ANSI_YELLOW ANSI_COLOR("33")
+#define ANSI_BLUE ANSI_COLOR("34")
+
 namespace sable::report {
 
 #define SEVERITY_LEVELS                                                        \
-  X(Info)                                                                      \
-  X(Warning)                                                                   \
-  X(Error)
+  X(Info, ANSI_BLUE)                                                           \
+  X(Warning, ANSI_YELLOW)                                                      \
+  X(Error, ANSI_RED)
 
 enum class Severity {
-#define X(name) name,
+#define X(name, color) name,
   SEVERITY_LEVELS
 #undef X
 };
 
 inline std::ostream &operator<<(std::ostream &os, Severity severity) {
   switch (severity) {
-#define X(name)                                                                \
+#define X(name, color)                                                         \
   case Severity::name:                                                         \
-    os << #name;                                                               \
+    os << color << #name << ANSI_RESET;                                        \
     break;
     SEVERITY_LEVELS
 #undef X
@@ -63,31 +69,12 @@ public:
   }
 
   std::ostream &print(std::ostream &os, const common::Manager &manager) const {
-    os << "[" << severity << "] ";
+    // no fallbacks
+    os << severity << ": ";
     if (message) {
       os << *message;
     }
-    os << "\n";
-
-    if (code) {
-      auto file = manager.getContent(code->source());
-      if (file) {
-        os << file->filename << ":" << code->start() << ":" << code->end()
-           << " | " << file->content.substr(code->start(), code->length())
-           << "\n";
-        os << "  " << std::string(code->start(), ' ') << "^";
-        if (code->length() > 1) {
-          os << std::string(code->length() - 1, '~');
-        }
-        os << "\n";
-      }
-    }
-    os << "\n";
-
-    for (const auto &label : labels) {
-      label.print(os, manager);
-    }
-
+    
     return os;
   }
 };
