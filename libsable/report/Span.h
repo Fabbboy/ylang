@@ -65,8 +65,7 @@ public:
       : source_(std::move(source)), range(range) {}
 
   const std::string_view &source() const override { return source_; }
-  std::size_t start() const override { return range.getStart(); }
-  std::size_t end() const override { return range.getStop(); }
+  common::Range<std::size_t> getRange() const { return range; }
 
   bool operator==(const FileLocSpan &other) const {
     return source_ == other.source_ &&

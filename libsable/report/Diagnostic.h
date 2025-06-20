@@ -69,8 +69,7 @@ public:
     return *this;
   }
 
-  std::ostream &print(std::ostream &os, const Cache<S> &manager) const {
-    // no fallbacks
+  std::ostream &print(std::ostream &os, const Cache<S> &cache) const {
     os << severity << ": ";
     if (message) {
       os << *message;
@@ -78,7 +77,7 @@ public:
     os << "\n";
 
     if (code) {
-      SpanWrite<S, span_template_argument_t<S>>::write(os, *code, manager);
+      SpanWrite<S>::write(os, *code, cache);
     }
 
     return os;

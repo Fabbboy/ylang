@@ -15,17 +15,17 @@ static inline void writeLine(std::ostream &os, const Line &line,
   os << "\n";
 }
 
-template <typename S, typename Key> struct SpanWrite {
+template <typename S> struct SpanWrite {
   static_assert(is_derived_from_span_v<S>, "S must be derived from Span");
-  static void write(std::ostream &os, const S &span, const Cache<Key> &cache) {
-    std::optional<std::shared_ptr<common::Source>> source =
-        cache.getManager().getContent(span.source());
+  static void write(std::ostream &os, const S &span, const Cache<S> &cache) {
+    std::optional<const CacheEntry *> entry = cache.getEntry(span);
 
-    if (!source)
+    if (!entry.has_value()) {
       return;
+    }
 
     std::span<const Line> lines =
-        cache.getLines(span.getStart(), span.getEnd());
+        entry.value()->getLines(span.getRange());
     if (lines.empty())
       return;
 

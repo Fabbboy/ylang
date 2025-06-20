@@ -1,5 +1,6 @@
 #include "common/Manager.h"
 #include "parsing/Lexer/Lexer.h"
+#include "report/Cache.h"
 #include "report/Diagnostic.h"
 #include "report/Engine.h"
 #include "report/Span.h"
@@ -17,9 +18,11 @@ int main() {
   sable::common::Manager manager;
   auto source = manager.addContent(SOURCE, "main.sable");
 
+  sable::report::Cache<sable::report::FileLocSpan> cache(manager);
+
   Lexer lexer(source);
   sable::report::StreamWriter<sable::report::FileLocSpan> writer(std::cout,
-                                                                 manager);
+                                                                 cache);
 
   Token token;
   do {
