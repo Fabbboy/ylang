@@ -8,6 +8,7 @@
 #include <optional>
 #include <span>
 #include <unordered_map>
+#include <string_view>
 #include <vector>
 
 namespace sable::report {
@@ -35,7 +36,7 @@ struct CacheEntry {
 class Cache {
 private:
   const common::Manager &manager;
-  std::unordered_map<Span, CacheEntry> entries;
+  std::unordered_map<std::string_view, CacheEntry> entries;
 
 public:
   explicit Cache(const common::Manager &manager);

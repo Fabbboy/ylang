@@ -55,18 +55,18 @@ std::span<const Line> CacheEntry::getLines(common::Range<std::size_t> range) con
 Cache::Cache(const common::Manager &manager) : manager(manager) {}
 
 void Cache::addEntry(const Span &span) {
-  auto it = entries.find(span);
+  auto it = entries.find(span.source());
   if (it == entries.end()) {
     std::shared_ptr<common::Source> source =
         manager.getContent(span.source()).value_or(nullptr);
     if (source) {
-      entries.emplace(span, CacheEntry(source));
+      entries.emplace(span.source(), CacheEntry(source));
     }
   }
 }
 
 std::optional<const CacheEntry *> Cache::getEntry(const Span &span) const {
-  auto it = entries.find(span);
+  auto it = entries.find(span.source());
   if (it != entries.end()) {
     return &it->second;
   }
