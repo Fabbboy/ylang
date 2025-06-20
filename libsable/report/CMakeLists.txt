@@ -4,6 +4,8 @@ set(LOCAL_SOURCES
   Span.h
   Label.h
   Write.h
+  Cache.h 
+  Cache.cc
 )
 
 set(LOCAL_SOURCES_WITH_PATH)
