@@ -10,7 +10,7 @@ std::size_t Line::start() const { return range.getStart(); }
 std::size_t Line::end() const { return range.getStop(); }
 std::size_t Line::length() const { return end() - start(); }
 bool Line::isWithin(common::Range<std::size_t> other) const {
-  return other.contains(start()) && other.contains(end() - 1);
+  return start() <= other.getStop() && end() > other.getStart();
 }
 
 CacheEntry::CacheEntry(std::shared_ptr<common::Source> source)
@@ -31,26 +31,40 @@ CacheEntry::CacheEntry(std::shared_ptr<common::Source> source)
     }
     ++end;
   }
+
+  // Handle the last line if it doesn't end with a newline
+  if (start < length) {
+    lines.emplace_back(common::Range<std::size_t>(start, length),
+                       lines.size() + 1);
+  }
 }
 
 std::span<const Line>
 CacheEntry::getLines(common::Range<std::size_t> range) const {
-  std::span<const Line> result;
-  if (!source) {
-    return result;
+  if (!source || lines.empty()) {
+    return {};
   }
 
-  for (const auto &line : lines) {
+  std::size_t firstIdx = lines.size();
+  std::size_t lastIdx = 0;
+
+  for (std::size_t i = 0; i < lines.size(); ++i) {
+    const auto &line = lines[i];
     if (line.isWithin(range)) {
-      if (result.empty()) {
-        result = std::span<const Line>(&line, 1);
-      } else {
-        result = std::span<const Line>(result.data(), result.size() + 1);
+      if (firstIdx == lines.size()) {
+        firstIdx = i;
       }
+      lastIdx = i;
     }
   }
 
-  return result;
+  if (firstIdx == lines.size()) {
+    return {};
+  }
+
+  std::span<const Line> slice =
+      std::span<const Line>(&lines[firstIdx], lastIdx - firstIdx + 1);
+  return slice;
 }
 
 Cache::Cache(const common::Manager &manager) : manager(manager) {}

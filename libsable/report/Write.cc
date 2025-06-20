@@ -1,11 +1,27 @@
 #include "report/Write.h"
+#include "report/Span.h"
+#include <cstddef>
 
 namespace sable::report {
 
-void writeLine(std::ostream &os, const Line &line,
+void writeLine(std::ostream &os, const Span &span, const Line &line,
                std::shared_ptr<common::Source> source) {
-  os << line.lineNumber << " | ";
+  os << " " << line.lineNumber << " | ";
   os << source->content.substr(line.start(), line.length());
+  os << "\n   | ";
+  std::size_t line_start = line.start();
+  std::size_t line_end = line.end();
+  std::size_t span_start = span.start();
+  std::size_t span_end = span.end();
+  std::size_t span_length = span.length();
+
+  for (std::size_t i = line_start; i < line_end; ++i) {
+    if (i >= span_start && i < span_end) {
+      os << "^";
+    } else {
+      os << " ";
+    }
+  }
   os << "\n";
 }
 
@@ -16,8 +32,7 @@ void SpanWrite::write(std::ostream &os, const Span &span, const Cache &cache) {
     return;
   }
 
-  std::span<const Line> lines =
-      entry.value()->getLines(span.getRange());
+  std::span<const Line> lines = entry.value()->getLines(span.getRange());
   if (lines.empty())
     return;
 
@@ -25,11 +40,10 @@ void SpanWrite::write(std::ostream &os, const Span &span, const Cache &cache) {
   std::size_t line_start = line.start();
   std::size_t column = span.start() - line_start + 1;
 
-  os << "[" << span.source() << ":" << line.lineNumber << ":" << column
-     << "] ";
+  os << "[" << span.source() << ":" << line.lineNumber << ":" << column << "]\n";
 
   for (const auto &l : lines) {
-    writeLine(os, l, entry.value()->source);
+    writeLine(os, span, l, entry.value()->source);
   }
 }
 

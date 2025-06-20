@@ -11,7 +11,7 @@
 using namespace sable::parsing;
 
 std::string_view SOURCE = R"(
- int a = 123; @
+ int a = 123; @ 
 )";
 
 int main() {
@@ -27,7 +27,7 @@ int main() {
   Token token;
   do {
     token = lexer.next();
-    if (token.type == Token::Type::Unknown) {
+    if (token.type == Token::Type::Unknown || token.type == Token::Type::IntegerError) {
       sable::report::Diagnostic diag(sable::report::Severity::Error);
       diag.withMessage(std::string("Unknown token encountered: ") +
                        std::string(token.lexeme));
