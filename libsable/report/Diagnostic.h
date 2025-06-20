@@ -3,7 +3,6 @@
 #include "report/Cache.h"
 #include "report/Label.h"
 #include "report/Span.h"
-#include "report/Write.h"
 #include <optional>
 #include <ostream>
 #include <string>
@@ -17,9 +16,9 @@
 
 namespace sable::report {
 
-#define SEVERITY_LEVELS \
-  X(Info, ANSI_BLUE) \
-  X(Warning, ANSI_YELLOW) \
+#define SEVERITY_LEVELS                                                        \
+  X(Info, ANSI_BLUE)                                                           \
+  X(Warning, ANSI_YELLOW)                                                      \
   X(Error, ANSI_RED)
 
 enum class Severity {

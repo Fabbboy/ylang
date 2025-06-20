@@ -5,7 +5,6 @@
 #include "report/Span.h"
 #include <memory>
 #include <ostream>
-#include <span>
 
 namespace sable::report {
 
