@@ -1,14 +1,26 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+pub trait Node {
+    fn accept(&self, visitor: &mut dyn AstVisitor);
+}
+
+pub trait AstVisitor {}
+
+pub struct Ast;
+
+impl Ast {
+    pub fn new() -> Self { Self }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
+    struct DummyVisitor;
+    impl AstVisitor for DummyVisitor {}
+    struct DummyNode;
+    impl Node for DummyNode {
+        fn accept(&self, _visitor: &mut dyn AstVisitor) {}
+    }
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn ast_basic() {
+        let _ast = Ast::new();
     }
 }

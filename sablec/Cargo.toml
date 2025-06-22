@@ -4,3 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+sable-common = { workspace = true }
+sable-parser = { workspace = true }
+sable-report = { workspace = true }
+sable-ast = { workspace = true }
