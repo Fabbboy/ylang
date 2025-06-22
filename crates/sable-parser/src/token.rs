@@ -1,17 +1,44 @@
 use getset::Getters;
 use sable_ast::location::Location;
 
-#[derive(Default, Clone, Debug, Eq)]
-pub enum TokenKind {
-  #[default]
-  Eof,
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum TokenError {
+  UnknownCharacter,
 }
 
-impl PartialEq for TokenKind {
-  fn eq(&self, other: &Self) -> bool {
-    let descriminated_left = std::mem::discriminant(self);
-    let descriminated_right = std::mem::discriminant(other);
-    descriminated_left == descriminated_right
+#[derive(Default, Clone, Debug, PartialEq)]
+pub enum TokenKind {
+  // Special
+  #[default]
+  Eof,
+  Error(TokenError),
+
+  // Values
+  Identifier,
+  Integer(i64),
+  Float(f64),
+
+  // Symbols
+  Comma,
+  Semicolon,
+
+  // Operators
+  Plus,
+  Minus,
+  Star,
+  Slash,
+  Assign,
+}
+
+impl Eq for TokenKind {}
+
+impl TokenKind {
+  pub fn tag(&self) -> TokenKind {
+    match self {
+      TokenKind::Integer(_) => TokenKind::Integer(0),
+      TokenKind::Float(_) => TokenKind::Float(0.0),
+      _ => self.clone(),
+    }
   }
 }
 
