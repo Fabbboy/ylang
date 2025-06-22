@@ -4,6 +4,8 @@ use sable_ast::location::Location;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TokenError {
   UnknownCharacter,
+  InvalidInteger,
+  InvalidFloat,
 }
 
 #[derive(Default, Clone, Debug, PartialEq)]

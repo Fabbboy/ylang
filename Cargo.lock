@@ -87,6 +87,12 @@ dependencies = [
 [[package]]
 name = "sablec"
 version = "0.1.0"
+dependencies = [
+ "bumpalo",
+ "sable-ast",
+ "sable-common",
+ "sable-parser",
+]
 
 [[package]]
 name = "syn"

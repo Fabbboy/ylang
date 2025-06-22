@@ -1,3 +1,5 @@
+use bumpalo::Bump;
+
 use crate::source::Source;
 
 pub struct Manager<'ctx> {
@@ -11,8 +13,10 @@ impl<'ctx> Manager<'ctx> {
     }
   }
 
-  pub fn add_source(&mut self, source: Source<'ctx>) {
+  pub fn add_source(&mut self, source: &str, filename: &str, bump: &'ctx Bump) -> &Source<'ctx> {
+    let source = Source::new(source, filename, bump);
     self.sources.push(source);
+    self.sources.last().unwrap()
   }
 
   pub fn get_source(&self, index: usize) -> Option<&[Source<'ctx>]> {
