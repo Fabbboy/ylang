@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use getset::Getters;
 
-#[derive(Getters)]
+#[derive(Getters, Default, Clone, Debug, PartialEq, Eq)]
 pub struct Location<'ctx> {
   #[getset(get = "pub")]
   range: Range<usize>,

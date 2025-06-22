@@ -1,11 +1,11 @@
 use bumpalo::{Bump, collections::String as BumpString};
-use getset::{Getters, Setters};
+use getset::Getters;
 
-#[derive(Getters, Setters)]
+#[derive(Getters)]
 pub struct Source<'ctx> {
-  #[getset(get = "pub", set = "pub(crate)")]
+  #[getset(get = "pub")]
   content: BumpString<'ctx>,
-  #[getset(get = "pub", set = "pub(crate)")]
+  #[getset(get = "pub")]
   filename: BumpString<'ctx>,
 }
 

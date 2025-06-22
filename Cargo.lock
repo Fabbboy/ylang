@@ -78,6 +78,11 @@ dependencies = [
 [[package]]
 name = "sable-parser"
 version = "0.1.0"
+dependencies = [
+ "getset",
+ "sable-ast",
+ "sable-common",
+]
 
 [[package]]
 name = "sablec"
