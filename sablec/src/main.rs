@@ -10,7 +10,8 @@ fn main() {
   let bump = Bump::new();
 
   let mut manager = Manager::new();
-  let source = manager.add_source(SOURCE, "test.sable", &bump);
+  manager.add_source(SOURCE, "test.sable", &bump);
+  let source = manager.sources().last().unwrap();
 
   let mut lexer = Lexer::new(source);
   while let Some(token) = lexer.next() {
