@@ -61,6 +61,15 @@ impl<'ctx> Lexer<'ctx> {
     loop {
       match self.get_char(0) {
         Some(' ' | '\t' | '\r' | '\n') => self.advance(),
+        Some('/') if self.check(1, |c| c == '/') => {
+          while let Some(c) = self.get_char(0) {
+            if c != '\n' {
+              self.advance();
+            } else {
+              break;
+            }
+          }
+        }
         _ => break,
       }
     }

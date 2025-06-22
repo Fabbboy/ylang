@@ -3,6 +3,7 @@ use sable_common::manager::Manager;
 use sable_parser::{lexer::Lexer, token::TokenKind};
 
 const SOURCE: &str = r#"
+   // this is a comment
     let idio = 123;
 "#;
 
