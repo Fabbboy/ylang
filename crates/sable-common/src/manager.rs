@@ -21,8 +21,15 @@ impl<'ctx> Manager<'ctx> {
     }
   }
 
-  pub fn add_source(&mut self, source: &str, filename: &'ctx str, bump: &'ctx Bump) {
+  pub fn add_source(
+    &mut self,
+    source: &str,
+    filename: &'ctx str,
+    bump: &'ctx Bump,
+  ) -> Arc<Source<'ctx>> {
     let source = Source::new(source, filename, bump);
-    self.sources.insert(filename, Arc::new(source));
+    let source = Arc::new(source);
+    self.sources.insert(filename, source.clone());
+    source
   }
 }

@@ -6,7 +6,10 @@ use sable_parser::{
   lexer::Lexer,
   token::TokenKind,
 };
-use sable_report::writer::DiagnosticWriter;
+use sable_report::{
+  cache::Cache,
+  writer::DiagnosticWriter,
+};
 
 const SOURCE: &str = r#"
    // this is a comment
@@ -17,9 +20,13 @@ fn main() {
   let bump = Bump::new();
 
   let mut manager = Manager::new();
-  let writer = DiagnosticWriter::new(&manager, &mut io::stdout());
+  let mut cache = Cache::new(&bump);
 
-  manager.add_source(SOURCE, "test.sable", &bump);
+  let writer = DiagnosticWriter::new(&cache, &mut io::stdout());
+
+  let source = manager.add_source(SOURCE, "test.sable", &bump);
+  cache.add_file("test.sable", source);
+
   let source = manager
     .sources()
     .get("test.sable")

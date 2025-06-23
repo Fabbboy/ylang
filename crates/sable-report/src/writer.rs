@@ -1,8 +1,9 @@
 use std::io;
 
-use sable_common::manager::Manager;
-
-use crate::sink::Sink;
+use crate::{
+  cache::Cache,
+  sink::Sink,
+};
 
 pub enum WriterError<'ctx> {
   IO(io::Error),
@@ -10,7 +11,7 @@ pub enum WriterError<'ctx> {
 }
 
 pub struct DiagnosticWriter<'ctx, 'w, O> {
-  manager: &'w Manager<'ctx>,
+  cache: &'w Cache<'ctx>,
   out: &'w mut O,
 }
 
@@ -18,8 +19,8 @@ impl<'ctx, 'w, O> DiagnosticWriter<'ctx, 'w, O>
 where
   O: io::Write,
 {
-  pub fn new(manager: &'w Manager<'ctx>, out: &'w mut O) -> Self {
-    Self { manager, out }
+  pub fn new(cache: &'w Cache<'ctx>, out: &'w mut O) -> Self {
+    Self { cache, out }
   }
 }
 

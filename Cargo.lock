@@ -88,6 +88,8 @@ dependencies = [
 name = "sable-report"
 version = "0.1.0"
 dependencies = [
+ "bumpalo",
+ "getset",
  "sable-common",
 ]
 
