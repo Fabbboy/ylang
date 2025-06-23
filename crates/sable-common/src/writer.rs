@@ -1,11 +1,5 @@
 use std::io;
 
-use ariadne::sources;
-use smallvec::{
-  SmallVec,
-  smallvec,
-};
-
 use crate::{
   manager::Manager,
   report::{
@@ -40,19 +34,6 @@ where
   type Error = WriterError<'ctx>;
 
   fn report(&mut self, diagnostic: impl Diagnostic<Self::Error>) -> Result<(), Self::Error> {
-    let report = diagnostic.write();
-    let files = diagnostic.sources(self.manager);
-
-    let mut srcs: SmallVec<[(&str, &str); 4]> = smallvec![];
-    for source in files {
-      
-
-    }
-
-    report
-      .write(sources(srcs), &mut *self.out)
-      .map_err(Self::Error::IO)?;
-
     Ok(())
   }
 }

@@ -8,5 +8,3 @@ sable-parser = { workspace = true }
 sable-ast = { workspace = true }
 sable-common = { workspace = true }
 bumpalo = { workspace = true }
-smallvec = { workspace = true }
-ariadne = { workspace = true }
