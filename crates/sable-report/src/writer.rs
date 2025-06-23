@@ -2,6 +2,7 @@ use std::io;
 
 use crate::{
   cache::Cache,
+  diagnostic::Diagnostic,
   sink::Sink,
 };
 
@@ -29,4 +30,8 @@ where
   O: io::Write,
 {
   type Error = WriterError<'ctx>;
+
+  fn report(&mut self, diagnostic: Diagnostic) -> Result<(), Self::Error> {
+    Ok(())
+  }
 }
