@@ -6,12 +6,15 @@ use std::{
 use bumpalo::Bump;
 use getset::Getters;
 
-use crate::source::Source;
+use crate::{
+  source::Source,
+  FileId,
+};
 
 #[derive(Getters)]
 pub struct Manager<'ctx> {
   #[getset(get = "pub")]
-  sources: HashMap<&'ctx str, Arc<Source<'ctx>>>,
+  sources: HashMap<FileId, Arc<Source<'ctx>>>,
 }
 
 impl<'ctx> Manager<'ctx> {
@@ -28,8 +31,9 @@ impl<'ctx> Manager<'ctx> {
     bump: &'ctx Bump,
   ) -> Arc<Source<'ctx>> {
     let source = Source::new(source, filename, bump);
+    let id = source.id().clone();
     let source = Arc::new(source);
-    self.sources.insert(filename, source.clone());
+    self.sources.insert(id, source.clone());
     source
   }
 }
