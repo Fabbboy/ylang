@@ -10,7 +10,7 @@ pub struct Source<'ctx> {
 }
 
 impl<'ctx> Source<'ctx> {
-  pub fn new(content: &str, filename: &'ctx str, bump: &'ctx Bump) -> Self {
+  pub fn new(content: &str, filename: &str, bump: &'ctx Bump) -> Self {
     Self {
       content: bump.alloc_str(content),
       filename: bump.alloc_str(filename),
