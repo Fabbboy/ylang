@@ -1,7 +1,11 @@
-use ariadne::{Report, ReportKind, Label};
+use ariadne::{
+  Label,
+  Report,
+  ReportKind,
+};
 use sable_common::{
-  FileSpan,
   FileId,
+  FileSpan,
   writer::Reportable,
 };
 use smallvec::SmallVec;
@@ -38,7 +42,7 @@ impl<'ctx> Reportable for UnexpectedToken<'ctx> {
         .expected
         .iter()
         .map(|kind| format!("{:?}", kind))
-        .collect::<Vec<_>>()
+        .collect::<SmallVec<[String; MAX_INLINE_KINDS]>>()
         .join(", ")
     );
 
