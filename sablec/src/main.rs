@@ -1,7 +1,7 @@
 use std::io;
 
 use bumpalo::Bump;
-use sable_ast::location::Location;
+use sable_ast::{ast::Ast, location::Location};
 use sable_common::manager::Manager;
 use sable_parser::{
   lexer::Lexer,
@@ -82,7 +82,8 @@ fn main() {
     }
   }
 
-  let mut parser = Parser::new(&writer, lexer);
+  let mut ast = Ast::new();
+  let mut parser = Parser::new(&writer, lexer, &mut ast);
   match parser.parse() {
     ParseStatus::Success => {
       println!("Parsing completed successfully.");
