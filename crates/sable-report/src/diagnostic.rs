@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use colored::Colorize;
+use pretty::RcDoc;
 use getset::Getters;
 use typed_builder::TypedBuilder;
 
@@ -37,11 +38,13 @@ pub struct Diagnostic<'ctx> {
 
 impl<'ctx> Diagnostic<'ctx> {
   pub fn write(&self, cache: &Cache<'ctx>, out: &mut dyn std::io::Write) -> std::io::Result<()> {
-    writeln!(out, "{}: {}", self.level, self.message.unwrap_or(" "))?;
+    let mut doc = RcDoc::text(format!("{}: {}", self.level, self.message.unwrap_or(" ")));
     if let Some(code) = &self.code {
-      code.write(cache, out)?;
+      doc = doc.append(RcDoc::line()).append(code.to_doc(cache));
     }
 
+    doc.render(100, out)?;
+    writeln!(out)?;
     Ok(())
   }
 }

@@ -59,14 +59,21 @@ impl<'ctx> CacheEntry<'ctx> {
   }
 
   pub fn get_lines(&self, range: Range<usize>) -> Option<&[Line]> {
-    let lines_iter = self
-      .lines
-      .iter()
-      .filter(|line| line.range.start <= range.end && line.range.end >= range.start);
-    if lines_iter.clone().next().is_some() {
-      Some(self.lines.as_slice())
-    } else {
-      None
+    let mut start_idx = None;
+    let mut end_idx = None;
+
+    for (i, line) in self.lines.iter().enumerate() {
+      if start_idx.is_none() && line.range.end >= range.start {
+        start_idx = Some(i);
+      }
+      if line.range.start <= range.end {
+        end_idx = Some(i);
+      }
+    }
+
+    match (start_idx, end_idx) {
+      (Some(s), Some(e)) if s <= e => Some(&self.lines[s..=e]),
+      _ => None,
     }
   }
 }
