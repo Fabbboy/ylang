@@ -1,6 +1,14 @@
+use std::io;
+
 use bumpalo::Bump;
-use sable_common::manager::Manager;
-use sable_parser::{lexer::Lexer, token::TokenKind};
+use sable_common::{
+  manager::Manager,
+  writer::DiagnosticWriter,
+};
+use sable_parser::{
+  lexer::Lexer,
+  token::TokenKind,
+};
 
 const SOURCE: &str = r#"
    // this is a comment
@@ -11,8 +19,13 @@ fn main() {
   let bump = Bump::new();
 
   let mut manager = Manager::new();
+  let writer = DiagnosticWriter::new(&manager, &mut io::stdout());
+
   manager.add_source(SOURCE, "test.sable", &bump);
-  let source = manager.sources().last().unwrap();
+  let source = manager
+    .sources()
+    .get("test.sable")
+    .expect("Source not found");
 
   let mut lexer = Lexer::new(source);
   while let Some(token) = lexer.next() {
