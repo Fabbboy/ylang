@@ -108,6 +108,7 @@ dependencies = [
  "getset",
  "sable-ast",
  "sable-common",
+ "sable-report",
 ]
 
 [[package]]

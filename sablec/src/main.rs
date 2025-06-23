@@ -5,6 +5,10 @@ use sable_ast::location::Location;
 use sable_common::manager::Manager;
 use sable_parser::{
   lexer::Lexer,
+  parser::{
+    ParseStatus,
+    Parser,
+  },
   token::{
     TokenError,
     TokenKind,
@@ -75,6 +79,16 @@ fn main() {
       }
       TokenKind::Eof => break,
       _ => {}
+    }
+  }
+
+  let mut parser = Parser::new(&writer, lexer);
+  match parser.parse() {
+    ParseStatus::Success => {
+      println!("Parsing completed successfully.");
+    }
+    ParseStatus::Error => {
+      eprintln!("Parsing encountered errors.");
     }
   }
 }
