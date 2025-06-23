@@ -1,19 +1,19 @@
-use bumpalo::{Bump, collections::String as BumpString};
+use bumpalo::Bump;
 use getset::Getters;
 
 #[derive(Getters)]
 pub struct Source<'ctx> {
   #[getset(get = "pub")]
-  content: BumpString<'ctx>,
+  content: &'ctx str,
   #[getset(get = "pub")]
-  filename: BumpString<'ctx>,
+  filename: &'ctx str,
 }
 
 impl<'ctx> Source<'ctx> {
-  pub fn new(content: &str, filename: &str, bump: &'ctx Bump) -> Self {
+  pub fn new(content: &str, filename: &'ctx str, bump: &'ctx Bump) -> Self {
     Self {
-      content: BumpString::from_str_in(content, bump),
-      filename: BumpString::from_str_in(filename, bump),
+      content: bump.alloc_str(content),
+      filename: bump.alloc_str(filename),
     }
   }
 }
