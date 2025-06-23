@@ -85,6 +85,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "sable-report"
+version = "0.1.0"
+dependencies = [
+ "sable-common",
+]
+
+[[package]]
 name = "sablec"
 version = "0.1.0"
 dependencies = [
@@ -92,6 +99,7 @@ dependencies = [
  "sable-ast",
  "sable-common",
  "sable-parser",
+ "sable-report",
 ]
 
 [[package]]

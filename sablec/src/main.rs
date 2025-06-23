@@ -1,14 +1,12 @@
 use std::io;
 
 use bumpalo::Bump;
-use sable_common::{
-  manager::Manager,
-  writer::DiagnosticWriter,
-};
+use sable_common::manager::Manager;
 use sable_parser::{
   lexer::Lexer,
   token::TokenKind,
 };
+use sable_report::writer::DiagnosticWriter;
 
 const SOURCE: &str = r#"
    // this is a comment

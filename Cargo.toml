@@ -2,7 +2,7 @@
 members = [
   "crates/sable-ast",
   "crates/sable-common",
-  "crates/sable-parser",
+  "crates/sable-parser", "crates/sable-report", 
   "sablec",
 ]
 resolver = "3"
@@ -16,3 +16,4 @@ bumpalo = "3.18.1"
 sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }
 sable-parser = { path = "crates/sable-parser" }
+sable-report = { path = "crates/sable-report" }

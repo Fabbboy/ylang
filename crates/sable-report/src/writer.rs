@@ -1,12 +1,8 @@
 use std::io;
 
-use crate::{
-  manager::Manager,
-  report::{
-    Diagnostic,
-    DiagnosticSink,
-  },
-};
+use sable_common::manager::Manager;
+
+use crate::sink::Sink;
 
 pub enum WriterError<'ctx> {
   IO(io::Error),
@@ -27,13 +23,9 @@ where
   }
 }
 
-impl<'ctx, 'w, O> DiagnosticSink for DiagnosticWriter<'ctx, 'w, O>
+impl<'ctx, 'w, O> Sink for DiagnosticWriter<'ctx, 'w, O>
 where
   O: io::Write,
 {
   type Error = WriterError<'ctx>;
-
-  fn report(&mut self, diagnostic: impl Diagnostic<Self::Error>) -> Result<(), Self::Error> {
-    Ok(())
-  }
 }
