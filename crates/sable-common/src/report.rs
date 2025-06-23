@@ -1,28 +1,24 @@
-use std::{
-  io,
-  ops::Range,
-};
+use std::{ops::Range, sync::Arc};
 
 use smallvec::SmallVec;
+
+use crate::{
+  manager::Manager,
+  source::Source,
+};
 
 pub type ReportCache<'ctx> = (&'ctx str, Range<usize>);
 pub type Report<'ctx> = ariadne::Report<'ctx, ReportCache<'ctx>>;
 
-const MAX_INLINE_CACHE: usize = 4;
+pub const MAX_INLINE_CACHE: usize = 4;
 
-#[derive(Debug)]
-pub enum DiagnosticError<'ctx> {
-  IoError(io::Error),
-  NotFound(&'ctx str),
-}
-
-pub trait Diagnostic {
+pub trait Diagnostic<E> {
   fn write<'ctx>(&self) -> Report<'ctx>;
-  fn cache<'f>(&self) -> SmallVec<[&'f str; MAX_INLINE_CACHE]>;
+  fn sources<'a>(&self, manager: &Manager<'a>) -> Result<SmallVec<[Arc<Source<'a>>; MAX_INLINE_CACHE]>, E>;
 }
 
 pub trait DiagnosticSink {
   type Error;
 
-  fn report(&mut self, diagnostic: impl Diagnostic) -> Result<(), Self::Error>;
+  fn report(&mut self, diagnostic: impl Diagnostic<Self::Error>) -> Result<(), Self::Error>;
 }

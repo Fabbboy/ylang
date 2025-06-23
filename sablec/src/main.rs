@@ -1,13 +1,28 @@
-use std::io;
+use std::{
+  io,
+  sync::Arc,
+};
 
+use ariadne::ReportKind;
 use bumpalo::Bump;
+use sable_ast::location::Location;
 use sable_common::{
   manager::Manager,
+  report::{
+    Diagnostic,
+    MAX_INLINE_CACHE,
+    Report,
+  },
+  source::Source,
   writer::DiagnosticWriter,
 };
 use sable_parser::{
   lexer::Lexer,
   token::TokenKind,
+};
+use smallvec::{
+  SmallVec,
+  smallvec,
 };
 
 const SOURCE: &str = r#"

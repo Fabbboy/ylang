@@ -39,19 +39,14 @@ where
 {
   type Error = WriterError<'ctx>;
 
-  fn report(&mut self, diagnostic: impl Diagnostic) -> Result<(), Self::Error> {
+  fn report(&mut self, diagnostic: impl Diagnostic<Self::Error>) -> Result<(), Self::Error> {
     let report = diagnostic.write();
-    let files = diagnostic.cache();
+    let files = diagnostic.sources(self.manager);
 
     let mut srcs: SmallVec<[(&str, &str); 4]> = smallvec![];
-    for name in files {
-      let source = self
-        .manager
-        .sources()
-        .get(name)
-        .ok_or(Self::Error::FileNotFound(name))?;
+    for source in files {
+      
 
-      srcs.push((name, source.content()));
     }
 
     report

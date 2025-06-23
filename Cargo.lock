@@ -100,10 +100,12 @@ dependencies = [
 name = "sablec"
 version = "0.1.0"
 dependencies = [
+ "ariadne",
  "bumpalo",
  "sable-ast",
  "sable-common",
  "sable-parser",
+ "smallvec",
 ]
 
 [[package]]
