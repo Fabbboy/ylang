@@ -32,28 +32,34 @@ impl<'ctx> Lexer<'ctx> {
     lexer
   }
 
+  #[inline]
   fn get_char(&self, offset: usize) -> Option<char> {
     self.source.content()[self.pos + offset..].chars().next()
   }
 
+  #[inline]
   fn advance(&mut self) {
     if let Some(c) = self.get_char(0) {
       self.pos += c.len_utf8();
     }
   }
 
+  #[inline]
   fn make_location(&self) -> Location<'ctx> {
     Location::new(self.start..self.pos, self.source.filename())
   }
 
+  #[inline]
   fn make_lexeme(&self) -> &'ctx str {
     &self.source.content()[self.start..self.pos]
   }
 
+  #[inline]
   fn make_token(&self, kind: TokenKind) -> Token<'ctx> {
     Token::new(kind, self.make_lexeme(), self.make_location())
   }
 
+  #[inline]
   fn check(&self, offset: usize, predicate: impl Fn(char) -> bool) -> bool {
     if let Some(c) = self.get_char(offset) {
       return predicate(c);
