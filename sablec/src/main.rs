@@ -22,8 +22,8 @@ use sable_report::{
 };
 
 const SOURCE: &str = r#"
-   // this is a comment
-    let idio = 123; #
+// this is a comment
+let idio = 123; #  
 "#;
 
 fn report<'f>(err: TokenError, loc: Location<'f>) -> Diagnostic<'f> {

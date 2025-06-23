@@ -37,7 +37,7 @@ impl<'ctx> Span<'ctx> {
       let column = (self.range.start - first_line.range().start) + 1;
       let line_number = first_line.num();
       let header = format!(
-        " --> {}:{}:{}",
+        "[{} --> {}:{}]",
         self.filename,
         line_number,
         column
@@ -46,11 +46,11 @@ impl<'ctx> Span<'ctx> {
       .to_string();
       doc = doc.append(RcDoc::text(header)).append(RcDoc::line());
     } else {
-      let header = format!(" --> {}:", self.filename).dimmed().to_string();
+      let header = format!("[{}]", self.filename).dimmed().to_string();
       doc = doc.append(RcDoc::text(header)).append(RcDoc::line());
     }
 
-    doc = doc.append(RcDoc::text("  |".dimmed().to_string())).append(RcDoc::line());
+    doc = doc.append(RcDoc::text("   |".dimmed().to_string())).append(RcDoc::line());
 
     for line in lines {
       let line_number = line.num();
