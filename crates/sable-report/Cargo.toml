@@ -7,3 +7,6 @@ edition = "2024"
 sable-common = { workspace = true }
 getset = { workspace = true }
 bumpalo = { workspace = true, features = ["collections"] }
+typed-builder = { workspace = true }
+pretty = { workspace = true }
+colored = { workspace = true }

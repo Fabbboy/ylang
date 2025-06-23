@@ -1,6 +1,13 @@
-use getset::Getters;
+use std::fmt::Display;
 
-use crate::span::Span;
+use colored::Colorize;
+use getset::Getters;
+use typed_builder::TypedBuilder;
+
+use crate::{
+  cache::Cache,
+  span::Span,
+};
 
 pub enum DiagnosticLevel {
   Error,
@@ -8,7 +15,17 @@ pub enum DiagnosticLevel {
   Info,
 }
 
-#[derive(Getters)]
+impl Display for DiagnosticLevel {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    match self {
+      DiagnosticLevel::Error => write!(f, "{}", "error".red()),
+      DiagnosticLevel::Warning => write!(f, "{}", "warning".yellow()),
+      DiagnosticLevel::Info => write!(f, "{}", "info".blue()),
+    }
+  }
+}
+
+#[derive(Getters, TypedBuilder)]
 pub struct Diagnostic<'ctx> {
   #[getset(get = "pub")]
   level: DiagnosticLevel,
@@ -19,11 +36,12 @@ pub struct Diagnostic<'ctx> {
 }
 
 impl<'ctx> Diagnostic<'ctx> {
-  pub fn new(level: DiagnosticLevel, message: Option<&'ctx str>, code: Option<Span<'ctx>>) -> Self {
-    Self {
-      level,
-      message,
-      code,
+  pub fn write(&self, cache: &Cache<'ctx>, out: &mut dyn std::io::Write) -> std::io::Result<()> {
+    writeln!(out, "{}: {}", self.level, self.message.unwrap_or(" "))?;
+    if let Some(code) = &self.code {
+      code.write(cache, out)?;
     }
+
+    Ok(())
   }
 }

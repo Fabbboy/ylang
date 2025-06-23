@@ -13,11 +13,25 @@ use bumpalo::{
 };
 
 #[derive(Getters)]
+pub struct Line {
+  #[getset(get = "pub")]
+  range: Range<usize>,
+  #[getset(get = "pub")]
+  num: usize,
+}
+
+impl Line {
+  pub fn new(range: Range<usize>, num: usize) -> Self {
+    Self { range, num }
+  }
+}
+
+#[derive(Getters)]
 pub struct CacheEntry<'ctx> {
   #[getset(get = "pub")]
   source: Arc<Source<'ctx>>,
   #[getset(get = "pub")]
-  lines: BumpVec<'ctx, Range<usize>>,
+  lines: BumpVec<'ctx, Line>,
 }
 
 impl<'ctx> CacheEntry<'ctx> {
@@ -26,26 +40,34 @@ impl<'ctx> CacheEntry<'ctx> {
     let mut start = 0;
     for (i, c) in source.content().char_indices() {
       if c == '\n' {
-        lines.push(Range { start, end: i });
+        lines.push(Line::new(Range { start, end: i }, lines.len() + 1));
         start = i + 1;
       }
     }
 
     if start < source.content().len() {
-      lines.push(Range {
-        start,
-        end: source.content().len(),
-      });
+      lines.push(Line::new(
+        Range {
+          start,
+          end: source.content().len(),
+        },
+        lines.len() + 1,
+      ));
     }
 
     Self { source, lines }
   }
 
-  pub fn get_lines(&self, range: Range<usize>) -> Option<&Range<usize>> {
-    self
+  pub fn get_lines(&self, range: Range<usize>) -> Option<&[Line]> {
+    let lines_iter = self
       .lines
       .iter()
-      .find(|&line| line.start <= range.start && line.end >= range.end)
+      .filter(|line| line.range.start <= range.end && line.range.end >= range.start);
+    if lines_iter.clone().next().is_some() {
+      Some(self.lines.as_slice())
+    } else {
+      None
+    }
   }
 }
 

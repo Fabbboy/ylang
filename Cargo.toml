@@ -12,6 +12,8 @@ getset = "0.1.6"
 smallvec = "1.15.1"
 typed-builder = "0.21.0"
 bumpalo = "3.18.1"
+pretty = "0.12.4"
+colored = "3.0.0"
 
 sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }

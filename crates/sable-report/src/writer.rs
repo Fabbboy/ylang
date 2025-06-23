@@ -6,6 +6,7 @@ use crate::{
   sink::Sink,
 };
 
+#[derive(Debug)]
 pub enum WriterError<'ctx> {
   IO(io::Error),
   FileNotFound(&'ctx str),
@@ -32,6 +33,9 @@ where
   type Error = WriterError<'ctx>;
 
   fn report(&mut self, diagnostic: Diagnostic) -> Result<(), Self::Error> {
+    diagnostic
+      .write(self.cache, self.out)
+      .map_err(WriterError::IO)?;
     Ok(())
   }
 }
