@@ -29,10 +29,10 @@ impl AriadneCache {
 impl Cache<FileId> for AriadneCache {
     type Storage = FileId;
 
-    fn fetch(&mut self, id: &FileId) -> Result<&Source<Self::Storage>, Box<dyn std::fmt::Debug>> {
+    fn fetch(&mut self, id: &FileId) -> Result<&Source<Self::Storage>, impl std::fmt::Debug> {
         self.files
             .get(id)
-            .ok_or_else(|| Box::new(format!("unknown file: {}", id)) as Box<dyn std::fmt::Debug>)
+            .ok_or_else(|| format!("unknown file: {}", id))
     }
 
     fn display<'a>(&self, id: &'a FileId) -> Option<impl std::fmt::Display + 'a> {
