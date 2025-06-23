@@ -1,11 +1,12 @@
+use std::sync::Arc;
+
 use sable_ast::location::Location;
 use sable_common::source::Source;
 
 use crate::token::{Token, TokenError, TokenKind};
 
 pub struct Lexer<'ctx> {
-  source: &'ctx Source<'ctx>,
-  raw: &'ctx str,
+  source: Arc<Source<'ctx>>,
 
   pos: usize,
   start: usize,
@@ -14,9 +15,8 @@ pub struct Lexer<'ctx> {
 }
 
 impl<'ctx> Lexer<'ctx> {
-  pub fn new(source: &'ctx Source<'ctx>) -> Self {
+  pub fn new(source: Arc<Source<'ctx>>) -> Self {
     let mut lexer = Self {
-      raw: source.content().as_str(),
       source,
 
       pos: 0,
@@ -28,8 +28,12 @@ impl<'ctx> Lexer<'ctx> {
     lexer
   }
 
+  fn source_content(&self) -> &'ctx str {
+    self.source.content()
+  }
+
   fn get_char(&self, offset: usize) -> Option<char> {
-    self.raw[self.pos + offset..].chars().next()
+    self.source_content()[self.pos + offset..].chars().next()
   }
 
   fn advance(&mut self) {
@@ -39,11 +43,11 @@ impl<'ctx> Lexer<'ctx> {
   }
 
   fn make_location(&self) -> Location<'ctx> {
-    Location::new(self.start..self.pos, self.source.filename().as_str())
+    Location::new(self.start..self.pos, self.source.filename())
   }
 
   fn make_lexeme(&self) -> &'ctx str {
-    &self.raw[self.start..self.pos]
+    &self.source_content()[self.start..self.pos]
   }
 
   fn make_token(&self, kind: TokenKind) -> Token<'ctx> {

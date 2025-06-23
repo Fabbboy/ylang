@@ -64,7 +64,7 @@ fn main() {
   let mut binding = io::stdout();
   let mut writer = DiagnosticWriter::new(&cache, &mut binding);
 
-  let mut lexer = Lexer::new(source.as_ref());
+  let mut lexer = Lexer::new(source.clone());
   while let Some(token) = lexer.next() {
     println!("{:?}", token);
     match token.kind().clone() {
