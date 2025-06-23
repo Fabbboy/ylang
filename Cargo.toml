@@ -2,7 +2,7 @@
 members = [
   "crates/sable-ast",
   "crates/sable-common",
-  "crates/sable-parser", "crates/sable-report", 
+  "crates/sable-parser",
   "sablec",
 ]
 resolver = "3"
@@ -18,4 +18,4 @@ colored = "3.0.0"
 sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }
 sable-parser = { path = "crates/sable-parser" }
-sable-report = { path = "crates/sable-report" }
+ariadne = "0.5.1"

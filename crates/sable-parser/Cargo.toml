@@ -7,5 +7,5 @@ edition = "2024"
 sable-ast = { workspace = true }
 sable-common = { workspace = true }
 getset = { workspace = true }
-sable-report = { workspace = true }
+ariadne = { workspace = true }
 smallvec = { workspace = true }

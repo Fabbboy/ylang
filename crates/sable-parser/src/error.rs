@@ -1,6 +1,7 @@
-use sable_report::{
-  diagnostic::Diagnostic,
-  sink::Report,
+use ariadne::Report;
+use sable_common::{
+  FileSpan,
+  writer::Reportable,
 };
 
 pub mod unexpected_token;
@@ -10,10 +11,8 @@ pub enum ParseError<'ctx> {
   UnexpectedToken(unexpected_token::UnexpectedToken<'ctx>),
 }
 
-impl<'ctx> Report for ParseError<'ctx> {
-  type Error = ();
-
-  fn report(&self) -> Diagnostic {
+impl<'ctx> Reportable for ParseError<'ctx> {
+  fn report(&self) -> Report<FileSpan> {
     match self {
       ParseError::UnexpectedToken(unexpected_token) => unexpected_token.report(),
     }

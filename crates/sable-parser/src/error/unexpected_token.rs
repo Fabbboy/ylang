@@ -1,14 +1,8 @@
-use sable_report::{
-  diagnostic::{
-    Diagnostic,
-    DiagnosticLevel,
-  },
-  label::{
-    Label,
-    LabelKind,
-  },
-  sink::Report,
-  span::Span,
+use ariadne::{Report, ReportKind, Label};
+use sable_common::{
+  FileSpan,
+  FileId,
+  writer::Reportable,
 };
 use smallvec::SmallVec;
 
@@ -31,13 +25,11 @@ impl<'ctx> UnexpectedToken<'ctx> {
   }
 }
 
-impl<'ctx> Report for UnexpectedToken<'ctx> {
-  type Error = ();
-
-  fn report(&self) -> Diagnostic {
-    let code = Span::new(
+impl<'ctx> Reportable for UnexpectedToken<'ctx> {
+  fn report(&self) -> Report<FileSpan> {
+    let span: FileSpan = (
+      FileId::from(*self.found.location().filename()),
       self.found.location().range().clone(),
-      self.found.location().filename(),
     );
 
     let expected = format!(
@@ -50,16 +42,9 @@ impl<'ctx> Report for UnexpectedToken<'ctx> {
         .join(", ")
     );
 
-    let label = Label::builder()
-      .message(Some(expected))
-      .kind(LabelKind::Note)
-      .build();
-
-    Diagnostic::builder()
-      .message(Some(format!("Unexpected token: `{:?}`", self.found.kind())))
-      .code(Some(code))
-      .level(DiagnosticLevel::Error)
-      .labels(vec![label])
-      .build()
+    Report::build(ReportKind::Error, span.clone())
+      .with_message(format!("Unexpected token: `{:?}`", self.found.kind()))
+      .with_label(Label::new(span).with_message(expected))
+      .finish()
   }
 }

@@ -1,7 +1,7 @@
 use sable_ast::ast::Ast;
-use sable_report::sink::{
-  Report,
+use sable_common::writer::{
   Sink,
+  Reportable,
 };
 use smallvec::{
   SmallVec,
@@ -59,13 +59,14 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     let expected = smallvec![TokenKind::Eof];
 
     loop {
-      let token_result = self.expect(expected.clone());
-      let token = match token_result {
+      let token = match self.expect(expected.clone()) {
         Ok(tok) => tok,
         Err(error) => {
-          let diagnostic = error.report();
-          if let Err(e) = sink.report(diagnostic) {
-            eprintln!("Failed to report diagnostic: {:?}", e);
+          {
+            let report = error.report();
+            if let Err(e) = sink.report(report) {
+              eprintln!("Failed to report diagnostic: {:?}", e);
+            }
           }
           status = ParseStatus::Error;
           continue;
