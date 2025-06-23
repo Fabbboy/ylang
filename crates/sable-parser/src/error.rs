@@ -1,8 +1,5 @@
 use ariadne::Report;
-use sable_common::{
-  FileSpan,
-  writer::Reportable,
-};
+use sable_common::{FileSpan, writer::Reportable};
 
 pub mod unexpected_token;
 

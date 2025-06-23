@@ -1,15 +1,9 @@
-use std::{
-  collections::HashMap,
-  sync::Arc,
-};
+use std::{collections::HashMap, sync::Arc};
 
 use bumpalo::Bump;
 use getset::Getters;
 
-use crate::{
-  source::Source,
-  FileId,
-};
+use crate::{FileId, source::Source};
 
 #[derive(Getters)]
 pub struct Manager<'ctx> {

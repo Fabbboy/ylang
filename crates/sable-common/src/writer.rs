@@ -1,43 +1,38 @@
-use std::io;
 use ariadne::Report;
+use std::io;
 
-use super::{
-    cache::AriadneCache,
-    FileSpan,
-};
+use super::{FileSpan, cache::AriadneCache};
 
 pub trait Sink {
-    type Error: std::fmt::Debug;
-    fn report(&mut self, report: Report<FileSpan>) -> Result<(), Self::Error>;
+  type Error: std::fmt::Debug;
+  fn report(&mut self, report: Report<FileSpan>) -> Result<(), Self::Error>;
 }
 
 pub trait Reportable {
-    fn report(&self) -> Report<FileSpan>;
+  fn report(&self) -> Report<FileSpan>;
 }
 
 pub struct ReportWriter<'w, O> {
-    cache: &'w mut AriadneCache,
-    out: &'w mut O,
+  cache: &'w mut AriadneCache,
+  out: &'w mut O,
 }
 
 impl<'w, O> ReportWriter<'w, O>
 where
-    O: io::Write,
+  O: io::Write,
 {
-    pub fn new(cache: &'w mut AriadneCache, out: &'w mut O) -> Self {
-        Self { cache, out }
-    }
+  pub fn new(cache: &'w mut AriadneCache, out: &'w mut O) -> Self {
+    Self { cache, out }
+  }
 }
 
 impl<'w, O> Sink for ReportWriter<'w, O>
 where
-    O: io::Write,
+  O: io::Write,
 {
-    type Error = io::Error;
+  type Error = io::Error;
 
-    fn report(&mut self, report: Report<FileSpan>) -> Result<(), Self::Error> {
-        report.write(&mut *self.cache, &mut *self.out)
-    }
+  fn report(&mut self, report: Report<FileSpan>) -> Result<(), Self::Error> {
+    report.write(&mut *self.cache, &mut *self.out)
+  }
 }
-
-

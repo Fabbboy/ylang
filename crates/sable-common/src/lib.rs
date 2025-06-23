@@ -1,6 +1,6 @@
+pub mod cache;
 pub mod manager;
 pub mod source;
-pub mod cache;
 pub mod writer;
 
 use std::sync::Arc;

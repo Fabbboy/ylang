@@ -3,11 +3,7 @@ use std::sync::Arc;
 use sable_ast::location::Location;
 use sable_common::source::Source;
 
-use crate::token::{
-  Token,
-  TokenError,
-  TokenKind,
-};
+use crate::token::{Token, TokenError, TokenKind};
 
 pub struct Lexer<'ctx> {
   source: Arc<Source<'ctx>>,
