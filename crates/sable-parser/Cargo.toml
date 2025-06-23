@@ -8,3 +8,4 @@ sable-ast = { workspace = true }
 sable-common = { workspace = true }
 getset = { workspace = true }
 sable-report = { workspace = true }
+smallvec = { workspace = true }

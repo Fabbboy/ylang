@@ -31,7 +31,7 @@ pub struct Label<'ctx> {
   kind: LabelKind,
   #[getset(get = "pub")]
   #[builder(default, setter(into))]
-  message: Option<&'ctx str>,
+  message: Option<String>,
   #[getset(get = "pub")]
   #[builder(default)]
   code: Option<Span<'ctx>>,
@@ -39,7 +39,11 @@ pub struct Label<'ctx> {
 
 impl<'ctx> Label<'ctx> {
   pub fn to_doc(&self, cache: &Cache<'ctx>) -> RcDoc<'ctx> {
-    let mut doc = RcDoc::text(format!("{}: {}", self.kind, self.message.unwrap_or(" ")));
+    let mut doc = RcDoc::text(format!(
+      "{}: {}",
+      self.kind,
+      self.message.as_deref().unwrap_or("")
+    ));
     if let Some(code) = &self.code {
       doc = doc.append(RcDoc::line()).append(code.to_doc(cache));
     }

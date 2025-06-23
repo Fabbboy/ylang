@@ -1,10 +1,7 @@
 use std::io;
 
 use bumpalo::Bump;
-use sable_ast::{
-  ast::Ast,
-  location::Location,
-};
+use sable_ast::ast::Ast;
 use sable_common::manager::Manager;
 use sable_parser::{
   lexer::Lexer,
@@ -12,19 +9,9 @@ use sable_parser::{
     ParseStatus,
     Parser,
   },
-  token::{
-    TokenError,
-    TokenKind,
-  },
 };
 use sable_report::{
   cache::Cache,
-  diagnostic::{
-    Diagnostic,
-    DiagnosticLevel,
-  },
-  sink::Sink,
-  span::Span,
   writer::DiagnosticWriter,
 };
 
@@ -32,26 +19,6 @@ const SOURCE: &str = r#"
 // this is a comment
 let idio = 123; #  
 "#;
-
-fn report<'f>(err: TokenError, loc: Location<'f>) -> Diagnostic<'f> {
-  match err {
-    TokenError::UnknownCharacter => Diagnostic::builder()
-      .level(DiagnosticLevel::Error)
-      .message(Some("Unknown character encountered"))
-      .code(Some(Span::new(loc.range().clone(), loc.filename())))
-      .build(),
-    TokenError::InvalidInteger => Diagnostic::builder()
-      .level(DiagnosticLevel::Error)
-      .message(Some("Invalid integer literal"))
-      .code(Some(Span::new(loc.range().clone(), loc.filename())))
-      .build(),
-    TokenError::InvalidFloat => Diagnostic::builder()
-      .level(DiagnosticLevel::Error)
-      .message(Some("Invalid float literal"))
-      .code(Some(Span::new(loc.range().clone(), loc.filename())))
-      .build(),
-  }
-}
 
 fn main() {
   let bump = Bump::new();
@@ -64,25 +31,10 @@ fn main() {
   let mut binding = io::stdout();
   let mut writer = DiagnosticWriter::new(&cache, &mut binding);
 
-  let mut lexer = Lexer::new(source.clone());
-  while let Some(token) = lexer.next() {
-    println!("{:?}", token);
-    match token.kind().clone() {
-      TokenKind::Error(err) => {
-        let loc = token.location();
-        let diagnostic = report(err, loc.clone());
-        if let Err(e) = writer.report(diagnostic) {
-          eprintln!("Error writing diagnostic: {:?}", e);
-        }
-      }
-      TokenKind::Eof => break,
-      _ => {}
-    }
-  }
-
+  let lexer = Lexer::new(source.clone());
   let mut ast = Ast::new();
-  let mut parser = Parser::new(&writer, lexer, &mut ast);
-  match parser.parse() {
+  let mut parser = Parser::new(lexer, &mut ast);
+  match parser.parse(&mut writer) {
     ParseStatus::Success => {
       println!("Parsing completed successfully.");
     }
