@@ -1,7 +1,10 @@
 use std::io;
 
 use bumpalo::Bump;
-use sable_ast::{ast::Ast, location::Location};
+use sable_ast::{
+  ast::Ast,
+  location::Location,
+};
 use sable_common::manager::Manager;
 use sable_parser::{
   lexer::Lexer,
@@ -56,17 +59,12 @@ fn main() {
   let mut manager = Manager::new();
   let mut cache = Cache::new(&bump);
   let source = manager.add_source(SOURCE, "test.sable", &bump);
-  cache.add_file("test.sable", source);
+  cache.add_file("test.sable", source.clone());
 
   let mut binding = io::stdout();
   let mut writer = DiagnosticWriter::new(&cache, &mut binding);
 
-  let source = manager
-    .sources()
-    .get("test.sable")
-    .expect("Source not found");
-
-  let mut lexer = Lexer::new(source);
+  let mut lexer = Lexer::new(source.as_ref());
   while let Some(token) = lexer.next() {
     println!("{:?}", token);
     match token.kind().clone() {
