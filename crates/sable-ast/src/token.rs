@@ -1,5 +1,6 @@
 use getset::Getters;
-use sable_ast::location::Location;
+
+use crate::location::Location;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TokenError {

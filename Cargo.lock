@@ -74,7 +74,10 @@ dependencies = [
 name = "sable-ast"
 version = "0.1.0"
 dependencies = [
+ "ariadne",
  "getset",
+ "sable-common",
+ "smallvec",
 ]
 
 [[package]]
