@@ -2,6 +2,7 @@
 members = [
   "crates/sable-ast",
   "crates/sable-common",
+  "crates/sable-ffi",
   "crates/sable-parser",
   "sablec",
 ]
