@@ -25,7 +25,7 @@ impl<'ctx> Manager<'ctx> {
     bump: &'ctx Bump,
   ) -> Arc<Source<'ctx>> {
     let source = Source::new(source, filename, bump);
-    let id = source.id().clone();
+    let id = source.filename().clone();
     let source = Arc::new(source);
     self.sources.insert(id, source.clone());
     source

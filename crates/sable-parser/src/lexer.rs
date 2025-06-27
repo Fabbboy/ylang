@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use sable_ast::{location::Location, token::{Token, TokenError, TokenKind}};
+use sable_ast::{
+  location::Location,
+  token::{Token, TokenError, TokenKind},
+};
 use sable_common::source::Source;
 
 pub struct Lexer<'ctx> {
@@ -39,8 +42,8 @@ impl<'ctx> Lexer<'ctx> {
   }
 
   #[inline]
-  fn make_location(&self) -> Location<'ctx> {
-    Location::new(self.start..self.pos, self.source.filename())
+  fn make_location(&self) -> Location {
+    Location::new(self.start..self.pos, self.source.filename().clone())
   }
 
   #[inline]

@@ -1,6 +1,6 @@
 use ariadne::{Label, Report, ReportKind};
 use sable_ast::token::{Token, TokenKind};
-use sable_common::{FileId, FileSpan, writer::Reportable};
+use sable_common::{FileSpan, writer::Reportable};
 use smallvec::SmallVec;
 
 pub const MAX_INLINE_KINDS: usize = 8;
@@ -20,7 +20,7 @@ impl<'ctx> UnexpectedToken<'ctx> {
 impl<'ctx> Reportable for UnexpectedToken<'ctx> {
   fn report(&self) -> Report<FileSpan> {
     let span: FileSpan = (
-      FileId::from(*self.found.location().filename()),
+      self.found.location().filename().clone(),
       self.found.location().range().clone(),
     );
 

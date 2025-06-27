@@ -1,17 +1,18 @@
 use std::ops::Range;
 
 use getset::Getters;
+use sable_common::FileId;
 
 #[derive(Getters, Default, Clone, Debug, PartialEq, Eq)]
-pub struct Location<'ctx> {
+pub struct Location {
   #[getset(get = "pub")]
   range: Range<usize>,
   #[getset(get = "pub")]
-  filename: &'ctx str,
+  filename: FileId,
 }
 
-impl<'ctx> Location<'ctx> {
-  pub fn new(range: Range<usize>, filename: &'ctx str) -> Self {
+impl Location {
+  pub fn new(range: Range<usize>, filename: FileId) -> Self {
     Self { range, filename }
   }
 }

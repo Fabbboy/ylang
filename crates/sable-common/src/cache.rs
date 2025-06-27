@@ -16,7 +16,7 @@ impl AriadneCache {
 
   pub fn add_file(&mut self, source: &CommonSource<'_>) {
     self.files.insert(
-      source.id().clone(),
+      source.filename().clone(),
       Source::from(Arc::<str>::from(*source.content())),
     );
   }

@@ -53,11 +53,11 @@ pub struct Token<'ctx> {
   #[getset(get = "pub")]
   lexeme: &'ctx str,
   #[getset(get = "pub")]
-  location: Location<'ctx>,
+  location: Location,
 }
 
 impl<'ctx> Token<'ctx> {
-  pub fn new(kind: TokenKind, lexeme: &'ctx str, location: Location<'ctx>) -> Self {
+  pub fn new(kind: TokenKind, lexeme: &'ctx str, location: Location) -> Self {
     Self {
       kind,
       lexeme,
