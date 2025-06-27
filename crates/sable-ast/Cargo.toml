@@ -5,3 +5,6 @@ edition = "2024"
 
 [dependencies]
 getset = { workspace = true }
+sable-common = { workspace = true }
+ariadne = { workspace = true }
+smallvec = { workspace = true }

@@ -1,7 +1,10 @@
 pub mod unexpected_token;
 
 use ariadne::Report;
-use sable_common::{FileSpan, writer::Reportable};
+use sable_common::{
+  FileSpan,
+  writer::Reportable,
+};
 
 #[derive(Debug)]
 pub enum ParseError<'ctx> {
