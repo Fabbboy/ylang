@@ -1,7 +1,7 @@
 [workspace]
 members = [
   "crates/sable-ast",
-  "crates/sable-common",
+  "crates/sable-common", "crates/sable-errors",
   "crates/sable-parser",
   "sablec",
 ]

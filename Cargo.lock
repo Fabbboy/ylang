@@ -87,6 +87,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sable-errors"
+version = "0.1.0"
+
+[[package]]
 name = "sable-parser"
 version = "0.1.0"
 dependencies = [
