@@ -1,13 +1,29 @@
 use sable_ast::{
   ast::Ast,
-  token::{Token, TokenError, TokenKind},
+  token::{
+    Token,
+    TokenError,
+    TokenKind,
+  },
 };
-use sable_common::writer::{Reportable, Sink};
-use sable_errors::parse_error::{
-  ParseError,
-  unexpected_token::{MAX_INLINE_KINDS, UnexpectedToken},
+use sable_common::writer::{
+  Reportable,
+  Sink,
 };
-use smallvec::{SmallVec, smallvec};
+use sable_errors::{
+  lex_error::unknown_char::UnknownCharError,
+  parse_error::{
+    ParseError,
+    unexpected_token::{
+      MAX_INLINE_KINDS,
+      UnexpectedTokenError,
+    },
+  },
+};
+use smallvec::{
+  SmallVec,
+  smallvec,
+};
 
 use crate::lexer::Lexer;
 
@@ -26,8 +42,15 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     Self { lexer, ast }
   }
 
-  fn handle_tok_err(&mut self, error: TokenError) -> ParseError<'ctx> {
-    todo!("Handle token error: {:?}", error);
+  fn token_error(&mut self, token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
+    match error {
+      TokenError::UnknownCharacter => ParseError::UnknownChar(UnknownCharError::new(
+        token.lexeme(),
+        token.location().clone(),
+      )),
+      TokenError::InvalidInteger => todo!(),
+      TokenError::InvalidFloat => todo!(),
+    }
   }
 
   fn expect(
@@ -37,14 +60,14 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     let found = self.lexer.next().unwrap();
 
     if let TokenKind::Error(token_error) = found.kind() {
-      let error = self.handle_tok_err(token_error.clone());
+      let error = self.token_error(&found, token_error);
       return Err(error);
     }
 
     if expected.contains(&found.kind().tag()) {
       return Ok(found);
     }
-    let unexp = UnexpectedToken::new(expected, found);
+    let unexp = UnexpectedTokenError::new(expected, found);
     Err(ParseError::UnexpectedToken(unexp))
   }
 

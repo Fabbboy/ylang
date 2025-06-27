@@ -6,18 +6,18 @@ use smallvec::SmallVec;
 pub const MAX_INLINE_KINDS: usize = 8;
 
 #[derive(Debug)]
-pub struct UnexpectedToken<'ctx> {
+pub struct UnexpectedTokenError<'ctx> {
   expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>,
   found: Token<'ctx>,
 }
 
-impl<'ctx> UnexpectedToken<'ctx> {
+impl<'ctx> UnexpectedTokenError<'ctx> {
   pub fn new(expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>, found: Token<'ctx>) -> Self {
     Self { expected, found }
   }
 }
 
-impl<'ctx> Reportable for UnexpectedToken<'ctx> {
+impl<'ctx> Reportable for UnexpectedTokenError<'ctx> {
   fn report(&self) -> Report<FileSpan> {
     let span: FileSpan = (
       self.found.location().filename().clone(),

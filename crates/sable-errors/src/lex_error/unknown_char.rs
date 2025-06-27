@@ -1,12 +1,17 @@
-use ariadne::{Label, Report, ReportKind};
+use ariadne::{
+  Label,
+  Report,
+  ReportKind,
+};
 use sable_ast::location::Location;
 
-pub struct UnknownChar<'ctx> {
+#[derive(Debug)]
+pub struct UnknownCharError<'ctx> {
   pub lexeme: &'ctx str,
   pub location: Location,
 }
 
-impl<'ctx> UnknownChar<'ctx> {
+impl<'ctx> UnknownCharError<'ctx> {
   pub fn new(lexeme: &'ctx str, location: Location) -> Self {
     Self { lexeme, location }
   }

@@ -10,7 +10,7 @@ use sable_parser::{
 
 const SOURCE: &str = r#"
 // this is a comment
-let idio = 123; #  
+let idio = 123; #
 "#;
 
 fn main() {
