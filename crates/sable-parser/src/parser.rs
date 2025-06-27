@@ -11,7 +11,10 @@ use sable_common::writer::{
   Sink,
 };
 use sable_errors::{
-  lex_error::unknown_char::UnknownCharError,
+  lex_error::{
+    numeric_error::NumericError,
+    unknown_char::UnknownCharError,
+  },
   parse_error::{
     ParseError,
     unexpected_token::{
@@ -48,8 +51,12 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
         token.lexeme(),
         token.location().clone(),
       )),
-      TokenError::InvalidInteger => todo!(),
-      TokenError::InvalidFloat => todo!(),
+      TokenError::InvalidInteger | TokenError::InvalidFloat => {
+        ParseError::NumericError(NumericError::new(
+          token.lexeme(),
+          token.location().clone(),
+        ))
+      }
     }
   }
 
