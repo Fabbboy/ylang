@@ -1,15 +1,9 @@
-use sable_ast::ast::Ast;
+use sable_ast::{ast::Ast, token::{Token, TokenKind}};
 use sable_common::writer::{Reportable, Sink};
+use sable_errors::parse_error::{unexpected_token::{UnexpectedToken, MAX_INLINE_KINDS}, ParseError};
 use smallvec::{SmallVec, smallvec};
 
-use crate::{
-  error::{
-    ParseError,
-    unexpected_token::{MAX_INLINE_KINDS, UnexpectedToken},
-  },
-  lexer::Lexer,
-  token::{Token, TokenKind},
-};
+use crate::lexer::Lexer;
 
 pub enum ParseStatus {
   Success,

@@ -1,8 +1,7 @@
 use ariadne::{Label, Report, ReportKind};
+use sable_ast::token::{Token, TokenKind};
 use sable_common::{FileId, FileSpan, writer::Reportable};
 use smallvec::SmallVec;
-
-use crate::token::{Token, TokenKind};
 
 pub const MAX_INLINE_KINDS: usize = 8;
 

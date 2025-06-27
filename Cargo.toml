@@ -19,3 +19,4 @@ ariadne = "0.5.1"
 sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }
 sable-parser = { path = "crates/sable-parser" }
+sable-errors = { path = "crates/sable-errors" }

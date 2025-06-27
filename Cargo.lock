@@ -89,15 +89,21 @@ dependencies = [
 [[package]]
 name = "sable-errors"
 version = "0.1.0"
+dependencies = [
+ "ariadne",
+ "sable-ast",
+ "sable-common",
+ "smallvec",
+]
 
 [[package]]
 name = "sable-parser"
 version = "0.1.0"
 dependencies = [
- "ariadne",
  "getset",
  "sable-ast",
  "sable-common",
+ "sable-errors",
  "smallvec",
 ]
 
