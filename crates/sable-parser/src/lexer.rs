@@ -13,12 +13,6 @@ pub struct Lexer<'ctx> {
   pos: usize,
   start: usize,
 
-  // Character offsets into the source. These are required because
-  // ariadne expects spans to be defined in terms of character indices
-  // rather than byte indices.
-  cpos: usize,
-  cstart: usize,
-
   next: Token<'ctx>,
 }
 
@@ -29,9 +23,6 @@ impl<'ctx> Lexer<'ctx> {
 
       pos: 0,
       start: 0,
-
-      cpos: 0,
-      cstart: 0,
 
       next: Token::default(),
     };
@@ -48,13 +39,14 @@ impl<'ctx> Lexer<'ctx> {
   fn advance(&mut self) {
     if let Some(c) = self.get_char(0) {
       self.pos += c.len_utf8();
-      self.cpos += 1;
     }
   }
 
   #[inline]
   fn make_location(&self) -> Location {
-    Location::new(self.cstart..self.cpos, self.source.filename().clone())
+    let start = self.source.content()[..self.start].chars().count();
+    let end = self.source.content()[..self.pos].chars().count();
+    Location::new(start..end, self.source.filename().clone())
   }
 
   #[inline]
@@ -139,7 +131,6 @@ impl<'ctx> Lexer<'ctx> {
     self.skip_trivial();
 
     self.start = self.pos;
-    self.cstart = self.cpos;
     match self.get_char(0) {
       None => return self.make_token(TokenKind::Eof),
       Some(c) => {
