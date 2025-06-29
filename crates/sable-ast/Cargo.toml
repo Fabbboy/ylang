@@ -8,3 +8,4 @@ getset = { workspace = true }
 sable-common = { workspace = true }
 ariadne = { workspace = true }
 smallvec = { workspace = true }
+typed-builder = { workspace = true }

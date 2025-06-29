@@ -8,3 +8,4 @@ ariadne = { workspace = true }
 sable-common = { workspace = true }
 sable-ast = { workspace = true }
 smallvec = { workspace = true }
+either = { workspace = true }

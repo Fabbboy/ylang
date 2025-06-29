@@ -33,8 +33,8 @@ fn main() {
 
   let lexer = Lexer::new(source.clone());
   let mut ast = Ast::new();
-  let mut parser = Parser::new(lexer, &mut ast);
-  match parser.parse(&mut writer) {
+  let mut parser = Parser::new(lexer, &mut ast, &mut writer);
+  match parser.parse() {
     ParseStatus::Success => {
       println!("Parsing completed successfully.");
     }

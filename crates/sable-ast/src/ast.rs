@@ -1,10 +1,10 @@
-use getset::Getters;
+use getset::{Getters, MutGetters};
 
 use crate::objects::function::Function;
 
-#[derive(Getters)]
+#[derive(Getters, MutGetters)]
 pub struct Ast {
-  #[getset(get = "pub")]
+  #[getset(get_mut = "pub", get = "pub")]
   funcs: Vec<Function>,
 }
 
