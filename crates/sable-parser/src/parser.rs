@@ -7,10 +7,7 @@ use sable_ast::{
     TokenKind,
   },
 };
-use sable_common::writer::{
-  DiagnosticEngine,
-  Sink,
-};
+use sable_common::writer::Sink;
 use sable_errors::{
   lex_error::{
     numeric_error::NumericError,
@@ -37,21 +34,21 @@ pub enum ParseStatus {
   Error,
 }
 
-pub struct Parser<'ctx, 'p, 'd, S>
+pub struct Parser<'ctx, 'p, D>
 where
-  S: Sink + ?Sized,
+  D: Sink + ?Sized,
 {
   lexer: Lexer<'ctx>,
   ast: &'p mut Ast,
-  engine: DiagnosticEngine<'d, S>,
+  sink: &'p mut D,
 }
 
-impl<'ctx, 'p, 'd, S> Parser<'ctx, 'p, 'd, S>
+impl<'ctx, 'p, D> Parser<'ctx, 'p, D>
 where
-  S: Sink + ?Sized,
+  D: Sink + ?Sized,
 {
-  pub fn new(lexer: Lexer<'ctx>, ast: &'p mut Ast, sink: &'d mut S) -> Self {
-    Self { lexer, ast, engine: DiagnosticEngine::new(sink) }
+  pub fn new(lexer: Lexer<'ctx>, ast: &'p mut Ast, sink: &'p mut D) -> Self {
+    Self { lexer, ast, sink }
   }
 
   fn token_error(token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
@@ -88,7 +85,6 @@ where
     todo!()
   }
 
-
   pub fn parse(&mut self) -> ParseStatus {
     let mut status = ParseStatus::Success;
     let expected = smallvec![TokenKind::Func, TokenKind::Eof];
@@ -97,7 +93,7 @@ where
       let kind_tag = match Self::expect(&mut self.lexer, expected.clone()) {
         Ok(tok) => tok.kind().tag(),
         Err(error) => {
-          if let Err(e) = self.engine.emit(error) {
+          if let Err(e) = self.sink.report(error) {
             eprintln!("failed to emit diagnostic: {:?}", e);
           }
           status = ParseStatus::Error;

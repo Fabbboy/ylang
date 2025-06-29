@@ -1,7 +1,10 @@
 use ariadne::Report;
 use std::io;
 
-use super::{FileSpan, cache::AriadneCache};
+use super::{
+  FileSpan,
+  cache::AriadneCache,
+};
 
 pub trait Sink {
   type Error: std::fmt::Debug;
@@ -34,26 +37,5 @@ where
 
   fn report(&mut self, report: Report<FileSpan>) -> Result<(), Self::Error> {
     report.write(&mut *self.cache, &mut *self.out)
-  }
-}
-
-pub struct DiagnosticEngine<'d, S>
-where
-  S: Sink + ?Sized,
-{
-  sink: &'d mut S,
-}
-
-impl<'d, S> DiagnosticEngine<'d, S>
-where
-  S: Sink + ?Sized,
-{
-  pub fn new(sink: &'d mut S) -> Self {
-    Self { sink }
-  }
-
-  pub fn emit(&mut self, diag: impl Reportable) -> Result<(), S::Error> {
-    let report = diag.report();
-    self.sink.report(report)
   }
 }
