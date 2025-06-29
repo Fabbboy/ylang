@@ -3,7 +3,7 @@ members = [
   "crates/sable-ast",
   "crates/sable-common",
   "crates/sable-errors",
-  "crates/sable-ffi",
+ # "crates/sable-ffi",
   "crates/sable-parser",
   "sablec",
 ]
@@ -17,6 +17,7 @@ bumpalo = "3.18.1"
 pretty = "0.12.4"
 colored = "3.0.0"
 ariadne = "0.5.1"
+phf = "0.11.3"
 
 sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }

@@ -31,6 +31,9 @@ pub enum TokenKind {
   Star,
   Slash,
   Assign,
+
+  // Keywords
+  Func,
 }
 
 impl Eq for TokenKind {}

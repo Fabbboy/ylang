@@ -52,10 +52,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
         token.location().clone(),
       )),
       TokenError::InvalidInteger | TokenError::InvalidFloat => {
-        ParseError::NumericError(NumericError::new(
-          token.lexeme(),
-          token.location().clone(),
-        ))
+        ParseError::NumericError(NumericError::new(token.lexeme(), token.location().clone()))
       }
     }
   }
@@ -83,7 +80,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     D: Sink,
   {
     let mut status = ParseStatus::Success;
-    let expected = smallvec![TokenKind::Eof];
+    let expected = smallvec![TokenKind::Func, TokenKind::Eof];
 
     loop {
       let token = match self.expect(expected.clone()) {
@@ -105,6 +102,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       }
 
       match token.kind() {
+        TokenKind::Func => {}
         _ => unreachable!("Unhandled token kind: {:?}", token.kind()),
       }
     }

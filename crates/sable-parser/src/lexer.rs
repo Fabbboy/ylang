@@ -2,9 +2,17 @@ use std::sync::Arc;
 
 use sable_ast::{
   location::Location,
-  token::{Token, TokenError, TokenKind},
+  token::{
+    Token,
+    TokenError,
+    TokenKind,
+  },
 };
 use sable_common::source::Source;
+
+const KEYWORDS: phf::Map<&'static str, TokenKind> = phf::phf_map! {
+  "func" => TokenKind::Func,
+};
 
 pub struct Lexer<'ctx> {
   source: Arc<Source<'ctx>>,
@@ -90,6 +98,12 @@ impl<'ctx> Lexer<'ctx> {
         break;
       }
     }
+
+    let lexeme = self.make_lexeme();
+    if let Some(keyword) = KEYWORDS.get(lexeme) {
+      return self.make_token(keyword.clone());
+    }
+
     self.make_token(TokenKind::Identifier)
   }
 

@@ -2,15 +2,22 @@ use std::io;
 
 use bumpalo::Bump;
 use sable_ast::ast::Ast;
-use sable_common::{cache::AriadneCache, manager::Manager, writer::ReportWriter};
+use sable_common::{
+  cache::AriadneCache,
+  manager::Manager,
+  writer::ReportWriter,
+};
 use sable_parser::{
   lexer::Lexer,
-  parser::{ParseStatus, Parser},
+  parser::{
+    ParseStatus,
+    Parser,
+  },
 };
 
 const SOURCE: &str = r#"
-// this is a comment
-let idio = 123; #
+func main() {
+}
 "#;
 
 fn main() {
