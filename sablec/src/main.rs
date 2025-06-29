@@ -5,9 +5,7 @@ use sable_ast::ast::Ast;
 use sable_common::{
   cache::AriadneCache,
   manager::Manager,
-  writer::{
-    ReportWriter,
-  },
+  writer::ReportWriter,
 };
 use sable_parser::{
   lexer::Lexer,
@@ -35,8 +33,8 @@ fn main() {
 
   let lexer = Lexer::new(source.clone());
   let mut ast = Ast::new();
-  let mut parser = Parser::new(lexer, &mut ast, &mut writer);
-  match parser.parse() {
+  let mut parser = Parser::new(lexer, &mut ast);
+  match parser.parse(&mut writer) {
     ParseStatus::Success => {
       println!("Parsing completed successfully.");
     }

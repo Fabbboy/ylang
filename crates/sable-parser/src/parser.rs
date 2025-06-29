@@ -1,3 +1,4 @@
+use either::Either;
 use sable_ast::{
   ast::Ast,
   objects::function::Function,
@@ -7,7 +8,10 @@ use sable_ast::{
     TokenKind,
   },
 };
-use sable_common::writer::Sink;
+use sable_common::writer::{
+  Reportable,
+  Sink,
+};
 use sable_errors::{
   lex_error::{
     numeric_error::NumericError,
@@ -34,24 +38,17 @@ pub enum ParseStatus {
   Error,
 }
 
-pub struct Parser<'ctx, 'p, D>
-where
-  D: Sink + ?Sized,
-{
+pub struct Parser<'ctx, 'p> {
   lexer: Lexer<'ctx>,
   ast: &'p mut Ast,
-  sink: &'p mut D,
 }
 
-impl<'ctx, 'p, D> Parser<'ctx, 'p, D>
-where
-  D: Sink + ?Sized,
-{
-  pub fn new(lexer: Lexer<'ctx>, ast: &'p mut Ast, sink: &'p mut D) -> Self {
-    Self { lexer, ast, sink }
+impl<'ctx, 'p> Parser<'ctx, 'p> {
+  pub fn new(lexer: Lexer<'ctx>, ast: &'p mut Ast) -> Self {
+    Self { lexer, ast }
   }
 
-  fn token_error(token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
+  fn handle_token_error(&self, token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
     match error {
       TokenError::UnknownCharacter => ParseError::UnknownChar(UnknownCharError::new(
         token.lexeme(),
@@ -63,14 +60,34 @@ where
     }
   }
 
+  fn handle_parse_error<D>(&self, sink: &mut D, error: ParseErrorMOO<'ctx>)
+  where
+    D: Sink + ?Sized,
+  {
+    match error.0 {
+      Either::Left(parse_error) => {
+        if let Err(e) = sink.report(parse_error.report()) {
+          eprintln!("failed to emit diagnostic: {:?}", e);
+        }
+      }
+      Either::Right(errors) => {
+        for parse_error in errors {
+          if let Err(e) = sink.report(parse_error.report()) {
+            eprintln!("failed to emit diagnostic: {:?}", e);
+          }
+        }
+      }
+    }
+  }
+
   fn expect(
-    lexer: &mut Lexer<'ctx>,
+    &mut self,
     expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>,
   ) -> Result<Token<'ctx>, ParseError<'ctx>> {
-    let found = lexer.next().unwrap();
+    let found = self.lexer.next().unwrap();
 
     if let TokenKind::Error(token_error) = found.kind() {
-      let error = Self::token_error(&found, token_error);
+      let error = self.handle_token_error(&found, token_error);
       return Err(error);
     }
 
@@ -85,17 +102,18 @@ where
     todo!()
   }
 
-  pub fn parse(&mut self) -> ParseStatus {
+  pub fn parse<D>(&mut self, sink: &mut D) -> ParseStatus
+  where
+    D: Sink + ?Sized,
+  {
     let mut status = ParseStatus::Success;
     let expected = smallvec![TokenKind::Func, TokenKind::Eof];
 
     loop {
-      let kind_tag = match Self::expect(&mut self.lexer, expected.clone()) {
+      let kind_tag = match self.expect(expected.clone()) {
         Ok(tok) => tok.kind().tag(),
         Err(error) => {
-          if let Err(e) = self.sink.report(error) {
-            eprintln!("failed to emit diagnostic: {:?}", e);
-          }
+          self.handle_parse_error(sink, ParseErrorMOO(Either::Left(error)));
           status = ParseStatus::Error;
           continue;
         }
