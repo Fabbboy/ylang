@@ -36,3 +36,25 @@ where
     report.write(&mut *self.cache, &mut *self.out)
   }
 }
+
+pub struct DiagnosticEngine<'d, S>
+where
+  S: Sink + ?Sized,
+{
+  sink: &'d mut S,
+}
+
+impl<'d, S> DiagnosticEngine<'d, S>
+where
+  S: Sink + ?Sized,
+{
+  pub fn new(sink: &'d mut S) -> Self {
+    Self { sink }
+  }
+
+  pub fn emit(&mut self, diag: impl Reportable) {
+    let report = diag.report();
+    // Ignoring errors for now; diagnostics should not panic
+    let _ = self.sink.report(report);
+  }
+}

@@ -5,7 +5,9 @@ use sable_ast::ast::Ast;
 use sable_common::{
   cache::AriadneCache,
   manager::Manager,
-  writer::ReportWriter,
+  writer::{
+    ReportWriter,
+  },
 };
 use sable_parser::{
   lexer::Lexer,

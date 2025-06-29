@@ -1,4 +1,3 @@
-use either::Either;
 use sable_ast::{
   ast::Ast,
   objects::function::Function,
@@ -9,7 +8,7 @@ use sable_ast::{
   },
 };
 use sable_common::writer::{
-  Reportable,
+  DiagnosticEngine,
   Sink,
 };
 use sable_errors::{
@@ -38,25 +37,24 @@ pub enum ParseStatus {
   Error,
 }
 
-pub struct Parser<'ctx, 'p, D> {
+pub struct Parser<'ctx, 'p, 'd, S>
+where
+  S: Sink + ?Sized,
+{
   lexer: Lexer<'ctx>,
   ast: &'p mut Ast,
-  sink: &'p mut D,
+  engine: DiagnosticEngine<'d, S>,
 }
 
-impl<'ctx, 'p, D> Parser<'ctx, 'p, D>
+impl<'ctx, 'p, 'd, S> Parser<'ctx, 'p, 'd, S>
 where
-  D: Sink,
+  S: Sink + ?Sized,
 {
-  pub fn new(lexer: Lexer<'ctx>, ast: &'p mut Ast, reporter: &'p mut D) -> Self {
-    Self {
-      lexer,
-      ast,
-      sink: reporter,
-    }
+  pub fn new(lexer: Lexer<'ctx>, ast: &'p mut Ast, sink: &'d mut S) -> Self {
+    Self { lexer, ast, engine: DiagnosticEngine::new(sink) }
   }
 
-  fn token_error(&mut self, token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
+  fn token_error(token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
     match error {
       TokenError::UnknownCharacter => ParseError::UnknownChar(UnknownCharError::new(
         token.lexeme(),
@@ -69,13 +67,13 @@ where
   }
 
   fn expect(
-    &mut self,
+    lexer: &mut Lexer<'ctx>,
     expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>,
-  ) -> Result<Token<'ctx>, ParseError> {
-    let found = self.lexer.next().unwrap();
+  ) -> Result<Token<'ctx>, ParseError<'ctx>> {
+    let found = lexer.next().unwrap();
 
     if let TokenKind::Error(token_error) = found.kind() {
-      let error = self.token_error(&found, token_error);
+      let error = Self::token_error(&found, token_error);
       return Err(error);
     }
 
@@ -90,50 +88,38 @@ where
     todo!()
   }
 
-  fn handle_moo(&mut self, error: ParseErrorMOO<'ctx>) {
-    match error.0 {
-      Either::Left(err) => {
-        let report = err.report();
-        self.sink.report(report).unwrap();
-      }
-      _ => unreachable!(),
-    }
-  }
 
   pub fn parse(&mut self) -> ParseStatus {
     let mut status = ParseStatus::Success;
     let expected = smallvec![TokenKind::Func, TokenKind::Eof];
 
     loop {
-      let token = self.expect(expected.clone());
-
-      let token = match token {
-        Ok(tok) => tok,
+      let kind_tag = match Self::expect(&mut self.lexer, expected.clone()) {
+        Ok(tok) => tok.kind().tag(),
         Err(error) => {
-          self.handle_moo(error.into());
+          self.engine.emit(error);
           status = ParseStatus::Error;
           continue;
         }
       };
 
-      if token.kind().tag() == TokenKind::Eof {
+      if kind_tag == TokenKind::Eof {
         break;
       }
 
-      match token.kind() {
+      match kind_tag {
         TokenKind::Func => {
           let res = self.parse_function();
           match res {
             Ok(func) => {
-              let funcs = self.ast.funcs_mut();
-              funcs.push(func);
+              self.ast.funcs_mut().push(func);
             }
-            Err(error) => {
+            Err(_error) => {
               todo!()
             }
           }
         }
-        _ => unreachable!("Unhandled token kind: {:?}", token.kind()),
+        _ => unreachable!("Unhandled token kind: {:?}", kind_tag),
       }
     }
 
