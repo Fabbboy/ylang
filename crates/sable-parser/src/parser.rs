@@ -110,7 +110,7 @@ where
       let token = match token {
         Ok(tok) => tok,
         Err(error) => {
-          self.handle_moo(ParseErrorMOO::from(error));
+          self.handle_moo(error.into());
           status = ParseStatus::Error;
           continue;
         }
