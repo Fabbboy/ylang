@@ -52,9 +52,8 @@ where
     Self { sink }
   }
 
-  pub fn emit(&mut self, diag: impl Reportable) {
+  pub fn emit(&mut self, diag: impl Reportable) -> Result<(), S::Error> {
     let report = diag.report();
-    // Ignoring errors for now; diagnostics should not panic
-    let _ = self.sink.report(report);
+    self.sink.report(report)
   }
 }

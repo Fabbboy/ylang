@@ -97,7 +97,9 @@ where
       let kind_tag = match Self::expect(&mut self.lexer, expected.clone()) {
         Ok(tok) => tok.kind().tag(),
         Err(error) => {
-          self.engine.emit(error);
+          if let Err(e) = self.engine.emit(error) {
+            eprintln!("failed to emit diagnostic: {:?}", e);
+          }
           status = ParseStatus::Error;
           continue;
         }
