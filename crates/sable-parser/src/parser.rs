@@ -130,8 +130,10 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
             Ok(func) => {
               self.ast.funcs_mut().push(func);
             }
-            Err(_error) => {
-              todo!()
+            Err(error) => {
+              self.handle_parse_error(sink, error);
+              status = ParseStatus::Error;
+              continue;
             }
           }
         }
