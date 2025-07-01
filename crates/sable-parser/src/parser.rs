@@ -5,18 +5,39 @@ use sable_ast::{
   ast::Ast,
   location::Location,
   objects::function::Function,
-  token::{Token, TokenError, TokenKind},
-  types::{PrimitiveType, Type, TypeNamePair},
-};
-use sable_common::writer::{Reportable, Sink};
-use sable_errors::{
-  lex_error::{numeric_error::NumericError, unknown_char::UnknownCharError},
-  parse_error::{
-    ParseError, ParseErrorMOO,
-    unexpected_token::{MAX_INLINE_KINDS, UnexpectedTokenError},
+  token::{
+    Token,
+    TokenError,
+    TokenKind,
+  },
+  types::{
+    PrimitiveType,
+    Type,
+    TypeNamePair,
   },
 };
-use smallvec::{SmallVec, smallvec};
+use sable_common::writer::{
+  Reportable,
+  Sink,
+};
+use sable_errors::{
+  lex_error::{
+    numeric_error::NumericError,
+    unknown_char::UnknownCharError,
+  },
+  parse_error::{
+    ParseError,
+    ParseErrorMOO,
+    unexpected_token::{
+      MAX_INLINE_KINDS,
+      UnexpectedTokenError,
+    },
+  },
+};
+use smallvec::{
+  SmallVec,
+  smallvec,
+};
 
 use crate::lexer::Lexer;
 
@@ -187,7 +208,6 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       };
 
       if kind_tag == TokenKind::Eof {
-        println!("Reached end of file.");
         break;
       }
 
