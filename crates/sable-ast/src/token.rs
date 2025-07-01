@@ -1,15 +1,19 @@
 use getset::Getters;
+use serde::Serialize;
 
-use crate::{location::Location, types::PrimitiveType};
+use crate::{
+  location::Location,
+  types::PrimitiveType,
+};
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Serialize)]
 pub enum TokenError {
   UnknownCharacter,
   InvalidInteger,
   InvalidFloat,
 }
 
-#[derive(Default, Clone, Debug, PartialEq)]
+#[derive(Default, Clone, Debug, PartialEq, Serialize)]
 pub enum TokenKind {
   // Special
   #[default]
@@ -54,7 +58,7 @@ impl TokenKind {
   }
 }
 
-#[derive(Getters, Default, Clone, Debug)]
+#[derive(Getters, Default, Clone, Debug, Serialize)]
 
 pub struct Token<'ctx> {
   #[getset(get = "pub")]

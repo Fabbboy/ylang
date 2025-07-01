@@ -2,7 +2,11 @@ use std::sync::Arc;
 
 use sable_ast::{
   location::Location,
-  token::{Token, TokenError, TokenKind},
+  token::{
+    Token,
+    TokenError,
+    TokenKind,
+  },
   types::PrimitiveType,
 };
 use sable_common::source::Source;

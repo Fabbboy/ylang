@@ -1,7 +1,16 @@
-use ariadne::{Cache, Source};
-use std::{collections::HashMap, sync::Arc};
+use ariadne::{
+  Cache,
+  Source,
+};
+use std::{
+  collections::HashMap,
+  sync::Arc,
+};
 
-use crate::{FileId, source::Source as CommonSource};
+use crate::{
+  FileId,
+  source::Source as CommonSource,
+};
 
 pub struct AriadneCache {
   files: HashMap<FileId, Source<FileId>>,

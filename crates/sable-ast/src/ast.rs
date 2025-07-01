@@ -1,8 +1,12 @@
-use getset::{Getters, MutGetters};
+use getset::{
+  Getters,
+  MutGetters,
+};
+use serde::Serialize;
 
 use crate::objects::function::Function;
 
-#[derive(Getters, MutGetters, Debug)]
+#[derive(Getters, MutGetters, Debug, Serialize)]
 pub struct Ast {
   #[getset(get_mut = "pub", get = "pub")]
   funcs: Vec<Function>,

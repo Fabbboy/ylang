@@ -7,5 +7,6 @@ edition = "2024"
 getset = { workspace = true }
 sable-common = { workspace = true }
 ariadne = { workspace = true }
-smallvec = { workspace = true }
+smallvec = { workspace = true, features = ["serde"] }
 typed-builder = { workspace = true }
+serde = { workspace = true, features = ["derive", "rc"] }

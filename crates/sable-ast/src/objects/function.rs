@@ -1,17 +1,21 @@
 use std::rc::Rc;
 
 use getset::Getters;
+use serde::Serialize;
 use smallvec::SmallVec;
 use typed_builder::TypedBuilder;
 
 use crate::{
   location::Location,
-  types::{Type, TypeNamePair},
+  types::{
+    Type,
+    TypeNamePair,
+  },
 };
 
 pub const MAX_INLINE_PARAMS: usize = 6;
 
-#[derive(Getters, TypedBuilder, Debug)]
+#[derive(Getters, TypedBuilder, Debug, Serialize)]
 pub struct FunctionParam {
   #[getset(get = "pub")]
   name: Rc<str>,
@@ -31,7 +35,7 @@ impl From<TypeNamePair> for FunctionParam {
   }
 }
 
-#[derive(Getters, TypedBuilder, Debug)]
+#[derive(Getters, TypedBuilder, Debug, Serialize)]
 pub struct Function {
   #[getset(get = "pub")]
   name: Rc<str>,

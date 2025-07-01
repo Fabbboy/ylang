@@ -2,8 +2,9 @@ use std::ops::Range;
 
 use getset::Getters;
 use sable_common::FileId;
+use serde::Serialize;
 
-#[derive(Getters, Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Getters, Default, Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Location {
   #[getset(get = "pub")]
   range: Range<usize>,

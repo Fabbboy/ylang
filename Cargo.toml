@@ -3,7 +3,7 @@ members = [
   "crates/sable-ast",
   "crates/sable-common",
   "crates/sable-errors",
- # "crates/sable-ffi",
+  "crates/sable-ffi",
   "crates/sable-parser",
   "sablec",
 ]
@@ -13,11 +13,12 @@ resolver = "3"
 getset = "0.1.6"
 smallvec = "1.15.1"
 typed-builder = "0.21.0"
-bumpalo = "3.18.1" 
+bumpalo = "3.18.1"
 ariadne = "0.5.1"
 phf = "0.11.3"
 either = "1.15.0"
 
+serde = "1.0.219"
 
 sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }

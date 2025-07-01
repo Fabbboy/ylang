@@ -1,16 +1,17 @@
 use std::rc::Rc;
 
 use getset::Getters;
+use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 use crate::location::Location;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum PrimitiveType {
   I32,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum Type {
   Invalid,
   Primitive(PrimitiveType),

@@ -9,8 +9,8 @@ use sable_common::{
 use smallvec::SmallVec;
 
 use crate::lex_error::{
-    numeric_error::NumericError,
-    unknown_char::UnknownCharError,
+  numeric_error::NumericError,
+  unknown_char::UnknownCharError,
 };
 
 #[derive(Debug)]
@@ -32,7 +32,9 @@ impl<'ctx> Reportable for ParseError<'ctx> {
 
 pub const MAX_INLINE_ERRORS: usize = 4;
 
-pub struct ParseErrorMOO<'ctx>(pub Either<ParseError<'ctx>, SmallVec<[ParseError<'ctx>; MAX_INLINE_ERRORS]>>);
+pub struct ParseErrorMOO<'ctx>(
+  pub Either<ParseError<'ctx>, SmallVec<[ParseError<'ctx>; MAX_INLINE_ERRORS]>>,
+);
 
 impl<'ctx> From<ParseError<'ctx>> for ParseErrorMOO<'ctx> {
   fn from(error: ParseError<'ctx>) -> Self {
