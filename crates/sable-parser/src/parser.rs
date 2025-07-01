@@ -194,16 +194,13 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       let kind_tag = match self.peek(expected.clone()) {
         Some(kind) => kind,
         None => {
-          let err = self.expect(expected.clone());
-          status = ParseStatus::Error;
-          match err {
-            Ok(_) => unreachable!("Expected error but got a valid token"),
-            Err(error) => {
-              self.handle_parse_error(sink, error.into());
-              self.sync(expected.clone());
-              continue;
-            }
+          if let Err(error) = self.expect(expected.clone()) {
+            status = ParseStatus::Error;
+            self.handle_parse_error(sink, error.into());
+            self.sync(expected.clone());
+            continue;
           }
+          unreachable!("Expected error but got a valid token")
         }
       };
 
