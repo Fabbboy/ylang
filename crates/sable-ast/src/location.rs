@@ -15,4 +15,14 @@ impl Location {
   pub fn new(range: Range<usize>, filename: FileId) -> Self {
     Self { range, filename }
   }
+
+  pub fn merge(&self, other: &Self) -> Option<Self> {
+    if self.filename != other.filename {
+      return None;
+    }
+
+    let start = self.range.start.min(other.range.start);
+    let end = self.range.end.max(other.range.end);
+    Some(Self::new(start..end, self.filename.clone()))
+  }
 }

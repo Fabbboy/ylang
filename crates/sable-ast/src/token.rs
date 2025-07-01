@@ -1,6 +1,6 @@
 use getset::Getters;
 
-use crate::location::Location;
+use crate::{location::Location, types::PrimitiveType};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum TokenError {
@@ -21,6 +21,10 @@ pub enum TokenKind {
   Integer(i64),
   Float(f64),
 
+  // Brackets
+  Paren(bool),
+  Brace(bool),
+
   // Symbols
   Comma,
   Semicolon,
@@ -34,6 +38,7 @@ pub enum TokenKind {
 
   // Keywords
   Func,
+  Type(PrimitiveType),
 }
 
 impl Eq for TokenKind {}
@@ -43,6 +48,7 @@ impl TokenKind {
     match self {
       TokenKind::Integer(_) => TokenKind::Integer(0),
       TokenKind::Float(_) => TokenKind::Float(0.0),
+      TokenKind::Type(_) => TokenKind::Type(PrimitiveType::I32),
       _ => self.clone(),
     }
   }

@@ -4,19 +4,34 @@ use getset::Getters;
 use smallvec::SmallVec;
 use typed_builder::TypedBuilder;
 
-use crate::types::Type;
+use crate::{
+  location::Location,
+  types::{Type, TypeNamePair},
+};
 
-pub const MAX_INLINE_PARAMS: usize = 4;
+pub const MAX_INLINE_PARAMS: usize = 6;
 
-#[derive(Getters, TypedBuilder)]
+#[derive(Getters, TypedBuilder, Debug)]
 pub struct FunctionParam {
   #[getset(get = "pub")]
   name: Rc<str>,
   #[getset(get = "pub")]
   type_: Type,
+  #[getset(get = "pub")]
+  location: Location,
 }
 
-#[derive(Getters, TypedBuilder)]
+impl From<TypeNamePair> for FunctionParam {
+  fn from(pair: TypeNamePair) -> Self {
+    Self {
+      name: pair.name().clone(),
+      type_: pair.type_().clone(),
+      location: pair.location().clone(),
+    }
+  }
+}
+
+#[derive(Getters, TypedBuilder, Debug)]
 pub struct Function {
   #[getset(get = "pub")]
   name: Rc<str>,
@@ -24,4 +39,6 @@ pub struct Function {
   params: SmallVec<[FunctionParam; MAX_INLINE_PARAMS]>,
   #[getset(get = "pub")]
   return_type: Type,
+  #[getset(get = "pub")]
+  location: Location,
 }

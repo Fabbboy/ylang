@@ -2,7 +2,7 @@ use getset::{Getters, MutGetters};
 
 use crate::objects::function::Function;
 
-#[derive(Getters, MutGetters)]
+#[derive(Getters, MutGetters, Debug)]
 pub struct Ast {
   #[getset(get_mut = "pub", get = "pub")]
   funcs: Vec<Function>,

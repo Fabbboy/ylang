@@ -2,16 +2,14 @@ use std::sync::Arc;
 
 use sable_ast::{
   location::Location,
-  token::{
-    Token,
-    TokenError,
-    TokenKind,
-  },
+  token::{Token, TokenError, TokenKind},
+  types::PrimitiveType,
 };
 use sable_common::source::Source;
 
 const KEYWORDS: phf::Map<&'static str, TokenKind> = phf::phf_map! {
   "func" => TokenKind::Func,
+  "i32" => TokenKind::Type(PrimitiveType::I32),
 };
 
 pub struct Lexer<'ctx> {
@@ -156,12 +154,20 @@ impl<'ctx> Lexer<'ctx> {
           '*' => return self.make_token(TokenKind::Star),
           '/' => return self.make_token(TokenKind::Slash),
           '=' => return self.make_token(TokenKind::Assign),
+          '(' => return self.make_token(TokenKind::Paren(true)),
+          ')' => return self.make_token(TokenKind::Paren(false)),
+          '{' => return self.make_token(TokenKind::Brace(true)),
+          '}' => return self.make_token(TokenKind::Brace(false)),
           _ => {}
         }
       }
     }
 
     self.make_token(TokenKind::Error(TokenError::UnknownCharacter))
+  }
+
+  pub fn peek(&self) -> Token<'ctx> {
+    self.next.clone()
   }
 }
 
