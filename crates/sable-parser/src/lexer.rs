@@ -37,7 +37,12 @@ impl<'ctx> Lexer<'ctx> {
 
   #[inline]
   fn get_char(&self, offset: usize) -> Option<char> {
-    self.source.content()[self.pos + offset..].chars().next()
+    self
+      .source
+      .content()
+      .get(self.pos..)?
+      .chars()
+      .nth(offset)
   }
 
   #[inline]

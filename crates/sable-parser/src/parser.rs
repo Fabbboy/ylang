@@ -80,7 +80,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   }
 
   fn sync(&mut self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) {
-    //peek awlays returns a tokentype
+    // `peek` always returns a token
     loop {
       let next = self.lexer.peek();
       if expected.contains(&next.kind().tag()) {
