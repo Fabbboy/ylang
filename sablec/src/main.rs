@@ -21,8 +21,8 @@ fn main() {
   let source = manager.add_source(SOURCE, "test.sable", &bump);
   cache.add_file(&source);
 
-  let mut binding = io::stdout();
-  let mut writer = ReportWriter::new(&mut cache, &mut binding);
+  let mut stdout = io::stdout();
+  let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
   let lexer = Lexer::new(source.clone());
   let mut ast = Ast::new();
