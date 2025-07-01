@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use getset::Getters;
+#[cfg(feature = "serde")]
 use serde::Serialize;
 use smallvec::SmallVec;
 use typed_builder::TypedBuilder;
@@ -15,7 +16,8 @@ use crate::{
 
 pub const MAX_INLINE_PARAMS: usize = 6;
 
-#[derive(Getters, TypedBuilder, Debug, Serialize)]
+#[derive(Getters, TypedBuilder, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct FunctionParam {
   #[getset(get = "pub")]
   name: Rc<str>,
@@ -35,7 +37,8 @@ impl From<TypeNamePair> for FunctionParam {
   }
 }
 
-#[derive(Getters, TypedBuilder, Debug, Serialize)]
+#[derive(Getters, TypedBuilder, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Function {
   #[getset(get = "pub")]
   name: Rc<str>,

@@ -7,6 +7,10 @@ edition = "2024"
 getset = { workspace = true }
 sable-common = { workspace = true }
 ariadne = { workspace = true }
-smallvec = { workspace = true, features = ["serde"] }
+smallvec = { workspace = true }
 typed-builder = { workspace = true }
-serde = { workspace = true, features = ["derive", "rc"] }
+serde = { workspace = true, optional = true, features = ["derive", "rc"] }
+
+[features]
+default = []
+serde = ["dep:serde", "smallvec/serde"]
