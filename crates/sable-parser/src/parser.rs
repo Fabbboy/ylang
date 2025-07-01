@@ -188,7 +188,9 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       };
 
       if kind_tag == TokenKind::Eof {
-        println!("Reached end of file.");
+        if let ParseStatus::Success = status {
+          println!("Reached end of file.");
+        }
         break;
       }
 
@@ -202,6 +204,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
             Err(error) => {
               self.handle_parse_error(sink, error);
               status = ParseStatus::Error;
+              self.sync(expected.clone());
               continue;
             }
           }
