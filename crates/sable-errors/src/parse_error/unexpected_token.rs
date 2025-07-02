@@ -5,7 +5,7 @@ use ariadne::{
 };
 use sable_ast::token::{
   Token,
-  TokenKind,
+  TokenTag,
 };
 use sable_common::{
   FileSpan,
@@ -17,12 +17,12 @@ pub const MAX_INLINE_KINDS: usize = 8;
 
 #[derive(Debug)]
 pub struct UnexpectedTokenError<'ctx> {
-  expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>,
+  expected: SmallVec<[TokenTag; MAX_INLINE_KINDS]>,
   found: Token<'ctx>,
 }
 
 impl<'ctx> UnexpectedTokenError<'ctx> {
-  pub fn new(expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>, found: Token<'ctx>) -> Self {
+  pub fn new(expected: SmallVec<[TokenTag; MAX_INLINE_KINDS]>, found: Token<'ctx>) -> Self {
     Self { expected, found }
   }
 }

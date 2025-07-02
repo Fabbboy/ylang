@@ -9,6 +9,7 @@ use sable_ast::{
     Token,
     TokenError,
     TokenKind,
+    TokenTag,
   },
   types::{
     Type,
@@ -83,7 +84,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
   fn expect(
     &mut self,
-    expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>,
+    expected: SmallVec<[TokenTag; MAX_INLINE_KINDS]>,
   ) -> Result<Token<'ctx>, ParseError<'ctx>> {
     let found = self.lexer.next().unwrap();
 
@@ -92,34 +93,34 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       return Err(error);
     }
 
-    if expected.contains(found.kind()) {
+    if expected.contains(&found.tag()) {
       return Ok(found);
     }
     let unexp = UnexpectedTokenError::new(expected, found);
     Err(ParseError::UnexpectedToken(unexp))
   }
 
-  fn sync(&mut self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) {
+  fn sync(&mut self, expected: SmallVec<[TokenTag; MAX_INLINE_KINDS]>) {
     loop {
       let next = self.lexer.peek();
-      if expected.contains(next.kind()) {
+      if expected.contains(&next.tag()) {
         return;
       }
       self.lexer.next();
     }
   }
 
-  fn peek(&self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) -> Option<TokenKind> {
+  fn peek(&self, expected: SmallVec<[TokenTag; MAX_INLINE_KINDS]>) -> Option<TokenTag> {
     let next = self.lexer.peek();
-    if expected.contains(next.kind()) {
-      Some(next.kind().clone())
+    if expected.contains(&next.tag()) {
+      Some(next.tag())
     } else {
       None
     }
   }
 
   fn parse_type(&mut self) -> Result<(Type, Location), ParseError<'ctx>> {
-    let expected = smallvec![TokenKind::Identifier, TokenKind::TYPE];
+    let expected = smallvec![TokenTag::Identifier, TokenTag::Type];
     let token = self.expect(expected)?;
 
     let start_loc = token.location();
@@ -135,7 +136,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   }
 
   fn parse_tn_pair(&mut self) -> Result<TypeNamePair, ParseError<'ctx>> {
-    let name_token = self.expect(smallvec![TokenKind::Identifier])?;
+    let name_token = self.expect(smallvec![TokenTag::Identifier])?;
     let (type_, type_pos) = self.parse_type()?;
 
     let location = name_token.location().merge(&type_pos).unwrap();
@@ -149,28 +150,28 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   }
 
   fn parse_function(&mut self) -> Result<Function, ParseErrorMOO<'ctx>> {
-    let func_start_loc = self.expect(smallvec![TokenKind::Func])?.location().clone();
+    let func_start_loc = self.expect(smallvec![TokenTag::Func])?.location().clone();
 
-    let name_token = self.expect(smallvec![TokenKind::Identifier])?;
+    let name_token = self.expect(smallvec![TokenTag::Identifier])?;
     let func_name = Rc::from(*name_token.lexeme());
 
-    self.expect(smallvec![TokenKind::Paren(true)])?;
+    self.expect(smallvec![TokenTag::Paren(true)])?;
     let mut params = SmallVec::new();
-    while self.peek(smallvec![TokenKind::Identifier]).is_some() {
+    while self.peek(smallvec![TokenTag::Identifier]).is_some() {
       let param = self.parse_tn_pair()?;
       params.push(param.into());
-      if self.peek(smallvec![TokenKind::Comma]).is_some() {
-        self.expect(smallvec![TokenKind::Comma])?;
+      if self.peek(smallvec![TokenTag::Comma]).is_some() {
+        self.expect(smallvec![TokenTag::Comma])?;
       }
     }
 
-    self.expect(smallvec![TokenKind::Paren(false)])?;
+    self.expect(smallvec![TokenTag::Paren(false)])?;
     let (return_type, return_type_pos) = self.parse_type()?;
 
     let signature_pos = func_start_loc.merge(&return_type_pos).unwrap();
 
-    self.expect(smallvec![TokenKind::Brace(true)])?;
-    self.expect(smallvec![TokenKind::Brace(false)])?;
+    self.expect(smallvec![TokenTag::Brace(true)])?;
+    self.expect(smallvec![TokenTag::Brace(false)])?;
 
     Ok(
       Function::builder()
@@ -187,7 +188,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     D: Sink + ?Sized,
   {
     let mut status = ParseStatus::Success;
-    let expected = smallvec![TokenKind::Func, TokenKind::Eof];
+    let expected = smallvec![TokenTag::Func, TokenTag::Eof];
 
     loop {
       let kind_tag = match self.peek(expected.clone()) {
@@ -203,12 +204,12 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
         }
       };
 
-      if kind_tag == TokenKind::Eof {
+      if kind_tag == TokenTag::Eof {
         break;
       }
 
       match kind_tag {
-        TokenKind::Func => {
+        TokenTag::Func => {
           let res = self.parse_function();
           match res {
             Ok(func) => {
