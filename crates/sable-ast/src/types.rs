@@ -20,7 +20,7 @@ pub enum PrimitiveType {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum Type {
-  Invalid,
+  Inference,
   Primitive(PrimitiveType),
   Custom(Rc<str>),
   Pointer(Box<Type>),

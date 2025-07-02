@@ -3,17 +3,21 @@ use std::rc::Rc;
 use getset::Getters;
 use typed_builder::TypedBuilder;
 
-use crate::{expression::Expression, location::Location, types::Type};
+use crate::{
+  expression::Expression,
+  location::Location,
+  types::Type,
+};
 
 #[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct VariableStatement {
   #[getset(get = "pub")]
   name: Rc<str>,
-#[getset(get = "pub")]
+  #[getset(get = "pub")]
   initializer: Expression,
   #[getset(get = "pub")]
-  type_: Option<Type>,
+  type_: Type,
   #[getset(get = "pub")]
-  location: Location
+  location: Location,
 }

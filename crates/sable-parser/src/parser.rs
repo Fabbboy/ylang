@@ -230,11 +230,11 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     let var_start = self.expect(smallvec![TokenKind::Var])?;
     let var_name_tok = self.expect(smallvec![TokenKind::Identifier])?;
 
-    let mut type_ = None;
+    let mut type_ = Type::Inference;
     if self.peek(smallvec![TokenKind::Colon]).is_some() {
       self.expect(smallvec![TokenKind::Colon])?;
       let (var_type, _) = self.parse_type()?;
-      type_ = Some(var_type);
+      type_ = var_type;
     }
 
     self.expect(smallvec![TokenKind::Assign])?;
@@ -361,6 +361,8 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     if self.peek(smallvec![TokenKind::Brace(true)]).is_some() {
       let block_expr = self.parse_block()?;
       block = Some(block_expr);
+    }else {
+      self.expect(smallvec![TokenKind::Semicolon])?;
     }
 
     Ok(
