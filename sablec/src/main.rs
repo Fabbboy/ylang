@@ -1,6 +1,7 @@
 use std::io;
 
 use bumpalo::Bump;
+use clap::Parser;
 use sable_ast::ast::Ast;
 use sable_common::{
   cache::AriadneCache,
@@ -11,25 +12,39 @@ use sable_parser::{
   lexer::Lexer,
   parser::{
     ParseStatus,
-    Parser,
+    Parser as SableParser,
   },
 };
 
-const SOURCE: &str = r#"
-func main(argc: i32, argv: i8**): i32 {
-  var lol = 123;
-  lol = 2.2;
+/// Sable compiler
+#[derive(Parser, Debug)]
+#[command(name = "sablec")]
+#[command(about = "A compiler for the Sable programming language")]
+#[command(version)]
+struct Args {
+  /// Input source file to compile
+  #[arg(value_name = "FILE")]
+  input: String,
 }
 
-func printer(msg: i8*): i32;
-"#;
-
 fn main() {
+  let args = Args::parse();
   let bump = Bump::new();
 
   let mut manager = Manager::new();
   let mut cache = AriadneCache::new();
-  let source = manager.add_source(SOURCE, "test.sable", &bump);
+
+  let (source_code, filename) = {
+    match std::fs::read_to_string(&args.input) {
+      Ok(content) => (content, args.input.clone()),
+      Err(e) => {
+        eprintln!("Error reading file '{}': {}", args.input, e);
+        std::process::exit(1);
+      }
+    }
+  };
+
+  let source = manager.add_source(&source_code, &filename, &bump);
   cache.add_file(&source);
 
   let mut stdout = io::stdout();
@@ -37,13 +52,14 @@ fn main() {
 
   let lexer = Lexer::new(source.clone());
   let mut ast = Ast::new();
-  let mut parser = Parser::new(lexer, &mut ast);
+  let mut parser = SableParser::new(lexer, &mut ast);
   match parser.parse(&mut writer) {
     ParseStatus::Success => {
-      println!("{:#?}", ast);
+      println!("AST: {:#?}", ast);
     }
     ParseStatus::Error => {
       eprintln!("Parsing encountered errors.");
+      std::process::exit(1);
     }
   }
 }

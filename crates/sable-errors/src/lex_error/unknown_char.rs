@@ -16,7 +16,7 @@ impl<'ctx> UnknownCharError<'ctx> {
     Self { lexeme, location }
   }
 
-  pub fn report(&self) -> ariadne::Report<sable_common::FileSpan> {
+  pub fn report(&self) -> ariadne::Report<'_, sable_common::FileSpan> {
     let span = (
       self.location.filename().clone(),
       self.location.range().clone(),
