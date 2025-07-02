@@ -1,17 +1,20 @@
 use std::rc::Rc;
 
 use getset::Getters;
+#[cfg(feature = "serde")]
 use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 use crate::location::Location;
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum PrimitiveType {
   I32,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum Type {
   Invalid,
   Primitive(PrimitiveType),
@@ -25,6 +28,7 @@ impl From<PrimitiveType> for Type {
 }
 
 #[derive(TypedBuilder, Getters)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct TypeNamePair {
   #[getset(get = "pub")]
   name: Rc<str>,

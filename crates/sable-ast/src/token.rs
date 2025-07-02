@@ -1,4 +1,5 @@
 use getset::Getters;
+#[cfg(feature = "serde")]
 use serde::Serialize;
 
 use crate::{
@@ -6,14 +7,16 @@ use crate::{
   types::PrimitiveType,
 };
 
-#[derive(Debug, Clone, Eq, PartialEq, Serialize)]
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum TokenError {
   UnknownCharacter,
   InvalidInteger,
   InvalidFloat,
 }
 
-#[derive(Default, Clone, Debug, PartialEq, Serialize)]
+#[derive(Default, Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum TokenKind {
   // Special
   #[default]
@@ -58,8 +61,8 @@ impl TokenKind {
   }
 }
 
-#[derive(Getters, Default, Clone, Debug, Serialize)]
-
+#[derive(Getters, Default, Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Token<'ctx> {
   #[getset(get = "pub")]
   kind: TokenKind,
