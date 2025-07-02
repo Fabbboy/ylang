@@ -113,7 +113,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   fn sync(&mut self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) {
     loop {
       let next = self.lexer.peek();
-      if expected.contains(&next.kind().tag()) {
+      if expected.contains(&next.kind().tag()) || next.kind().tag() == TokenKind::Eof {
         return;
       }
       self.lexer.next();
@@ -171,24 +171,34 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     }
   }
 
-  fn pase_term(&mut self) -> Result<Expression, ParseError<'ctx>> {
+  fn parse_term(&mut self) -> Result<Expression, ParseError<'ctx>> {
    let lhs = self.parse_factor()?;
    Ok(lhs)
   }
 
   fn parse_expression(&mut self) -> Result<Expression, ParseError<'ctx>> {
-    let lhs = self.pase_term()?;
+    let lhs = self.parse_term()?;
     Ok(lhs)
   }
 
   fn parse_statement(&mut self) -> Result<Statement, ParseErrorMOO<'ctx>> {
     if self.peek(expected_expression()).is_some() {
       let expr = self.parse_expression()?;
-      self.expect(smallvec![TokenKind::Semicolon])?;
+      // Try to expect semicolon, but handle missing semicolon gracefully
+      if let Err(error) = self.expect(smallvec![TokenKind::Semicolon]) {
+        // Convert single parse error to ParseErrorMOO and return it
+        return Err(ParseErrorMOO(Either::Left(error)));
+      }
       return Ok(Statement::Expression(expr));
     }
 
-    unimplemented!("not implemented yet")
+    // If we can't parse any recognized statement, return an error instead of panicking
+    let next_token = self.lexer.peek();
+    let error = ParseError::UnexpectedToken(UnexpectedTokenError::new(
+      expected_expression(),
+      next_token.clone(),
+    ));
+    Err(ParseErrorMOO(Either::Left(error)))
   }
 
   fn parse_block(&mut self) -> Result<BlockExpression, ParseErrorMOO<'ctx>> {
@@ -198,9 +208,10 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
     self.expect(smallvec![TokenKind::Brace(true)])?;
 
-    let expected = smallvec![TokenKind::Semicolon, TokenKind::Brace(false),];
+    // Sync points for error recovery - we want to continue at semicolons, closing braces, or EOF
+    let sync_points = smallvec![TokenKind::Semicolon, TokenKind::Brace(false), TokenKind::Eof];
 
-    while !self.peek(smallvec![TokenKind::Brace(false)]).is_some() {
+    while !self.peek(smallvec![TokenKind::Brace(false), TokenKind::Eof]).is_some() {
       match self.parse_statement() {
         Ok(statement) => {
           statements.push(statement);
@@ -217,12 +228,21 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
             }
           }
 
-          self.sync(expected.clone());
+          // Sync to a recovery point
+          self.sync(sync_points.clone());
+          
+          // If we synchronized to a semicolon, consume it to continue parsing
+          if self.peek(smallvec![TokenKind::Semicolon]).is_some() {
+            let _ = self.expect(smallvec![TokenKind::Semicolon]);
+          }
         }
       }
     }
 
-    self.expect(smallvec![TokenKind::Brace(false)])?;
+    // Only expect closing brace if we're not at EOF
+    if self.peek(smallvec![TokenKind::Brace(false)]).is_some() {
+      self.expect(smallvec![TokenKind::Brace(false)])?;
+    }
 
     match status {
       ParseStatus::Error => Err(ParseErrorMOO(Either::Right(errors))),
