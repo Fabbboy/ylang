@@ -66,11 +66,11 @@ fn expected_expression() -> SmallVec<[TokenKind; MAX_INLINE_KINDS]> {
 
 pub struct Parser<'ctx, 'p> {
   lexer: Lexer<'ctx>,
-  ast: &'p mut Ast,
+  ast: &'p mut Ast<'ctx>,
 }
 
 impl<'ctx, 'p> Parser<'ctx, 'p> {
-  pub fn new(lexer: Lexer<'ctx>, ast: &'p mut Ast) -> Self {
+  pub fn new(lexer: Lexer<'ctx>, ast: &'p mut Ast<'ctx>) -> Self {
     Self { lexer, ast }
   }
 

@@ -51,7 +51,7 @@ fn main() {
   let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
   let lexer = Lexer::new(source.clone());
-  let mut ast = Ast::new();
+  let mut ast = Ast::new(&bump);
   let mut parser = SableParser::new(lexer, &mut ast);
   match parser.parse(&mut writer) {
     ParseStatus::Success => {
