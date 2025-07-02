@@ -11,7 +11,6 @@ use sable_ast::{
     TokenKind,
   },
   types::{
-    PrimitiveType,
     Type,
     TypeNamePair,
   },
@@ -120,7 +119,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   }
 
   fn parse_type(&mut self) -> Result<(Type, Location), ParseError<'ctx>> {
-    let expected = smallvec![TokenKind::Identifier, TokenKind::Type(PrimitiveType::I32)];
+    let expected = smallvec![TokenKind::Identifier, TokenKind::TYPE];
     let token = self.expect(expected)?;
 
     let start_loc = token.location();

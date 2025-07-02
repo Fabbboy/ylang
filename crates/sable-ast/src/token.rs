@@ -57,6 +57,10 @@ impl PartialEq for TokenKind {
 }
 
 impl TokenKind {
+  pub const INTEGER: Self = Self::Integer(0);
+  pub const FLOAT: Self = Self::Float(0.0);
+  pub const TYPE: Self = Self::Type(PrimitiveType::I32);
+
   pub fn tag(&self) -> TokenKind {
     match self {
       TokenKind::Integer(_) => TokenKind::Integer(0),
