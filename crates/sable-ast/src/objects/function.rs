@@ -7,6 +7,7 @@ use smallvec::SmallVec;
 use typed_builder::TypedBuilder;
 
 use crate::{
+  expression::block_expression::BlockExpression,
   location::Location,
   types::{
     Type,
@@ -48,4 +49,6 @@ pub struct Function {
   return_type: Type,
   #[getset(get = "pub")]
   location: Location,
+  #[getset(get = "pub")]
+  block: Option<BlockExpression>,
 }

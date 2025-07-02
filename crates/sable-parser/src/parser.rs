@@ -3,8 +3,10 @@ use std::rc::Rc;
 use either::Either;
 use sable_ast::{
   ast::Ast,
+  expression::block_expression::BlockExpression,
   location::Location,
   objects::function::Function,
+  statement::Statement,
   token::{
     Token,
     TokenError,
@@ -149,6 +151,54 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     )
   }
 
+  fn parse_statement(&mut self) -> Result<Statement, ParseErrorMOO<'ctx>> {
+    todo!()
+  }
+
+  fn parse_block(&mut self) -> Result<BlockExpression, ParseErrorMOO<'ctx>> {
+    let mut status = ParseStatus::Success;
+    let mut statements = Vec::new();
+    let mut errors = SmallVec::new();
+
+    self.expect(smallvec![TokenKind::Brace(true)])?;
+
+    let expected = smallvec![TokenKind::Semicolon, TokenKind::Brace(false),];
+
+    while !self.peek(smallvec![TokenKind::Brace(false)]).is_some() {
+      match self.parse_statement() {
+        Ok(statement) => {
+          statements.push(statement);
+        }
+        Err(error) => {
+          match error.0 {
+            Either::Left(parse_error) => {
+              errors.push(parse_error);
+              status = ParseStatus::Error;
+            }
+            Either::Right(multiple_errors) => {
+              errors.extend(multiple_errors);
+              status = ParseStatus::Error;
+            }
+          }
+
+          self.sync(expected.clone());
+        }
+      }
+    }
+
+    self.expect(smallvec![TokenKind::Brace(false)])?;
+
+    match status {
+      ParseStatus::Error => Err(ParseErrorMOO(Either::Right(errors))),
+      ParseStatus::Success => Ok(
+        BlockExpression::builder()
+          .body(statements)
+          .location(Location::default())
+          .build(),
+      ),
+    }
+  }
+
   fn parse_function(&mut self) -> Result<Function, ParseErrorMOO<'ctx>> {
     let func_start_loc = self.expect(smallvec![TokenKind::Func])?.location().clone();
 
@@ -170,13 +220,17 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
     let signature_pos = func_start_loc.merge(&return_type_pos).unwrap();
 
-    self.expect(smallvec![TokenKind::Brace(true)])?;
-    self.expect(smallvec![TokenKind::Brace(false)])?;
+    let mut block = None;
+    if self.peek(smallvec![TokenKind::Brace(true)]).is_some() {
+      let block_expr = self.parse_block()?;
+      block = Some(block_expr);
+    }
 
     Ok(
       Function::builder()
         .name(func_name)
         .params(params)
+        .block(block)
         .return_type(return_type)
         .location(signature_pos)
         .build(),

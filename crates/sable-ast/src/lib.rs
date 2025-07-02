@@ -4,3 +4,4 @@ pub mod objects;
 pub mod token;
 pub mod types;
 pub mod expression;
+pub mod statement;
