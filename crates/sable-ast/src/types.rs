@@ -10,7 +10,11 @@ use crate::location::Location;
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum PrimitiveType {
+  I8,
+  I16,
   I32,
+  F32,
+  F64,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

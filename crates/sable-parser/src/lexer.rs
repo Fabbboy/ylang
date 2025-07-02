@@ -4,14 +4,22 @@ use sable_ast::{
   location::Location,
   token::{
     Token,
+    TokenData,
     TokenError,
     TokenKind,
-    TokenData,
   },
   types::PrimitiveType,
 };
 use sable_common::source::Source;
 
+const KEYWORDS: phf::Map<&'static str, (TokenKind, Option<TokenData>)> = phf::phf_map! {
+  "func" => (TokenKind::Func, None),
+  "i8" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::I8))),
+  "i16" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::I16))),
+  "i32" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::I32))),
+  "f32" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::F32))),
+  "f64" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::F64))),
+};
 
 pub struct Lexer<'ctx> {
   source: Arc<Source<'ctx>>,
@@ -99,11 +107,11 @@ impl<'ctx> Lexer<'ctx> {
     }
 
     let lexeme = self.make_lexeme();
-    match lexeme {
-      "func" => self.make_token(TokenKind::Func, None),
-      "i32" => self.make_token(TokenKind::Type, Some(TokenData::Type(PrimitiveType::I32))),
-      _ => self.make_token(TokenKind::Identifier, None),
+    if let Some((kind, data)) = KEYWORDS.get(lexeme) {
+      return self.make_token(*kind, data.clone());
     }
+
+    self.make_token(TokenKind::Identifier, None)
   }
 
   fn lex_number(&mut self) -> Token<'ctx> {
@@ -126,13 +134,19 @@ impl<'ctx> Lexer<'ctx> {
       let lexeme = self.make_lexeme();
       match lexeme.parse::<f64>() {
         Ok(fval) => self.make_token(TokenKind::Float, Some(TokenData::Float(fval))),
-        Err(_) => self.make_token(TokenKind::Error, Some(TokenData::Error(TokenError::InvalidFloat))),
+        Err(_) => self.make_token(
+          TokenKind::Error,
+          Some(TokenData::Error(TokenError::InvalidFloat)),
+        ),
       }
     } else {
       let lexeme = self.make_lexeme();
       match lexeme.parse::<i64>() {
         Ok(ival) => self.make_token(TokenKind::Integer, Some(TokenData::Integer(ival))),
-        Err(_) => self.make_token(TokenKind::Error, Some(TokenData::Error(TokenError::InvalidInteger))),
+        Err(_) => self.make_token(
+          TokenKind::Error,
+          Some(TokenData::Error(TokenError::InvalidInteger)),
+        ),
       }
     }
   }
@@ -164,7 +178,10 @@ impl<'ctx> Lexer<'ctx> {
       }
     }
 
-    self.make_token(TokenKind::Error, Some(TokenData::Error(TokenError::UnknownCharacter)))
+    self.make_token(
+      TokenKind::Error,
+      Some(TokenData::Error(TokenError::UnknownCharacter)),
+    )
   }
 
   pub fn peek(&self) -> Token<'ctx> {

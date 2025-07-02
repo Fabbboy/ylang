@@ -11,3 +11,4 @@ sable-errors = { workspace = true }
 getset = { workspace = true }
 smallvec = { workspace = true }
 either = { workspace = true }
+phf = { workspace = true, features = ["macros"]}
