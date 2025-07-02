@@ -16,9 +16,8 @@ use sable_parser::{
 };
 
 const SOURCE: &str = r#"
-func main(argc i32, argv i32**) i32 {
-123;
-123;
+func main(argc: i32, argv: i32**): i32 {
+  var lol = 123;
 }
 "#;
 

@@ -1,13 +1,14 @@
-use crate::expression::{block_expression::BlockExpression, literal_expression::LiteralExpression};
-
 pub mod block_expression;
 pub mod literal_expression;
 
+pub use block_expression::BlockExpression;
+pub use literal_expression::LiteralExpression;
+
 #[derive(Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum Expression {
   Block(BlockExpression),
-  Literal(LiteralExpression)
+  Literal(LiteralExpression),
 }
 
 pub trait VisitExpression {

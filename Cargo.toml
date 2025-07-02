@@ -20,7 +20,7 @@ either = "1.15.0"
 
 serde = "1.0.219"
 
-sable-ast = { path = "crates/sable-ast" }
+sable-ast = { path = "crates/sable-ast", features = ["serde"] }
 sable-common = { path = "crates/sable-common" }
 sable-parser = { path = "crates/sable-parser" }
 sable-errors = { path = "crates/sable-errors" }

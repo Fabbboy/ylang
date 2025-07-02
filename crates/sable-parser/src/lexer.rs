@@ -19,6 +19,7 @@ const KEYWORDS: phf::Map<&'static str, (TokenKind, Option<TokenData>)> = phf::ph
   "i32" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::I32))),
   "f32" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::F32))),
   "f64" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::F64))),
+  "var" => (TokenKind::Var, None),
 };
 
 pub struct Lexer<'ctx> {
@@ -173,6 +174,7 @@ impl<'ctx> Lexer<'ctx> {
           ')' => return self.make_token(TokenKind::Paren(false), None),
           '{' => return self.make_token(TokenKind::Brace(true), None),
           '}' => return self.make_token(TokenKind::Brace(false), None),
+          ':' => return self.make_token(TokenKind::Colon, None),
           _ => {}
         }
       }

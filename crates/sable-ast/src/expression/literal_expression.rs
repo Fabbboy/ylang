@@ -4,14 +4,14 @@ use typed_builder::TypedBuilder;
 use crate::location::Location;
 
 #[derive(Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum LiteralExpression {
   Integer(IntegerExpression),
   Float(FloatExpression),
 }
 
 #[derive(Debug, Getters, TypedBuilder)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct IntegerExpression {
   #[getset(get = "pub")]
   value: i64,
@@ -20,7 +20,7 @@ pub struct IntegerExpression {
 }
 
 #[derive(Debug, Getters, TypedBuilder)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FloatExpression {
   #[getset(get = "pub")]
   value: f64,

@@ -7,7 +7,7 @@ use crate::{
 };
 
 #[derive(Getters, TypedBuilder, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct BlockExpression {
   #[getset(get = "pub")]
   body: Vec<Statement>,

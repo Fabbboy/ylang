@@ -35,6 +35,7 @@ pub enum TokenKind {
   // Symbols
   Comma,
   Semicolon,
+  Colon,
 
   // Operators
   Plus,
@@ -46,6 +47,7 @@ pub enum TokenKind {
   // Keywords
   Func,
   Type,
+  Var,
 }
 
 #[derive(Clone, Debug, PartialEq)]

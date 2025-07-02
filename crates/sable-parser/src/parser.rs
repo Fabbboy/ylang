@@ -2,19 +2,23 @@ use std::rc::Rc;
 
 use either::Either;
 use sable_ast::{
+  self,
   ast::Ast,
   expression::{
+    BlockExpression,
     Expression,
-    block_expression::BlockExpression,
+    LiteralExpression,
     literal_expression::{
       FloatExpression,
       IntegerExpression,
-      LiteralExpression,
     },
   },
   location::Location,
   objects::function::Function,
-  statement::Statement,
+  statement::{
+    Statement,
+    VariableStatement,
+  },
   token::{
     Token,
     TokenData,
@@ -165,6 +169,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
   fn parse_tn_pair(&mut self) -> Result<TypeNamePair, ParseError<'ctx>> {
     let name_token = self.expect(smallvec![TokenKind::Identifier])?;
+    self.expect(smallvec![TokenKind::Colon])?;
     let (type_, type_pos) = self.parse_type()?;
 
     let location = name_token.location().merge(&type_pos).unwrap();
@@ -221,6 +226,34 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     Ok(lhs)
   }
 
+  fn parse_variable_stmt(&mut self) -> Result<VariableStatement, ParseErrorMOO<'ctx>> {
+    let var_start = self.expect(smallvec![TokenKind::Var])?;
+    let var_name_tok = self.expect(smallvec![TokenKind::Identifier])?;
+
+    let mut type_ = None;
+    if self.peek(smallvec![TokenKind::Colon]).is_some() {
+      self.expect(smallvec![TokenKind::Colon])?;
+      let (var_type, _) = self.parse_type()?;
+      type_ = Some(var_type);
+    }
+
+    self.expect(smallvec![TokenKind::Assign])?;
+
+    let initializer = self.parse_expression()?;
+    let var_stop = self.expect(smallvec![TokenKind::Semicolon])?;
+
+    let combined_loc = var_start.location().merge(var_stop.location()).unwrap();
+
+    Ok(
+      VariableStatement::builder()
+        .name(Rc::from(*var_name_tok.lexeme()))
+        .initializer(initializer)
+        .type_(type_)
+        .location(combined_loc)
+        .build(),
+    )
+  }
+
   fn parse_statement(&mut self) -> Result<Statement, ParseErrorMOO<'ctx>> {
     if self.peek(expected_expression()).is_some() {
       let expr = self.parse_expression()?;
@@ -229,7 +262,25 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       return Ok(Statement::Expression(expr));
     }
 
-    todo!("Implement other statement types");
+    let expected = smallvec![TokenKind::Var,];
+
+    let stmt_start = match self.peek(expected.clone()) {
+      Some(kind) => kind,
+      None => {
+        if let Err(error) = self.expect(expected.clone()) {
+          return Err(ParseErrorMOO(Either::Left(error)));
+        }
+        unreachable!("Expected error but got a valid token")
+      }
+    };
+
+    match stmt_start {
+      TokenKind::Var => {
+        let var_stmt = self.parse_variable_stmt()?;
+        return Ok(Statement::Variable(var_stmt));
+      }
+      _ => unreachable!("Unhandled token kind: {:?}", stmt_start),
+    }
   }
 
   fn parse_block(&mut self) -> Result<BlockExpression, ParseErrorMOO<'ctx>> {
@@ -301,6 +352,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     }
 
     self.expect(smallvec![TokenKind::Paren(false)])?;
+    self.expect(smallvec![TokenKind::Colon])?;
     let (return_type, return_type_pos) = self.parse_type()?;
 
     let signature_pos = func_start_loc.merge(&return_type_pos).unwrap();
