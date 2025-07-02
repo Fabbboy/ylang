@@ -103,7 +103,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       return Err(error);
     }
 
-    if expected.contains(&found.kind().tag()) {
+    if expected.contains(found.kind()) {
       return Ok(found);
     }
     let unexp = UnexpectedTokenError::new(expected, found);
@@ -113,7 +113,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   fn sync(&mut self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) {
     loop {
       let next = self.lexer.peek();
-      if expected.contains(&next.kind().tag()) || next.kind().tag() == TokenKind::Eof {
+      if expected.contains(&next.kind()) || next.kind().clone() == TokenKind::Eof {
         return;
       }
       self.lexer.next();
@@ -122,8 +122,8 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
   fn peek(&self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) -> Option<TokenKind> {
     let next = self.lexer.peek();
-    if expected.contains(&next.kind().tag()) {
-      Some(next.kind().tag())
+    if expected.contains(next.kind()) {
+      Some(next.kind().clone())
     } else {
       None
     }
@@ -172,8 +172,8 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   }
 
   fn parse_term(&mut self) -> Result<Expression, ParseError<'ctx>> {
-   let lhs = self.parse_factor()?;
-   Ok(lhs)
+    let lhs = self.parse_factor()?;
+    Ok(lhs)
   }
 
   fn parse_expression(&mut self) -> Result<Expression, ParseError<'ctx>> {
@@ -209,9 +209,16 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     self.expect(smallvec![TokenKind::Brace(true)])?;
 
     // Sync points for error recovery - we want to continue at semicolons, closing braces, or EOF
-    let sync_points = smallvec![TokenKind::Semicolon, TokenKind::Brace(false), TokenKind::Eof];
+    let sync_points = smallvec![
+      TokenKind::Semicolon,
+      TokenKind::Brace(false),
+      TokenKind::Eof
+    ];
 
-    while !self.peek(smallvec![TokenKind::Brace(false), TokenKind::Eof]).is_some() {
+    while !self
+      .peek(smallvec![TokenKind::Brace(false), TokenKind::Eof])
+      .is_some()
+    {
       match self.parse_statement() {
         Ok(statement) => {
           statements.push(statement);
@@ -230,7 +237,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
           // Sync to a recovery point
           self.sync(sync_points.clone());
-          
+
           // If we synchronized to a semicolon, consume it to continue parsing
           if self.peek(smallvec![TokenKind::Semicolon]).is_some() {
             let _ = self.expect(smallvec![TokenKind::Semicolon]);
