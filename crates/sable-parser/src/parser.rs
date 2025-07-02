@@ -6,18 +6,22 @@ use sable_ast::{
   expression::{
     Expression,
     block_expression::BlockExpression,
-    literal_expression::LiteralExpression,
+    literal_expression::{
+      FloatExpression,
+      IntegerExpression,
+      LiteralExpression,
+    },
   },
   location::Location,
   objects::function::Function,
   statement::Statement,
   token::{
     Token,
+    TokenData,
     TokenError,
     TokenKind,
   },
   types::{
-    PrimitiveType,
     Type,
     TypeNamePair,
   },
@@ -53,7 +57,7 @@ pub enum ParseStatus {
 }
 
 fn expected_expression() -> SmallVec<[TokenKind; MAX_INLINE_KINDS]> {
-  smallvec![TokenKind::Integer(0), TokenKind::Float(0.0),]
+  smallvec![TokenKind::Integer, TokenKind::Float,]
 }
 
 pub struct Parser<'ctx, 'p> {
@@ -98,7 +102,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   ) -> Result<Token<'ctx>, ParseError<'ctx>> {
     let found = self.lexer.next().unwrap();
 
-    if let TokenKind::Error(token_error) = found.kind() {
+    if let Some(TokenData::Error(token_error)) = found.data() {
       let error = self.handle_token_error(&found, token_error);
       return Err(error);
     }
@@ -123,14 +127,14 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   fn peek(&self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) -> Option<TokenKind> {
     let next = self.lexer.peek();
     if expected.contains(next.kind()) {
-      Some(next.kind().clone())
+      Some(*next.kind())
     } else {
       None
     }
   }
 
   fn parse_type(&mut self) -> Result<(Type, Location), ParseError<'ctx>> {
-    let expected = smallvec![TokenKind::Identifier, TokenKind::Type(PrimitiveType::I32)];
+    let expected = smallvec![TokenKind::Identifier, TokenKind::Type];
     let token = self.expect(expected)?;
 
     let start_loc = token.location();
@@ -140,7 +144,13 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
         let type_name = Rc::from(*token.lexeme());
         Ok((Type::Custom(type_name), start_loc.clone()))
       }
-      TokenKind::Type(primitive_type) => Ok((primitive_type.clone().into(), start_loc.clone())),
+      TokenKind::Type => {
+        if let Some(TokenData::Type(primitive_type)) = token.data() {
+          Ok((primitive_type.clone().into(), start_loc.clone()))
+        } else {
+          unreachable!("Type token missing data")
+        }
+      }
       _ => unreachable!("Unhandled token kind: {:?}", token.kind()),
     }
   }
@@ -163,10 +173,32 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     let expected = expected_expression();
     let expr_start = self.expect(expected)?;
     match expr_start.kind() {
-      TokenKind::Integer(value) => Ok(Expression::Literal(LiteralExpression::Integer(
-        value.clone(),
-      ))),
-      TokenKind::Float(value) => Ok(Expression::Literal(LiteralExpression::Float(value.clone()))),
+      TokenKind::Integer => {
+        let value = match expr_start.data() {
+          Some(TokenData::Integer(value)) => value,
+          _ => unreachable!("Integer token missing data"),
+        };
+
+        let int_expr = IntegerExpression::builder()
+          .value(*value)
+          .location(expr_start.location().clone())
+          .build();
+
+        Ok(Expression::Literal(LiteralExpression::Integer(int_expr)))
+      }
+      TokenKind::Float => {
+        let value = match expr_start.data() {
+          Some(TokenData::Float(value)) => value,
+          _ => unreachable!("Float token missing data"),
+        };
+
+        let float_expr = FloatExpression::builder()
+          .value(*value)
+          .location(expr_start.location().clone())
+          .build();
+
+        Ok(Expression::Literal(LiteralExpression::Float(float_expr)))
+      }
       _ => unreachable!("Unhandled token kind: {:?}", expr_start.kind()),
     }
   }

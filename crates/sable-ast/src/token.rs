@@ -15,18 +15,18 @@ pub enum TokenError {
   InvalidFloat,
 }
 
-#[derive(Default, Clone, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum TokenKind {
   // Special
   #[default]
   Eof,
-  Error(TokenError),
+  Error,
 
   // Values
   Identifier,
-  Integer(i64),
-  Float(f64),
+  Integer,
+  Float,
 
   // Brackets
   Paren(bool),
@@ -45,15 +45,16 @@ pub enum TokenKind {
 
   // Keywords
   Func,
-  Type(PrimitiveType),
+  Type,
 }
 
-impl Eq for TokenKind {}
-
-impl PartialEq for TokenKind {
-  fn eq(&self, other: &Self) -> bool {
-    std::mem::discriminant(self) == std::mem::discriminant(other)
-  }
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
+pub enum TokenData {
+  Error(TokenError),
+  Integer(i64),
+  Float(f64),
+  Type(PrimitiveType),
 }
 
 #[derive(Getters, Default, Clone, Debug)]
@@ -61,6 +62,8 @@ impl PartialEq for TokenKind {
 pub struct Token<'ctx> {
   #[getset(get = "pub")]
   kind: TokenKind,
+  #[getset(skip)]
+  data: Option<TokenData>,
   #[getset(get = "pub")]
   lexeme: &'ctx str,
   #[getset(get = "pub")]
@@ -68,11 +71,21 @@ pub struct Token<'ctx> {
 }
 
 impl<'ctx> Token<'ctx> {
-  pub fn new(kind: TokenKind, lexeme: &'ctx str, location: Location) -> Self {
+  pub fn new(
+    kind: TokenKind,
+    data: Option<TokenData>,
+    lexeme: &'ctx str,
+    location: Location,
+  ) -> Self {
     Self {
       kind,
+      data,
       lexeme,
       location,
     }
+  }
+
+  pub fn data(&self) -> Option<&TokenData> {
+    self.data.as_ref()
   }
 }
