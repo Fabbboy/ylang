@@ -17,6 +17,8 @@ use sable_parser::{
 
 const SOURCE: &str = r#"
 func main(argv i32, argc i32) i32 {
+123;
+123
 }
 "#;
 

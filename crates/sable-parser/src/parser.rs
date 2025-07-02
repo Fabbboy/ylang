@@ -3,7 +3,11 @@ use std::rc::Rc;
 use either::Either;
 use sable_ast::{
   ast::Ast,
-  expression::block_expression::BlockExpression,
+  expression::{
+    Expression,
+    block_expression::BlockExpression,
+    literal_expression::LiteralExpression,
+  },
   location::Location,
   objects::function::Function,
   statement::Statement,
@@ -46,6 +50,10 @@ use crate::lexer::Lexer;
 pub enum ParseStatus {
   Success,
   Error,
+}
+
+fn expected_expression() -> SmallVec<[TokenKind; MAX_INLINE_KINDS]> {
+  smallvec![TokenKind::Integer(0), TokenKind::Float(0.0),]
 }
 
 pub struct Parser<'ctx, 'p> {
@@ -151,8 +159,36 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     )
   }
 
+  fn parse_factor(&mut self) -> Result<Expression, ParseError<'ctx>> {
+    let expected = expected_expression();
+    let expr_start = self.expect(expected)?;
+    match expr_start.kind() {
+      TokenKind::Integer(value) => Ok(Expression::Literal(LiteralExpression::Integer(
+        value.clone(),
+      ))),
+      TokenKind::Float(value) => Ok(Expression::Literal(LiteralExpression::Float(value.clone()))),
+      _ => unreachable!("Unhandled token kind: {:?}", expr_start.kind()),
+    }
+  }
+
+  fn pase_term(&mut self) -> Result<Expression, ParseError<'ctx>> {
+   let lhs = self.parse_factor()?;
+   Ok(lhs)
+  }
+
+  fn parse_expression(&mut self) -> Result<Expression, ParseError<'ctx>> {
+    let lhs = self.pase_term()?;
+    Ok(lhs)
+  }
+
   fn parse_statement(&mut self) -> Result<Statement, ParseErrorMOO<'ctx>> {
-    todo!()
+    if self.peek(expected_expression()).is_some() {
+      let expr = self.parse_expression()?;
+      self.expect(smallvec![TokenKind::Semicolon])?;
+      return Ok(Statement::Expression(expr));
+    }
+
+    unimplemented!("not implemented yet")
   }
 
   fn parse_block(&mut self) -> Result<BlockExpression, ParseErrorMOO<'ctx>> {
