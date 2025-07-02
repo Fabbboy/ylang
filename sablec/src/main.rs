@@ -18,6 +18,7 @@ use sable_parser::{
 const SOURCE: &str = r#"
 func main(argc: i32, argv: i8**): i32 {
   var lol = 123;
+  lol = 2.2;
 }
 
 func printer(msg: i8*): i32;

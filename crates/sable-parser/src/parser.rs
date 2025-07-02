@@ -61,7 +61,7 @@ pub enum ParseStatus {
 }
 
 fn expected_expression() -> SmallVec<[TokenKind; MAX_INLINE_KINDS]> {
-  smallvec![TokenKind::Integer, TokenKind::Float,]
+  smallvec![TokenKind::Integer, TokenKind::Float, TokenKind::Identifier]
 }
 
 pub struct Parser<'ctx, 'p> {
@@ -212,6 +212,19 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
         Ok(Expression::Literal(LiteralExpression::Float(float_expr)))
       }
+      TokenKind::Identifier => {
+        self.expect(smallvec![TokenKind::Assign])?;
+        let val = self.parse_expression()?;
+
+        let combined_loc = expr_start.location().merge(val.location()).unwrap();
+        Ok(Expression::Assign(
+          sable_ast::expression::assign_expression::AssignExpression::builder()
+            .identifier(Rc::from(*expr_start.lexeme()))
+            .value(Box::new(val))
+            .location(combined_loc)
+            .build(),
+        ))
+      }
       _ => unreachable!("Unhandled token kind: {:?}", expr_start.kind()),
     }
   }
@@ -361,7 +374,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     if self.peek(smallvec![TokenKind::Brace(true)]).is_some() {
       let block_expr = self.parse_block()?;
       block = Some(block_expr);
-    }else {
+    } else {
       self.expect(smallvec![TokenKind::Semicolon])?;
     }
 
