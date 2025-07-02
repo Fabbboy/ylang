@@ -15,7 +15,7 @@ pub enum TokenError {
   InvalidFloat,
 }
 
-#[derive(Default, Clone, Debug, PartialEq)]
+#[derive(Default, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum TokenKind {
   // Special
@@ -49,6 +49,12 @@ pub enum TokenKind {
 }
 
 impl Eq for TokenKind {}
+
+impl PartialEq for TokenKind {
+  fn eq(&self, other: &Self) -> bool {
+    std::mem::discriminant(self) == std::mem::discriminant(other)
+  }
+}
 
 impl TokenKind {
   pub fn tag(&self) -> TokenKind {

@@ -93,7 +93,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       return Err(error);
     }
 
-    if expected.contains(&found.kind().tag()) {
+    if expected.contains(found.kind()) {
       return Ok(found);
     }
     let unexp = UnexpectedTokenError::new(expected, found);
@@ -103,7 +103,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   fn sync(&mut self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) {
     loop {
       let next = self.lexer.peek();
-      if expected.contains(&next.kind().tag()) {
+      if expected.contains(next.kind()) {
         return;
       }
       self.lexer.next();
@@ -112,8 +112,8 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
   fn peek(&self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) -> Option<TokenKind> {
     let next = self.lexer.peek();
-    if expected.contains(&next.kind().tag()) {
-      Some(next.kind().tag())
+    if expected.contains(next.kind()) {
+      Some(next.kind().clone())
     } else {
       None
     }
