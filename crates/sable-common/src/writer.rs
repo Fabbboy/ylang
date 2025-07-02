@@ -8,11 +8,11 @@ use super::{
 
 pub trait Sink {
   type Error: std::fmt::Debug;
-  fn report(&mut self, report: Report<FileSpan>) -> Result<(), Self::Error>;
+  fn report(&mut self, report: Report<'_, FileSpan>) -> Result<(), Self::Error>;
 }
 
 pub trait Reportable {
-  fn report(&self) -> Report<FileSpan>;
+  fn report(&self) -> Report<'_, FileSpan>;
 }
 
 pub struct ReportWriter<'w, O> {
