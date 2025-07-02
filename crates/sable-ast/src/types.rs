@@ -19,6 +19,7 @@ pub enum Type {
   Invalid,
   Primitive(PrimitiveType),
   Custom(Rc<str>),
+  Pointer(Box<Type>),
 }
 
 impl From<PrimitiveType> for Type {
