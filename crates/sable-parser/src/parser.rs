@@ -5,9 +5,16 @@ use sable_ast::{
   self,
   ast::Ast,
   expression::{
+    BinaryExpression,
     BlockExpression,
     Expression,
     LiteralExpression,
+    binary_expression::{
+      AddExpression,
+      DivideExpression,
+      MultiplyExpression,
+      SubtractExpression,
+    },
     literal_expression::{
       FloatExpression,
       IntegerExpression,
@@ -230,12 +237,72 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
   }
 
   fn parse_term(&mut self) -> Result<Expression, ParseError<'ctx>> {
-    let lhs = self.parse_factor()?;
+    let mut lhs = self.parse_factor()?;
+
+    let expected = smallvec![TokenKind::Star, TokenKind::Slash,];
+    while let Some(op_token) = self.peek(expected.clone()) {
+      let op_token = self.expect(expected.clone())?;
+      let rhs = self.parse_factor()?;
+
+      let combined_loc = lhs.location().merge(rhs.location()).unwrap();
+      let binary_expr = match op_token.kind() {
+        TokenKind::Star => {
+          let expr = MultiplyExpression::builder()
+            .left(Box::new(lhs))
+            .right(Box::new(rhs))
+            .location(combined_loc)
+            .build();
+          lhs = Expression::Binary(BinaryExpression::Multiply(expr));
+        }
+        TokenKind::Slash => {
+          let expr = DivideExpression::builder()
+            .left(Box::new(lhs))
+            .right(Box::new(rhs))
+            .location(combined_loc)
+            .build();
+          lhs = Expression::Binary(BinaryExpression::Divide(expr));
+        }
+        _ => unreachable!("Unhandled token kind: {:?}", op_token.kind()),
+      };
+    }
+
     Ok(lhs)
   }
 
   fn parse_expression(&mut self) -> Result<Expression, ParseError<'ctx>> {
-    let lhs = self.parse_term()?;
+    let mut lhs = self.parse_term()?;
+
+    let expected = smallvec![TokenKind::Plus, TokenKind::Minus,];
+    if self.peek(expected.clone()).is_some() {
+      let op_token = self.expect(expected)?;
+      let rhs = self.parse_term()?;
+
+      let combined_loc = lhs.location().merge(rhs.location()).unwrap();
+      let binary_expr = match op_token.kind() {
+        TokenKind::Plus => {
+          let expr = AddExpression::builder()
+            .left(Box::new(lhs))
+            .right(Box::new(rhs))
+            .location(combined_loc)
+            .build();
+
+          lhs = Expression::Binary(BinaryExpression::Add(expr));
+        }
+        TokenKind::Minus => {
+          let expr = BinaryExpression::Subtract(
+            SubtractExpression::builder()
+              .left(Box::new(lhs))
+              .right(Box::new(rhs))
+              .location(combined_loc)
+              .build(),
+          );
+          lhs = Expression::Binary(expr);
+        }
+
+        _ => unreachable!("Unhandled token kind: {:?}", op_token.kind()),
+      };
+    }
+
     Ok(lhs)
   }
 

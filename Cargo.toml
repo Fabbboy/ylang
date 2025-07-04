@@ -20,6 +20,7 @@ either = "1.15.0"
 
 serde = "1.0.219"
 clap = "4.5.40"
+paste = "1.0.15"
 
 sable-ast = { path = "crates/sable-ast", features = ["serde"] }
 sable-common = { path = "crates/sable-common" }
