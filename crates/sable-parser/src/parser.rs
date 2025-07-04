@@ -5,9 +5,11 @@ use sable_ast::{
   self,
   ast::Ast,
   expression::{
+    AssignExpression,
     BinaryExpression,
     BlockExpression,
     Expression,
+    IdentifierExpression,
     LiteralExpression,
     binary_expression::{
       AddExpression,
@@ -189,54 +191,83 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     )
   }
 
-  fn parse_factor(&mut self) -> Result<Expression, ParseError<'ctx>> {
+  fn parse_identifier(&mut self) -> Result<Expression, ParseErrorMOO<'ctx>> {
+    let identifier = self.expect(smallvec![TokenKind::Identifier])?;
+    let maybe_next = match self.peek(smallvec![TokenKind::Assign]) {
+      Some(got) => got,
+      _ => {
+        let id_expr = IdentifierExpression::builder()
+          .name(Rc::from(*identifier.lexeme()))
+          .location(identifier.location().clone())
+          .build();
+        return Ok(Expression::Identifier(id_expr));
+      }
+    };
+
+    match maybe_next {
+      TokenKind::Assign => {
+        self.expect(smallvec![TokenKind::Assign])?;
+        let value = self.parse_expression()?;
+        let assign_expr = Expression::Assign(
+          AssignExpression::builder()
+            .identifier(Rc::from(*identifier.lexeme()))
+            .value(Box::new(value))
+            .location(identifier.location().clone())
+            .build(),
+        );
+        Ok(assign_expr)
+      }
+      _ => unreachable!("Expected assignment operator but got: {:?}", maybe_next),
+    }
+  }
+
+  fn parse_factor(&mut self) -> Result<Expression, ParseErrorMOO<'ctx>> {
     let expected = expected_expression();
-    let expr_start = self.expect(expected)?;
-    match expr_start.kind() {
+    let expr_type = match self.peek(expected.clone()) {
+      Some(kind) => kind,
+      None => {
+        self.expect(expected.clone())?;
+        unreachable!("Expected error but got a valid token")
+      }
+    };
+
+    match expr_type {
       TokenKind::Integer => {
-        let value = match expr_start.data() {
+        let value_expr = self.expect(smallvec![TokenKind::Integer])?;
+
+        let value = match value_expr.data() {
           Some(TokenData::Integer(value)) => value,
           _ => unreachable!("Integer token missing data"),
         };
 
         let int_expr = IntegerExpression::builder()
           .value(*value)
-          .location(expr_start.location().clone())
+          .location(value_expr.location().clone())
           .build();
 
         Ok(Expression::Literal(LiteralExpression::Integer(int_expr)))
       }
       TokenKind::Float => {
-        let value = match expr_start.data() {
+        let value_expr = self.expect(smallvec![TokenKind::Float])?;
+
+        let value = match value_expr.data() {
           Some(TokenData::Float(value)) => value,
           _ => unreachable!("Float token missing data"),
         };
 
         let float_expr = FloatExpression::builder()
           .value(*value)
-          .location(expr_start.location().clone())
+          .location(value_expr.location().clone())
           .build();
 
         Ok(Expression::Literal(LiteralExpression::Float(float_expr)))
       }
-      TokenKind::Identifier => {
-        self.expect(smallvec![TokenKind::Assign])?;
-        let val = self.parse_expression()?;
-
-        let combined_loc = expr_start.location().merge(val.location()).unwrap();
-        Ok(Expression::Assign(
-          sable_ast::expression::assign_expression::AssignExpression::builder()
-            .identifier(Rc::from(*expr_start.lexeme()))
-            .value(Box::new(val))
-            .location(combined_loc)
-            .build(),
-        ))
-      }
-      _ => unreachable!("Unhandled token kind: {:?}", expr_start.kind()),
+      TokenKind::Identifier => Ok(self.parse_identifier()?),
+      _ => unreachable!("Unhandled token kind: {:?}", expr_type),
     }
   }
 
-  fn parse_term(&mut self) -> Result<Expression, ParseError<'ctx>> {
+  fn parse_term(&mut self) -> Result<Expression, ParseErrorMOO<'ctx>> {
     let mut lhs = self.parse_factor()?;
 
     let expected = smallvec![TokenKind::Star, TokenKind::Slash,];
@@ -269,7 +300,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     Ok(lhs)
   }
 
-  fn parse_expression(&mut self) -> Result<Expression, ParseError<'ctx>> {
+  fn parse_expression(&mut self) -> Result<Expression, ParseErrorMOO<'ctx>> {
     let mut lhs = self.parse_term()?;
 
     let expected = smallvec![TokenKind::Plus, TokenKind::Minus,];
