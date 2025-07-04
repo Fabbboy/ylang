@@ -113,17 +113,27 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     &mut self,
     expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>,
   ) -> Result<Token<'ctx>, ParseError<'ctx>> {
-    let found = self.lexer.next().unwrap();
+    let found_peek = self.lexer.peek();
 
-    if let Some(TokenData::Error(token_error)) = found.data() {
-      let error = self.handle_token_error(&found, token_error);
+    if let Some(TokenData::Error(token_error)) = found_peek.data() {
+      // Consume the erroneous token so parsing can continue in a consistent
+      // state, then forward the produced error.
+      let _ = self.lexer.next();
+      let error = self.handle_token_error(&found_peek, token_error);
       return Err(error);
     }
 
-    if expected.contains(found.kind()) {
+    if expected.contains(found_peek.kind()) {
+      // Token matches expectation; consume it and return.
+      let found = self.lexer.next().unwrap();
       return Ok(found);
     }
-    let unexp = UnexpectedTokenError::new(expected, found);
+
+    // The next token was not one of the expected kinds. Report an error but do
+    // **not** consume the token so that subsequent parsing can inspect it. This
+    // avoids losing important tokens (e.g. closing braces) when a statement is
+    // missing its terminating token like a semicolon.
+    let unexp = UnexpectedTokenError::new(expected, found_peek);
     Err(ParseError::UnexpectedToken(unexp))
   }
 
