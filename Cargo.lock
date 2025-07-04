@@ -899,6 +899,7 @@ dependencies = [
  "bumpalo",
  "sable-ast",
  "sable-common",
+ "sable-errors",
  "sable-parser",
  "tokio",
  "tower-lsp",

@@ -543,4 +543,56 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
     status
   }
+
+  pub fn parse_collect<D>(&mut self, sink: &mut D, errors: &mut Vec<ParseError<'ctx>>) -> ParseStatus
+  where
+    D: Sink + ?Sized,
+  {
+    let mut status = ParseStatus::Success;
+    let expected = smallvec![TokenKind::Func, TokenKind::Eof];
+
+    loop {
+      let kind_tag = match self.peek(expected.clone()) {
+        Some(kind) => kind,
+        None => {
+          if let Err(error) = self.expect(expected.clone()) {
+            errors.push(error.clone());
+            status = ParseStatus::Error;
+            self.handle_parse_error(sink, error.into());
+            self.sync(expected.clone());
+            continue;
+          }
+          unreachable!("Expected error but got a valid token");
+        }
+      };
+
+      if kind_tag == TokenKind::Eof {
+        break;
+      }
+
+      match kind_tag {
+        TokenKind::Func => {
+          let res = self.parse_function();
+          match res {
+            Ok(func) => {
+              self.ast.funcs_mut().push(func);
+            }
+            Err(error) => {
+              match &error.0 {
+                Either::Left(e) => errors.push(e.clone()),
+                Either::Right(errs) => errors.extend(errs.iter().cloned()),
+              }
+              self.handle_parse_error(sink, error);
+              status = ParseStatus::Error;
+              self.sync(expected.clone());
+              continue;
+            }
+          }
+        }
+        _ => unreachable!("Unhandled token kind: {:?}", kind_tag),
+      }
+    }
+
+    status
+  }
 }

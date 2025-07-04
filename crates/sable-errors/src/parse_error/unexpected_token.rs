@@ -15,7 +15,7 @@ use smallvec::SmallVec;
 
 pub const MAX_INLINE_KINDS: usize = 8;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnexpectedTokenError<'ctx> {
   expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>,
   found: Token<'ctx>,
@@ -24,6 +24,10 @@ pub struct UnexpectedTokenError<'ctx> {
 impl<'ctx> UnexpectedTokenError<'ctx> {
   pub fn new(expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>, found: Token<'ctx>) -> Self {
     Self { expected, found }
+  }
+
+  pub fn found(&self) -> &Token<'ctx> {
+    &self.found
   }
 }
 

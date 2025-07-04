@@ -5,7 +5,7 @@ use ariadne::{
 };
 use sable_ast::location::Location;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NumericError<'ctx> {
   pub lexeme: &'ctx str,
   pub location: Location,

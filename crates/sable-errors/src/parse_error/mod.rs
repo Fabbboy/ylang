@@ -13,7 +13,7 @@ use crate::lex_error::{
   unknown_char::UnknownCharError,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ParseError<'ctx> {
   UnexpectedToken(unexpected_token::UnexpectedTokenError<'ctx>),
   UnknownChar(UnknownCharError<'ctx>),
@@ -32,6 +32,7 @@ impl<'ctx> Reportable for ParseError<'ctx> {
 
 pub const MAX_INLINE_ERRORS: usize = 4;
 
+#[derive(Clone, Debug)]
 pub struct ParseErrorMOO<'ctx>(
   pub Either<ParseError<'ctx>, SmallVec<[ParseError<'ctx>; MAX_INLINE_ERRORS]>>,
 );
