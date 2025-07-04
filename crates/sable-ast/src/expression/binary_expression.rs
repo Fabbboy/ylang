@@ -30,7 +30,7 @@ macro_rules! binary_expr_factory {
       }
 
       impl BinaryExpression {
-        pub fn location(&self) -> &crate::location::Location {
+        pub fn location(&self) -> &Location {
           match self {
             $(
               BinaryExpression::$name(expr) => expr.location(),
