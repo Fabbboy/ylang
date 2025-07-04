@@ -7,7 +7,7 @@ use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 macro_rules! binary_expr_factory {
-  ($($name:ident => $variant:ident),* $(,)?) => {
+  ($($name:ident),* $(,)?) => {
     paste::paste! {
       $(
         #[derive(Debug, TypedBuilder, Getters)]
@@ -42,9 +42,4 @@ macro_rules! binary_expr_factory {
   };
 }
 
-binary_expr_factory!(
-  Add => add,
-  Subtract => subtract,
-  Multiply => multiply,
-  Divide => divide,
-);
+binary_expr_factory!(Add, Subtract, Multiply, Divide,);
