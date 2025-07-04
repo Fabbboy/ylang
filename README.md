@@ -6,7 +6,7 @@ This repository contains the sources for the Sable programming language.
 
 A basic [Tree-sitter](https://tree-sitter.github.io/) grammar lives in
 `tree-sitter-sable`. After running `npm install` inside this directory you can
-run `npx tree-sitter generate` to build the parser. Editors like VSCode can use
+run `tree-sitter generate` to build the parser. Editors like VSCode can use
 this grammar for syntax highlighting.
 
 ### Using with Neovim
@@ -32,4 +32,6 @@ require("nvim-treesitter.configs").setup {
 }
 ```
 
-Restart Neovim and run `:TSInstall sable` to build the parser.
+Restart Neovim and run `:TSInstall sable` to build the parser.  If you prefer,
+you can also install the grammar on the fly without editing your config by
+executing `:TSInstallFromGrammar /path/to/tree-sitter-sable`.
