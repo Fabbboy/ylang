@@ -4,7 +4,7 @@ func main(argc: i32, argv: i8**): i32 {
 } // we get a "expected Brace(false) but got eof" although we clearly have a RBrace here lol
 
 // here better example 
-func test() i8 {
+func test(): i8 {
   noissuehere;
   ohshitforgotsemicolon
   allgood; // now the error message is good because in this example we get the // "expected Semicolon but got Identifier" which is correct
