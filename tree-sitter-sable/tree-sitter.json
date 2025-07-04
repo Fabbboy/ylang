@@ -1,0 +1,18 @@
+{
+  "grammars": [
+    {
+      "name": "sable",
+      "scope": "source.sable",
+      "path": ".",
+      "file-types": ["sable"],
+      "highlights": ["queries/highlights.scm"]
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Sable grammar for tree-sitter",
+    "authors": [ {"name": "Unknown"} ],
+    "links": {"repository": "https://example.com"}
+  }
+}
