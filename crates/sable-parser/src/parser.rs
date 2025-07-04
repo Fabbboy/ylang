@@ -240,12 +240,12 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     let mut lhs = self.parse_factor()?;
 
     let expected = smallvec![TokenKind::Star, TokenKind::Slash,];
-    while let Some(op_token) = self.peek(expected.clone()) {
+    while let Some(_) = self.peek(expected.clone()) {
       let op_token = self.expect(expected.clone())?;
       let rhs = self.parse_factor()?;
 
       let combined_loc = lhs.location().merge(rhs.location()).unwrap();
-      let binary_expr = match op_token.kind() {
+      match op_token.kind() {
         TokenKind::Star => {
           let expr = MultiplyExpression::builder()
             .left(Box::new(lhs))
@@ -278,7 +278,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       let rhs = self.parse_term()?;
 
       let combined_loc = lhs.location().merge(rhs.location()).unwrap();
-      let binary_expr = match op_token.kind() {
+      match op_token.kind() {
         TokenKind::Plus => {
           let expr = AddExpression::builder()
             .left(Box::new(lhs))
