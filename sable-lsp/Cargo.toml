@@ -1,0 +1,13 @@
+[package]
+name = "sable-lsp"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sable-parser = { workspace = true }
+sable-ast = { workspace = true }
+sable-common = { workspace = true }
+tower-lsp = { workspace = true }
+bumpalo = { workspace = true }
+ariadne = { workspace = true }
+tokio = { workspace = true }
