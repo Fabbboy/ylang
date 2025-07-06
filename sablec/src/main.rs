@@ -15,6 +15,7 @@ use sable_parser::{
     Parser as SableParser,
   },
 };
+use sable_sema::sema::SemanticAnalyzer;
 
 /// Sable compiler
 #[derive(Parser, Debug)]
@@ -62,4 +63,6 @@ fn main() {
       std::process::exit(1);
     }
   }
+
+  let sema = SemanticAnalyzer::new(&ast);
 }
