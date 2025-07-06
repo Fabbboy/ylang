@@ -1,0 +1,9 @@
+[package]
+name = "sable-sema"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sable-errors = { workspace = true }
+sable-ast = { workspace = true }
+sable-common = { workspace = true }

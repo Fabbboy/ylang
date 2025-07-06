@@ -5,6 +5,7 @@ members = [
   "crates/sable-errors",
   "crates/sable-ffi",
   "crates/sable-parser",
+  "crates/sable-sema",
   "sablec",
 ]
 resolver = "3"
@@ -26,3 +27,4 @@ sable-ast = { path = "crates/sable-ast", features = ["serde"] }
 sable-common = { path = "crates/sable-common" }
 sable-parser = { path = "crates/sable-parser" }
 sable-errors = { path = "crates/sable-errors" }
+sable-sema = { path = "crates/sable-sema" }
