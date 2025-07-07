@@ -1,26 +1,26 @@
 pub mod assign_expression;
 pub mod binary_expression;
 pub mod block_expression;
-pub mod literal_expression;
 pub mod identifier_expression;
+pub mod literal_expression;
 
 pub use assign_expression::AssignExpression;
 pub use binary_expression::BinaryExpression;
 pub use block_expression::BlockExpression;
-pub use literal_expression::LiteralExpression;
 pub use identifier_expression::IdentifierExpression;
+pub use literal_expression::LiteralExpression;
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub enum Expression {
-  Block(BlockExpression),
+pub enum Expression<'ctx> {
+  Block(BlockExpression<'ctx>),
   Literal(LiteralExpression),
-  Assign(AssignExpression),
-  Binary(BinaryExpression),
+  Assign(AssignExpression<'ctx>),
+  Binary(BinaryExpression<'ctx>),
   Identifier(IdentifierExpression),
 }
 
-impl Expression {
+impl<'ctx> Expression<'ctx> {
   pub fn location(&self) -> &crate::location::Location {
     match self {
       Expression::Block(block) => block.location(),
@@ -32,16 +32,16 @@ impl Expression {
   }
 }
 
-pub trait VisitExpression {
+pub trait VisitExpression<'ctx> {
   type Result;
 
-  fn visit_block(&mut self, block: &BlockExpression) -> Self::Result;
+  fn visit_block(&mut self, block: &BlockExpression<'ctx>) -> Self::Result;
   fn visit_literal(&mut self, literal: &LiteralExpression) -> Self::Result;
-  fn visit_assign(&mut self, assign: &AssignExpression) -> Self::Result;
-  fn visit_binary(&mut self, binary: &BinaryExpression) -> Self::Result;
+  fn visit_assign(&mut self, assign: &AssignExpression<'ctx>) -> Self::Result;
+  fn visit_binary(&mut self, binary: &BinaryExpression<'ctx>) -> Self::Result;
   fn visit_identifier(&mut self, identifier: &IdentifierExpression) -> Self::Result;
 
-  fn visit_expression(&mut self, expression: &Expression) -> Self::Result {
+  fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Result {
     match expression {
       Expression::Block(block) => self.visit_block(block),
       Expression::Literal(literal) => self.visit_literal(literal),

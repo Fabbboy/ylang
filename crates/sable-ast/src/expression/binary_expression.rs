@@ -3,7 +3,6 @@ use crate::{
   location::Location,
 };
 use getset::Getters;
-use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 macro_rules! binary_expr_factory {
@@ -12,24 +11,25 @@ macro_rules! binary_expr_factory {
       $(
         #[derive(Debug, TypedBuilder, Getters)]
         #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-        pub struct [<$name Expression>] {
+        pub struct [<$name Expression>]<'ctx> {
           #[getset(get = "pub")]
-          left: Box<Expression>,
+          left: Box<Expression<'ctx>>,
           #[getset(get = "pub")]
-          right: Box<Expression>,
+          right: Box<Expression<'ctx>>,
           #[getset(get = "pub")]
           location: Location,
         }
       )*
 
-      #[derive(Debug, Serialize)]
-      pub enum BinaryExpression {
+      #[derive(Debug)]
+      #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+      pub enum BinaryExpression<'ctx> {
         $(
-          $name([<$name Expression>]),
+          $name([<$name Expression>]<'ctx>),
         )*
       }
 
-      impl BinaryExpression {
+      impl <'ctx>BinaryExpression<'ctx> {
         pub fn location(&self) -> &Location {
           match self {
             $(

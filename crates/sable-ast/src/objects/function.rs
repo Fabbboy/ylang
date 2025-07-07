@@ -38,7 +38,7 @@ impl From<TypeNamePair> for FunctionParam {
 
 #[derive(Getters, TypedBuilder, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct Function {
+pub struct Function<'ctx> {
   #[getset(get = "pub")]
   name: Rc<str>,
   #[getset(get = "pub")]
@@ -48,5 +48,5 @@ pub struct Function {
   #[getset(get = "pub")]
   location: Location,
   #[getset(get = "pub")]
-  block: Option<BlockExpression>,
+  block: Option<BlockExpression<'ctx>>,
 }

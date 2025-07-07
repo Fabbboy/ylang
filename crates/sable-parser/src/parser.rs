@@ -1,4 +1,5 @@
 use std::rc::Rc;
+use bumpalo::collections::Vec as BumpVec;
 
 use either::Either;
 use sable_ast::{
@@ -193,7 +194,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     )
   }
 
-  fn parse_identifier(&mut self) -> Result<Expression, ParseErrorMOO<'ctx>> {
+  fn parse_identifier(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
     let identifier = self.expect(smallvec![TokenKind::Identifier])?;
     let maybe_next = match self.peek(smallvec![TokenKind::Assign]) {
       Some(got) => got,
@@ -223,7 +224,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     }
   }
 
-  fn parse_factor(&mut self) -> Result<Expression, ParseErrorMOO<'ctx>> {
+  fn parse_factor(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
     let expected = expected_expression();
     let expr_type = match self.peek(expected.clone()) {
       Some(kind) => kind,
@@ -269,7 +270,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     }
   }
 
-  fn parse_term(&mut self) -> Result<Expression, ParseErrorMOO<'ctx>> {
+  fn parse_term(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
     let mut lhs = self.parse_factor()?;
 
     let expected = smallvec![TokenKind::Star, TokenKind::Slash,];
@@ -302,7 +303,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     Ok(lhs)
   }
 
-  fn parse_expression(&mut self) -> Result<Expression, ParseErrorMOO<'ctx>> {
+  fn parse_expression(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
     let mut lhs = self.parse_term()?;
 
     let expected = smallvec![TokenKind::Plus, TokenKind::Minus,];
@@ -339,7 +340,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     Ok(lhs)
   }
 
-  fn parse_variable_stmt(&mut self) -> Result<VariableStatement, ParseErrorMOO<'ctx>> {
+  fn parse_variable_stmt(&mut self) -> Result<VariableStatement<'ctx>, ParseErrorMOO<'ctx>> {
     let var_start = self.expect(smallvec![TokenKind::Var])?;
     let var_name_tok = self.expect(smallvec![TokenKind::Identifier])?;
 
@@ -367,7 +368,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     )
   }
 
-  fn parse_statement(&mut self) -> Result<Statement, ParseErrorMOO<'ctx>> {
+  fn parse_statement(&mut self) -> Result<Statement<'ctx>, ParseErrorMOO<'ctx>> {
     if self.peek(expected_expression()).is_some() {
       let expr = self.parse_expression()?;
       self.expect(smallvec![TokenKind::Semicolon])?;
@@ -396,9 +397,9 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     }
   }
 
-  fn parse_block(&mut self) -> Result<BlockExpression, ParseErrorMOO<'ctx>> {
+  fn parse_block(&mut self) -> Result<BlockExpression<'ctx>, ParseErrorMOO<'ctx>> {
     let mut status = ParseStatus::Success;
-    let mut statements = Vec::new();
+    let mut statements = BumpVec::new_in(self.ast.bump());
     let mut errors = SmallVec::new();
 
     let blk_start = self.expect(smallvec![TokenKind::Brace(true)])?;
@@ -448,7 +449,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     }
   }
 
-  fn parse_function(&mut self) -> Result<Function, ParseErrorMOO<'ctx>> {
+  fn parse_function(&mut self) -> Result<Function<'ctx>, ParseErrorMOO<'ctx>> {
     let func_start_loc = self.expect(smallvec![TokenKind::Func])?.location().clone();
 
     let name_token = self.expect(smallvec![TokenKind::Identifier])?;

@@ -10,11 +10,11 @@ use crate::{
 
 #[derive(Debug, TypedBuilder, Getters)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct AssignExpression {
+pub struct AssignExpression<'ctx> {
   #[getset(get = "pub")]
   identifier: Rc<str>,
   #[getset(get = "pub")]
-  value: Box<Expression>,
+  value: Box<Expression<'ctx>>,
   #[getset(get = "pub")]
   location: Location,
 }
