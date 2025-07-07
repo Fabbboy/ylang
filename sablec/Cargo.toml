@@ -5,9 +5,8 @@ edition = "2024"
 
 [dependencies]
 sable-parser = { workspace = true }
-sable-ast = { workspace = true }
+sable-ast = { workspace = true, features = ["serde"] }
 sable-common = { workspace = true }
-sable-sema = { workspace = true }
 
 bumpalo = { workspace = true }
 ariadne = { workspace = true }

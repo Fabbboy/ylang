@@ -15,7 +15,10 @@ pub trait VisitStatement<'ctx> {
   type Result;
 
   fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Result;
-  fn visit_variable_statement(&mut self, variable_statement: &VariableStatement<'ctx>) -> Self::Result;
+  fn visit_variable_statement(
+    &mut self,
+    variable_statement: &VariableStatement<'ctx>,
+  ) -> Self::Result;
 
   fn visit_statement(&mut self, statement: &Statement<'ctx>) -> Self::Result {
     match statement {

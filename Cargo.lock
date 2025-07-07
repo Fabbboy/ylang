@@ -457,15 +457,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sable-sema"
-version = "0.1.0"
-dependencies = [
- "sable-ast",
- "sable-common",
- "sable-errors",
-]
-
-[[package]]
 name = "sablec"
 version = "0.1.0"
 dependencies = [
@@ -475,7 +466,6 @@ dependencies = [
  "sable-ast",
  "sable-common",
  "sable-parser",
- "sable-sema",
 ]
 
 [[package]]

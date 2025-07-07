@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use bumpalo::collections::Vec as BumpVec;
+use std::rc::Rc;
 
 use either::Either;
 use sable_ast::{
