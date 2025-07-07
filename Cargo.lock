@@ -445,6 +445,9 @@ dependencies = [
 [[package]]
 name = "sable-hir"
 version = "0.1.0"
+dependencies = [
+ "bumpalo",
+]
 
 [[package]]
 name = "sable-parser"
