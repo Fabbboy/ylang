@@ -67,8 +67,8 @@ fn main() {
     }
   }
 
-  let mut hir = HirModule::new(&ctx);
-  let mut lowering = AstLowering::new(&ast, &mut hir);
+  let mut hir = HirModule::default();
+  let mut lowering = AstLowering::new(&ast, &mut hir, &ctx);
   lowering.lower();
   println!("HIR: {:#?}", hir);
 }

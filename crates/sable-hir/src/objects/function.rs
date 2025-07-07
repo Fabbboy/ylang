@@ -29,5 +29,5 @@ pub struct HirFunction<'hir> {
   #[getset(get = "pub")]
   return_type: Type,
   #[getset(get = "pub")]
-  body: BumpVec<'hir, HirStatement>,
+  body: &'hir [&'hir HirStatement],
 }
