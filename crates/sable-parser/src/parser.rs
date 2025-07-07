@@ -399,7 +399,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
   fn parse_block(&mut self) -> Result<BlockExpression<'ctx>, ParseErrorMOO<'ctx>> {
     let mut status = ParseStatus::Success;
-    let mut statements = BumpVec::new_in(self.ast.bump());
+    let mut statements = BumpVec::new_in(self.ast.ast_bump());
     let mut errors = SmallVec::new();
 
     let blk_start = self.expect(smallvec![TokenKind::Brace(true)])?;

@@ -16,16 +16,16 @@ use bumpalo::{
 pub struct Ast<'ctx> {
   #[getset(get = "pub")]
   #[cfg_attr(feature = "serde", serde(skip))]
-  bump: &'ctx Bump,
+  ast_bump: &'ctx Bump,
   #[getset(get_mut = "pub", get = "pub")]
   funcs: BumpVec<'ctx, Function<'ctx>>,
 }
 
 impl<'ctx> Ast<'ctx> {
-  pub fn new(bump: &'ctx Bump) -> Self {
+  pub fn new(ast_bump: &'ctx Bump) -> Self {
     Self {
-      bump,
-      funcs: BumpVec::new_in(bump),
+      ast_bump,
+      funcs: BumpVec::new_in(ast_bump),
     }
   }
 }

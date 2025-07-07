@@ -29,7 +29,8 @@ struct Args {
 
 fn main() {
   let args = Args::parse();
-  let bump = Bump::new();
+  let ast_bump = Bump::new();
+  let file_bump = Bump::new();
 
   let mut manager = Manager::new();
   let mut cache = AriadneCache::new();
@@ -44,14 +45,14 @@ fn main() {
     }
   };
 
-  let source = manager.add_source(&source_code, &filename, &bump);
+  let source = manager.add_source(&source_code, &filename, &file_bump);
   cache.add_file(&source);
 
   let mut stdout = io::stdout();
   let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
   let lexer = Lexer::new(source.clone());
-  let mut ast = Ast::new(&bump);
+  let mut ast = Ast::new(&ast_bump);
   let mut parser = SableParser::new(lexer, &mut ast);
   match parser.parse(&mut writer) {
     ParseStatus::Success => {
