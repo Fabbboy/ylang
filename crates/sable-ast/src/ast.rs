@@ -2,8 +2,7 @@ use getset::{
   Getters,
   MutGetters,
 };
-#[cfg(feature = "serde")]
-use serde::Serialize;
+use sable_common::context::Context;
 
 use crate::objects::function::Function;
 use bumpalo::{
@@ -12,7 +11,7 @@ use bumpalo::{
 };
 
 #[derive(Getters, MutGetters, Debug)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Ast<'ctx> {
   #[getset(get = "pub")]
   #[cfg_attr(feature = "serde", serde(skip))]
@@ -22,10 +21,10 @@ pub struct Ast<'ctx> {
 }
 
 impl<'ctx> Ast<'ctx> {
-  pub fn new(ast_bump: &'ctx Bump) -> Self {
+  pub fn new(ctx: &'ctx Context) -> Self {
     Self {
-      ast_bump,
-      funcs: BumpVec::new_in(ast_bump),
+      ast_bump: ctx.ast_bump(),
+      funcs: BumpVec::new_in(ctx.ast_bump()),
     }
   }
 }

@@ -3,7 +3,6 @@ members = [
   "crates/sable-ast",
   "crates/sable-common",
   "crates/sable-errors",
-  "crates/sable-ffi",
   "crates/sable-hir",
   "crates/sable-parser",
   "sablec",

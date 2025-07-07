@@ -1,10 +1,10 @@
 use std::io;
 
-use bumpalo::Bump;
 use clap::Parser;
 use sable_ast::ast::Ast;
 use sable_common::{
   cache::AriadneCache,
+  context::Context,
   manager::Manager,
   writer::ReportWriter,
 };
@@ -29,10 +29,9 @@ struct Args {
 
 fn main() {
   let args = Args::parse();
-  let ast_bump = Bump::new();
-  let file_bump = Bump::new();
+  let ctx = Context::default();
 
-  let mut manager = Manager::new();
+  let mut manager = Manager::new(&ctx);
   let mut cache = AriadneCache::new();
 
   let (source_code, filename) = {
@@ -45,14 +44,14 @@ fn main() {
     }
   };
 
-  let source = manager.add_source(&source_code, &filename, &file_bump);
+  let source = manager.add_source(&source_code, &filename);
   cache.add_file(&source);
 
   let mut stdout = io::stdout();
   let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
   let lexer = Lexer::new(source.clone());
-  let mut ast = Ast::new(&ast_bump);
+  let mut ast = Ast::new(&ctx);
   let mut parser = SableParser::new(lexer, &mut ast);
   match parser.parse(&mut writer) {
     ParseStatus::Success => {

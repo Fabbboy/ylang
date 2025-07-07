@@ -1,8 +1,7 @@
-use bumpalo::Bump;
 use getset::Getters;
 use std::sync::Arc;
 
-use crate::FileId;
+use crate::{context::Context, FileId};
 
 #[derive(Getters)]
 pub struct Source<'ctx> {
@@ -13,9 +12,9 @@ pub struct Source<'ctx> {
 }
 
 impl<'ctx> Source<'ctx> {
-  pub fn new(content: &str, filename: &str, bump: &'ctx Bump) -> Self {
+  pub fn new(content: &str, filename: &str, ctx: &'ctx Context) -> Self {
     Self {
-      content: bump.alloc_str(content),
+      content: ctx.file_bump().alloc_str(content),
       filename: Arc::from(filename),
     }
   }
