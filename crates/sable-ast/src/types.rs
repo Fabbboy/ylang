@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{default, rc::Rc};
 
 use getset::Getters;
 #[cfg(feature = "serde")]
@@ -17,9 +17,10 @@ pub enum PrimitiveType {
   F64,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum Type {
+  #[default]
   Inference,
   Primitive(PrimitiveType),
   Custom(Rc<str>),

@@ -5,3 +5,8 @@ edition = "2024"
 
 [dependencies]
 bumpalo = { workspace = true }
+typed-builder = { workspace = true }
+getset = { workspace = true }
+
+sable-ast = { workspace = true }
+sable-common = { workspace = true }

@@ -37,6 +37,22 @@ macro_rules! binary_expr_factory {
             )*
           }
         }
+
+        pub fn left(&self) -> &Expression<'ctx> {
+          match self {
+            $(
+              BinaryExpression::$name(expr) => expr.left(),
+            )*
+          }
+        }
+
+        pub fn right(&self) -> &Expression<'ctx> {
+          match self {
+            $(
+              BinaryExpression::$name(expr) => expr.right(),
+            )*
+          }
+        }
       }
     }
   };

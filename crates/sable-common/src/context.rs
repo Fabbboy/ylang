@@ -9,4 +9,6 @@ pub struct Context {
   file_bump: Bump,
   #[getset(get = "pub")]
   ast_bump: Bump,
+  #[getset(get = "pub")]
+  hir_bump: Bump,
 }

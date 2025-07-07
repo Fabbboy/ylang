@@ -33,15 +33,13 @@ impl<'ctx> Expression<'ctx> {
 }
 
 pub trait VisitExpression<'ctx> {
-  type Result;
+  fn visit_block<T>(&mut self, block: &BlockExpression<'ctx>) -> T;
+  fn visit_literal<T>(&mut self, literal: &LiteralExpression) -> T;
+  fn visit_assign<T>(&mut self, assign: &AssignExpression<'ctx>) -> T;
+  fn visit_binary<T>(&mut self, binary: &BinaryExpression<'ctx>) -> T;
+  fn visit_identifier<T>(&mut self, identifier: &IdentifierExpression) -> T;
 
-  fn visit_block(&mut self, block: &BlockExpression<'ctx>) -> Self::Result;
-  fn visit_literal(&mut self, literal: &LiteralExpression) -> Self::Result;
-  fn visit_assign(&mut self, assign: &AssignExpression<'ctx>) -> Self::Result;
-  fn visit_binary(&mut self, binary: &BinaryExpression<'ctx>) -> Self::Result;
-  fn visit_identifier(&mut self, identifier: &IdentifierExpression) -> Self::Result;
-
-  fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Result {
+  fn visit_expression<T>(&mut self, expression: &Expression<'ctx>) -> T {
     match expression {
       Expression::Block(block) => self.visit_block(block),
       Expression::Literal(literal) => self.visit_literal(literal),

@@ -8,6 +8,10 @@ use sable_common::{
   manager::Manager,
   writer::ReportWriter,
 };
+use sable_hir::{
+  lowering::AstLowering,
+  module::HirModule,
+};
 use sable_parser::{
   lexer::Lexer,
   parser::{
@@ -62,4 +66,9 @@ fn main() {
       std::process::exit(1);
     }
   }
+
+  let mut hir = HirModule::new(&ctx);
+  let mut lowering = AstLowering::new(&ast, &mut hir);
+  lowering.lower();
+  println!("HIR: {:#?}", hir);
 }

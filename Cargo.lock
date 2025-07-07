@@ -295,6 +295,10 @@ name = "sable-hir"
 version = "0.1.0"
 dependencies = [
  "bumpalo",
+ "getset",
+ "sable-ast",
+ "sable-common",
+ "typed-builder",
 ]
 
 [[package]]
@@ -320,6 +324,7 @@ dependencies = [
  "clap",
  "sable-ast",
  "sable-common",
+ "sable-hir",
  "sable-parser",
 ]
 
