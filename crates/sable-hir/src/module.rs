@@ -1,6 +1,5 @@
 use getset::{
   Getters,
-  MutGetters,
   Setters,
 };
 

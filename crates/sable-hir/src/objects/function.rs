@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use bumpalo::collections::Vec as BumpVec;
 use getset::Getters;
 use sable_ast::{
   location::Location,
