@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use getset::Getters;
 use typed_builder::TypedBuilder;
 
@@ -12,7 +10,7 @@ use crate::{
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AssignExpression<'ctx> {
   #[getset(get = "pub")]
-  identifier: Rc<str>,
+  identifier: &'ctx str,
   #[getset(get = "pub")]
   value: Box<Expression<'ctx>>,
   #[getset(get = "pub")]
