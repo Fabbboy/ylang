@@ -443,6 +443,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "sable-hir"
+version = "0.1.0"
+
+[[package]]
 name = "sable-parser"
 version = "0.1.0"
 dependencies = [
