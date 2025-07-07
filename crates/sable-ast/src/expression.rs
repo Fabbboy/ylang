@@ -17,7 +17,7 @@ pub enum Expression<'ctx> {
   Literal(LiteralExpression),
   Assign(AssignExpression<'ctx>),
   Binary(BinaryExpression<'ctx>),
-  Identifier(IdentifierExpression),
+  Identifier(IdentifierExpression<'ctx>),
 }
 
 impl<'ctx> Expression<'ctx> {
@@ -37,7 +37,8 @@ pub trait VisitExpression<'ctx> {
   fn visit_literal<T>(&mut self, literal: &LiteralExpression) -> T;
   fn visit_assign<T>(&mut self, assign: &AssignExpression<'ctx>) -> T;
   fn visit_binary<T>(&mut self, binary: &BinaryExpression<'ctx>) -> T;
-  fn visit_identifier<T>(&mut self, identifier: &IdentifierExpression) -> T;
+  fn visit_identifier<T>(&mut self, identifier: &IdentifierExpression<'ctx>) -> T;
+
 
   fn visit_expression<T>(&mut self, expression: &Expression<'ctx>) -> T {
     match expression {

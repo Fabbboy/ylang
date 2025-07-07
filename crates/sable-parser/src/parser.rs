@@ -1,5 +1,4 @@
 use bumpalo::collections::Vec as BumpVec;
-use std::rc::Rc;
 
 use either::Either;
 use sable_ast::{
@@ -149,7 +148,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     }
   }
 
-  fn parse_type(&mut self) -> Result<(Type, Location), ParseError<'ctx>> {
+  fn parse_type(&mut self) -> Result<(Type<'ctx>, Location), ParseError<'ctx>> {
     let expected = smallvec![TokenKind::Identifier, TokenKind::Type];
     let token = self.expect(expected)?;
 
@@ -157,8 +156,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
     let mut type_ = match token.kind() {
       TokenKind::Identifier => {
-        let type_name = Rc::from(*token.lexeme());
-        (Type::Custom(type_name), start_loc.clone())
+        (Type::Custom(token.lexeme()), start_loc.clone())
       }
       TokenKind::Type => {
         if let Some(TokenData::Type(primitive_type)) = token.data() {
@@ -179,7 +177,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     Ok(type_)
   }
 
-  fn parse_tn_pair(&mut self) -> Result<TypeNamePair, ParseError<'ctx>> {
+  fn parse_tn_pair(&mut self) -> Result<TypeNamePair<'ctx>, ParseError<'ctx>> {
     let name_token = self.expect(smallvec![TokenKind::Identifier])?;
     self.expect(smallvec![TokenKind::Colon])?;
     let (type_, type_pos) = self.parse_type()?;
@@ -187,7 +185,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     let location = name_token.location().merge(&type_pos).unwrap();
     Ok(
       TypeNamePair::builder()
-        .name(Rc::from(*name_token.lexeme()))
+        .name(name_token.lexeme())
         .type_(type_)
         .location(location)
         .build(),
@@ -200,7 +198,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       Some(got) => got,
       _ => {
         let id_expr = IdentifierExpression::builder()
-          .name(Rc::from(*identifier.lexeme()))
+          .name(identifier.lexeme())
           .location(identifier.location().clone())
           .build();
         return Ok(Expression::Identifier(id_expr));
@@ -213,7 +211,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
         let value = self.parse_expression()?;
         let assign_expr = Expression::Assign(
           AssignExpression::builder()
-            .identifier(Rc::from(*identifier.lexeme()))
+            .identifier(identifier.lexeme())
             .value(Box::new(value))
             .location(identifier.location().clone())
             .build(),
@@ -360,7 +358,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
     Ok(
       VariableStatement::builder()
-        .name(Rc::from(*var_name_tok.lexeme()))
+        .name(var_name_tok.lexeme())
         .initializer(initializer)
         .type_(type_)
         .location(combined_loc)
@@ -453,7 +451,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     let func_start_loc = self.expect(smallvec![TokenKind::Func])?.location().clone();
 
     let name_token = self.expect(smallvec![TokenKind::Identifier])?;
-    let func_name = Rc::from(*name_token.lexeme());
+    let func_name = name_token.lexeme();
 
     self.expect(smallvec![TokenKind::Paren(true)])?;
     let mut params = SmallVec::new();

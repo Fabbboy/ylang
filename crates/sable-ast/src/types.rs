@@ -1,4 +1,4 @@
-use std::{default, rc::Rc};
+use std::default;
 
 use getset::Getters;
 #[cfg(feature = "serde")]
@@ -19,15 +19,15 @@ pub enum PrimitiveType {
 
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum Type {
+pub enum Type<'ctx> {
   #[default]
   Inference,
   Primitive(PrimitiveType),
-  Custom(Rc<str>),
-  Pointer(Box<Type>),
+  Custom(&'ctx str),
+  Pointer(Box<Type<'ctx>>),
 }
 
-impl From<PrimitiveType> for Type {
+impl<'ctx> From<PrimitiveType> for Type<'ctx> {
   fn from(primitive_type: PrimitiveType) -> Self {
     Type::Primitive(primitive_type)
   }
@@ -35,11 +35,11 @@ impl From<PrimitiveType> for Type {
 
 #[derive(TypedBuilder, Getters)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct TypeNamePair {
+pub struct TypeNamePair<'ctx> {
   #[getset(get = "pub")]
-  name: Rc<str>,
+  name: &'ctx str,
   #[getset(get = "pub")]
-  type_: Type,
+  type_: Type<'ctx>,
   #[getset(get = "pub")]
   location: Location,
 }
