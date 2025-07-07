@@ -1,4 +1,4 @@
-use std::{default, rc::Rc};
+use std::rc::Rc;
 
 use getset::Getters;
 #[cfg(feature = "serde")]
