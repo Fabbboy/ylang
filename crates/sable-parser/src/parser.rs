@@ -339,7 +339,7 @@ impl<'ctx> Parser<'ctx> {
     let var_start = self.expect(smallvec![TokenKind::Var])?;
     let var_name_tok = self.expect(smallvec![TokenKind::Identifier])?;
 
-    let mut type_ = Type::Inference;
+    let mut type_ = Type::Infer;
     if self.peek(smallvec![TokenKind::Colon]).is_some() {
       self.expect(smallvec![TokenKind::Colon])?;
       let (var_type, _) = self.parse_type()?;

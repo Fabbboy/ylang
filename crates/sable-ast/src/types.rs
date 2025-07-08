@@ -17,7 +17,7 @@ pub enum PrimitiveType {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum Type<'ctx> {
   #[default]
-  Inference,
+  Infer,
   Primitive(PrimitiveType),
   Custom(&'ctx str),
   Pointer(Box<Type<'ctx>>),
