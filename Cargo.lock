@@ -287,6 +287,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "sable-hir"
+version = "0.1.0"
+
+[[package]]
+name = "sable-middle"
+version = "0.1.0"
+dependencies = [
+ "bumpalo",
+ "getset",
+ "sable-ast",
+ "sable-common",
+ "serde",
+ "smallvec",
+]
+
+[[package]]
 name = "sable-parse"
 version = "0.1.0"
 dependencies = [
@@ -309,6 +325,7 @@ dependencies = [
  "clap",
  "sable-ast",
  "sable-common",
+ "sable-middle",
  "sable-parse",
 ]
 

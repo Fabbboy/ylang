@@ -6,6 +6,7 @@ use sable_common::{
   manager::Manager,
   writer::ReportWriter,
 };
+use sable_middle::ty::tcx::TypeContext;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -55,4 +56,6 @@ fn main() {
       std::process::exit(1);
     }
   };
+
+  let tctx = TypeContext::new();
 }

@@ -5,7 +5,7 @@ use sable_common::FileId;
 #[cfg(feature = "serde")]
 use serde::Serialize;
 
-#[derive(Getters, Default, Clone, Debug, PartialEq, Eq)]
+#[derive(Getters, Default, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Location {
   #[getset(get = "pub")]

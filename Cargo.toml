@@ -3,6 +3,8 @@ members = [
   "crates/sable-ast",
   "crates/sable-common",
   "crates/sable-errors",
+  "crates/sable-hir",
+  "crates/sable-middle",
   "crates/sable-parse",
   "sablec",
 ]
@@ -27,3 +29,4 @@ sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }
 sable-parse = { path = "crates/sable-parse" }
 sable-errors = { path = "crates/sable-errors" }
+sable-middle = { path = "crates/sable-middle" }
