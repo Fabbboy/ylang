@@ -1,5 +1,5 @@
 [workspace]
-members = [
+members = [ "crates/sable-arena",
   "crates/sable-ast",
   "crates/sable-common",
   "crates/sable-errors",
