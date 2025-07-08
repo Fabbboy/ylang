@@ -3,7 +3,10 @@ use std::io;
 use clap::Parser as ClapParser;
 
 use sable_common::file::manager::Manager;
-use sable_errors::{cache::ErrorCache, writer::ReportWriter};
+use sable_errors::{
+  cache::ErrorCache,
+  writer::ReportWriter,
+};
 use sable_middle::gctx::GlobalContext;
 use sable_parse::{
   lexer::Lexer,
@@ -52,6 +55,7 @@ fn main() {
     }
   };
   println!("AST: {:#?}", ast);
-  let gctx = GlobalContext::new();
+  let mut gctx = GlobalContext::new();
+  let _ = gctx.create_package();
   println!("Global Context: {:#?}", gctx);
 }
