@@ -189,6 +189,12 @@ impl<'ctx> Lexer<'ctx> {
   pub fn peek(&self) -> Token<'ctx> {
     self.next.clone()
   }
+
+  pub fn reset(&mut self) {
+    self.pos = 0;
+    self.start = 0;
+    self.next = self.lex();
+  }
 }
 
 impl<'ctx> Iterator for Lexer<'ctx> {

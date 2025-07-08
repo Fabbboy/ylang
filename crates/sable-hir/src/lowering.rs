@@ -15,17 +15,17 @@ use crate::{
 
 pub struct AstLowering<'lower, 'hir> {
   ast: &'lower Ast<'hir>,
-  hir: &'lower mut HirModule<'hir>,
 }
 
 impl<'lower, 'hir> AstLowering<'lower, 'hir> {
-  pub fn new(ast: &'lower Ast<'hir>, hir: &'lower mut HirModule<'hir>) -> Self {
-    Self { ast, hir }
+  pub fn new(ast: &'lower Ast<'hir>) -> Self {
+    Self { ast }
   }
 
-  pub fn lower(&mut self) {
-    let funcs_uninit = self
-      .hir
+  pub fn lower(&mut self) -> HirModule<'hir> {
+    let mut hir = HirModule::new();
+
+    let funcs_uninit = hir
       .hir_bump()
       .alloc_slice_fill_with::<MaybeUninit<&'hir HirFunction<'hir>>, _>(
         self.ast.funcs().len(),
@@ -46,10 +46,11 @@ impl<'lower, 'hir> AstLowering<'lower, 'hir> {
       )
     };
 
-    self.hir.set_funcs(funcs_slice);
+    hir.set_funcs(funcs_slice);
+    hir
   }
 
-  fn lower_func(&mut self, func: &Function<'hir>) -> &'hir HirFunction<'hir> {
+  fn lower_func(&mut self, _: &Function<'hir>) -> &'hir HirFunction<'hir> {
     todo!()
   }
 }

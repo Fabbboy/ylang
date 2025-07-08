@@ -3,19 +3,18 @@ use std::{
   sync::Arc,
 };
 
-use getset::Getters;
 use bumpalo::Bump;
+use getset::Getters;
 
 use crate::{
   FileId,
   source::Source,
-}; 
+};
 
 #[derive(Getters)]
 pub struct Manager<'src> {
   #[getset(get = "pub")]
   sources: HashMap<FileId, Arc<Source<'src>>>,
-  #[cfg_attr(feature = "serde", serde(skip))]
   file_bump: Box<Bump>,
 }
 

@@ -10,9 +10,8 @@ ariadne = { workspace = true }
 smallvec = { workspace = true }
 typed-builder = { workspace = true }
 serde = { workspace = true, optional = true, features = ["derive", "rc"] }
-bumpalo = { workspace = true, features = ["collections"] }
 paste = { workspace = true }
 
 [features]
 default = []
-serde = ["dep:serde", "smallvec/serde", "bumpalo/serde"]
+serde = ["dep:serde", "smallvec/serde"]

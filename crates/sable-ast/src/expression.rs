@@ -17,7 +17,7 @@ pub enum Expression<'ctx> {
   Literal(LiteralExpression),
   Assign(AssignExpression<'ctx>),
   Binary(BinaryExpression<'ctx>),
-  Identifier(IdentifierExpression),
+  Identifier(IdentifierExpression<'ctx>),
 }
 
 impl<'ctx> Expression<'ctx> {

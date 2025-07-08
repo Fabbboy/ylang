@@ -8,6 +8,7 @@ use bumpalo::Bump;
 use crate::objects::function::HirFunction;
 
 #[derive(Debug, Getters, Setters)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct HirModule<'hir> {
   #[cfg_attr(feature = "serde", serde(skip))]
   hir_bump: Box<Bump>,

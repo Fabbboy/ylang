@@ -1,22 +1,15 @@
 use std::io;
 
 use clap::Parser;
-use sable_ast::ast::Ast;
 use sable_common::{
   cache::AriadneCache,
   manager::Manager,
   writer::ReportWriter,
 };
-use sable_hir::{
-  lowering::AstLowering,
-  module::HirModule,
-};
+use sable_hir::lowering::AstLowering;
 use sable_parser::{
   lexer::Lexer,
-  parser::{
-    ParseStatus,
-    Parser as SableParser,
-  },
+  parser::Parser as SableParser,
 };
 
 /// Sable compiler
@@ -52,20 +45,19 @@ fn main() {
   let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
   let lexer = Lexer::new(source.clone());
-  let mut ast = Ast::new();
-  let mut parser = SableParser::new(lexer, &mut ast);
-  match parser.parse(&mut writer) {
-    ParseStatus::Success => {
+  let mut parser = SableParser::new(lexer);
+  let ast = match parser.parse(&mut writer) {
+    Ok(ast) => {
       println!("AST: {:#?}", ast);
+      ast
     }
-    ParseStatus::Error => {
-      eprintln!("Parsing encountered errors.");
+    Err(_) => {
+      eprintln!("Parsing failed. See errors above.");
       std::process::exit(1);
     }
-  }
+  };
 
-  let mut hir = HirModule::default();
-  let mut lowering = AstLowering::new(&ast, &mut hir);
-  lowering.lower();
+  let mut lowering = AstLowering::new(&ast);
+  let hir = lowering.lower();
   println!("HIR: {:#?}", hir);
 }
