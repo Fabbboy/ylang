@@ -7,11 +7,11 @@ use sable_ast::token::{
   Token,
   TokenKind,
 };
-use sable_common::{
-  FileSpan,
-  writer::Reportable,
-};
+
+use sable_common::file::Span;
 use smallvec::SmallVec;
+
+use crate::writer::Reportable;
 
 pub const MAX_INLINE_KINDS: usize = 8;
 
@@ -28,8 +28,8 @@ impl<'ctx> UnexpectedTokenError<'ctx> {
 }
 
 impl<'ctx> Reportable for UnexpectedTokenError<'ctx> {
-  fn report(&self) -> Report<'_, FileSpan> {
-    let span: FileSpan = (
+  fn report(&self) -> Report<'_, Span> {
+    let span: Span = (
       self.found.location().filename().clone(),
       self.found.location().range().clone(),
     );

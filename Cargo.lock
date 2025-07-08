@@ -331,6 +331,7 @@ dependencies = [
  "clap",
  "sable-ast",
  "sable-common",
+ "sable-errors",
  "sable-middle",
  "sable-parse",
 ]

@@ -8,6 +8,7 @@ sable-parse = { workspace = true }
 sable-ast = { workspace = true, features = ["serde"] }
 sable-common = { workspace = true }
 sable-middle = { workspace = true, features = ["serde"] }
+sable-errors = { workspace = true }
 
 bumpalo = { workspace = true }
 ariadne = { workspace = true }

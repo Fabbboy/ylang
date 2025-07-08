@@ -39,10 +39,6 @@ use sable_ast::{
     TypeNamePair,
   },
 };
-use sable_common::writer::{
-  Reportable,
-  Sink,
-};
 use sable_errors::{
   lex_error::{
     numeric_error::NumericError,
@@ -55,6 +51,10 @@ use sable_errors::{
       MAX_INLINE_KINDS,
       UnexpectedTokenError,
     },
+  },
+  writer::{
+    Reportable,
+    Sink,
   },
 };
 use smallvec::{

@@ -6,7 +6,7 @@ use std::{
 use bumpalo::Bump;
 use getset::Getters;
 
-use crate::{
+use crate::file::{
   FileId,
   source::Source,
 };

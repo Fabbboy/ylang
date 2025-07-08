@@ -1,18 +1,17 @@
 use ariadne::Report;
-use std::io;
-
-use super::{
-  FileSpan,
+use sable_common::file::{
+  Span,
   cache::ErrorCache,
 };
+use std::io;
 
 pub trait Sink {
   type Error: std::fmt::Debug;
-  fn report(&mut self, report: Report<'_, FileSpan>) -> Result<(), Self::Error>;
+  fn report(&mut self, report: Report<'_, Span>) -> Result<(), Self::Error>;
 }
 
 pub trait Reportable {
-  fn report(&self) -> Report<'_, FileSpan>;
+  fn report(&self) -> Report<'_, Span>;
 }
 
 pub struct ReportWriter<'w, O> {
@@ -35,7 +34,7 @@ where
 {
   type Error = io::Error;
 
-  fn report(&mut self, report: Report<FileSpan>) -> Result<(), Self::Error> {
+  fn report(&mut self, report: Report<Span>) -> Result<(), Self::Error> {
     report.write(&mut *self.cache, &mut *self.out)
   }
 }

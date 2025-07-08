@@ -4,6 +4,7 @@ use ariadne::{
   ReportKind,
 };
 use sable_ast::location::Location;
+use sable_common::file::Span;
 
 #[derive(Debug)]
 pub struct UnknownCharError<'ctx> {
@@ -16,7 +17,7 @@ impl<'ctx> UnknownCharError<'ctx> {
     Self { lexeme, location }
   }
 
-  pub fn report(&self) -> ariadne::Report<'_, sable_common::FileSpan> {
+  pub fn report(&self) -> ariadne::Report<'_, Span> {
     let span = (
       self.location.filename().clone(),
       self.location.range().clone(),

@@ -1,8 +1,8 @@
+use bumpalo::Bump;
 use getset::Getters;
 use std::sync::Arc;
-use bumpalo::Bump;
 
-use crate::FileId;
+use crate::file::FileId;
 
 #[derive(Getters)]
 pub struct Source<'ctx> {

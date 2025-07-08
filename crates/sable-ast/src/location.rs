@@ -1,7 +1,7 @@
 use std::ops::Range;
 
 use getset::Getters;
-use sable_common::FileId;
+use sable_common::file::FileId;
 #[cfg(feature = "serde")]
 use serde::Serialize;
 

@@ -9,7 +9,7 @@ use sable_ast::{
     TokenKind,
   },
 };
-use sable_common::source::Source;
+use sable_common::file::source::Source;
 
 const KEYWORDS: phf::Map<&'static str, TokenKind> = phf::phf_map! {
   "func" => TokenKind::Func,
