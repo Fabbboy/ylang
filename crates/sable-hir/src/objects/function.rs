@@ -7,7 +7,7 @@ use sable_ast::{
 };
 use typed_builder::TypedBuilder;
 
-use crate::statement::HirStatement;
+use crate::statement::HirStmt;
 
 #[derive(TypedBuilder, Debug, Getters)]
 pub struct HirParam<'hir> {
@@ -28,5 +28,5 @@ pub struct HirFunction<'hir> {
   #[getset(get = "pub")]
   return_type: Type<'hir>,
   #[getset(get = "pub")]
-  body: &'hir [&'hir HirStatement],
+  body: &'hir [HirStmt<'hir>],
 }

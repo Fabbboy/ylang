@@ -1,6 +1,8 @@
-use crate::expression::HirExpresison;
+use crate::expression::HirExpr;
 
 #[derive(Debug)]
-pub enum HirStatement {
-  Expression(HirExpresison),
+pub enum HirStatement<'hir> {
+  Expression(HirExpr<'hir>),
 }
+
+pub type HirStmt<'hir> = &'hir HirStatement<'hir>;
