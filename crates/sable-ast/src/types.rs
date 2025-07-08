@@ -3,14 +3,11 @@ use typed_builder::TypedBuilder;
 
 use crate::location::Location;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Default, TypedBuilder, Getters)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub enum PrimitiveType {
-  I8,
-  I16,
-  I32,
-  F32,
-  F64,
+pub struct Path<'ctx> {
+  #[getset(get = "pub")]
+  segments: Vec<&'ctx str>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
@@ -18,15 +15,8 @@ pub enum PrimitiveType {
 pub enum Type<'ctx> {
   #[default]
   Infer,
-  Primitive(PrimitiveType),
-  Custom(&'ctx str),
+  Path(Path<'ctx>),
   Pointer(Box<Type<'ctx>>),
-}
-
-impl<'ctx> From<PrimitiveType> for Type<'ctx> {
-  fn from(primitive_type: PrimitiveType) -> Self {
-    Type::Primitive(primitive_type)
-  }
 }
 
 #[derive(TypedBuilder, Getters)]

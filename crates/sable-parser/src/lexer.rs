@@ -8,18 +8,12 @@ use sable_ast::{
     TokenError,
     TokenKind,
   },
-  types::PrimitiveType,
 };
 use sable_common::source::Source;
 
-const KEYWORDS: phf::Map<&'static str, (TokenKind, Option<TokenData>)> = phf::phf_map! {
-  "func" => (TokenKind::Func, None),
-  "i8" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::I8))),
-  "i16" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::I16))),
-  "i32" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::I32))),
-  "f32" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::F32))),
-  "f64" => (TokenKind::Type, Some(TokenData::Type(PrimitiveType::F64))),
-  "var" => (TokenKind::Var, None),
+const KEYWORDS: phf::Map<&'static str, TokenKind> = phf::phf_map! {
+  "func" => TokenKind::Func,
+  "var" =>  TokenKind::Var,
 };
 
 pub struct Lexer<'ctx> {
@@ -108,8 +102,8 @@ impl<'ctx> Lexer<'ctx> {
     }
 
     let lexeme = self.make_lexeme();
-    if let Some((kind, data)) = KEYWORDS.get(lexeme) {
-      return self.make_token(*kind, data.clone());
+    if let Some(kind) = KEYWORDS.get(lexeme) {
+      return self.make_token(*kind, None);
     }
 
     self.make_token(TokenKind::Identifier, None)

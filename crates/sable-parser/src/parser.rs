@@ -34,6 +34,7 @@ use sable_ast::{
     TokenKind,
   },
   types::{
+    Path,
     Type,
     TypeNamePair,
   },
@@ -148,19 +149,16 @@ impl<'ctx> Parser<'ctx> {
   }
 
   fn parse_type(&mut self) -> Result<(Type<'ctx>, Location), ParseError<'ctx>> {
-    let expected = smallvec![TokenKind::Identifier, TokenKind::Type];
+    let expected = smallvec![TokenKind::Identifier];
     let token = self.expect(expected)?;
 
     let start_loc = token.location();
 
     let mut type_ = match token.kind() {
-      TokenKind::Identifier => (Type::Custom(token.lexeme()), start_loc.clone()),
-      TokenKind::Type => {
-        if let Some(TokenData::Type(primitive_type)) = token.data() {
-          (primitive_type.clone().into(), start_loc.clone())
-        } else {
-          unreachable!("Type token missing data")
-        }
+      TokenKind::Identifier => {
+        let type_name = token.lexeme();
+        let type_path = Type::Path(Path::builder().segments(vec![type_name]).build());
+        (type_path, start_loc.clone())
       }
       _ => unreachable!("Unhandled token kind: {:?}", token.kind()),
     };

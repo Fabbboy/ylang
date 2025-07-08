@@ -2,10 +2,7 @@ use getset::Getters;
 #[cfg(feature = "serde")]
 use serde::Serialize;
 
-use crate::{
-  location::Location,
-  types::PrimitiveType,
-};
+use crate::location::Location;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
@@ -46,7 +43,6 @@ pub enum TokenKind {
 
   // Keywords
   Func,
-  Type,
   Var,
 }
 
@@ -56,7 +52,6 @@ pub enum TokenData {
   Error(TokenError),
   Integer(i64),
   Float(f64),
-  Type(PrimitiveType),
 }
 
 #[derive(Getters, Default, Clone, Debug)]
