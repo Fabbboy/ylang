@@ -38,22 +38,31 @@ impl<'lower, 'hir> AstLowering<'lower, 'hir> {
         |_| MaybeUninit::uninit(),
       );
 
-    for (idx, func) in self.ast.funcs().iter().enumerate() {
-      let hir_func = self.lower_func(func, &hir);
-      if let Some(func_slot) = funcs_uninit.get_mut(idx) {
-        *func_slot = MaybeUninit::new(hir_func);
-      }
-    }
+    self.lower_funcs(self.ast.funcs().as_slice(), funcs_uninit, &mut hir);
 
-    let funcs_slice = unsafe {
+    let func_slice = unsafe {
       slice::from_raw_parts(
         funcs_uninit.as_ptr() as *const &'hir HirFunction<'hir>,
         funcs_uninit.len(),
       )
     };
 
-    hir.set_funcs(funcs_slice);
+    hir.set_funcs(func_slice);
     hir
+  }
+
+  fn lower_funcs(
+    &mut self,
+    ast_funcs: &[Function<'hir>],
+    funcs: &mut [MaybeUninit<&HirFunction<'hir>>],
+    hir: &mut HirModule<'hir>,
+  ) {
+    for (idx, func) in ast_funcs.iter().enumerate() {
+      let hir_func = self.lower_func(func, hir);
+      if let Some(func_slot) = funcs.get_mut(idx) {
+        *func_slot = MaybeUninit::new(hir_func);
+      }
+    }
   }
 
   fn lower_param(
@@ -69,7 +78,7 @@ impl<'lower, 'hir> AstLowering<'lower, 'hir> {
   fn lower_func(
     &mut self,
     func: &Function<'hir>,
-    hir: &HirModule<'hir>,
+    hir: &mut HirModule<'hir>,
   ) -> &'hir HirFunction<'hir> {
     let param_slice = hir
       .hir_bump()
