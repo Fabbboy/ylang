@@ -3,22 +3,22 @@ use std::{
   hash::Hash,
 };
 
-use crate::arena::RawArena;
+use crate::arena::DroplessArena;
 
-pub struct Interner<'intern, T, const CHUNK_SIZE: usize = 4096>
+pub struct Interner<'intern, T>
 where
   T: Eq + Hash + ?Sized,
 {
-  backing: &'intern RawArena<CHUNK_SIZE>,
+  backing: &'intern mut DroplessArena,
   lookup: HashMap<&'intern T, &'intern T>,
 }
 
-impl<'intern, T, const CHUNK_SIZE: usize> Interner<'intern, T, CHUNK_SIZE>
+impl<'intern, T> Interner<'intern, T>
 where
   T: Eq + Hash + ?Sized + 'intern,
   for<'a> &'a T: Hash,
 {
-  pub fn new(backing: &'intern RawArena<CHUNK_SIZE>) -> Self {
+  pub fn new(backing: &'intern mut DroplessArena) -> Self {
     Self {
       backing,
       lookup: HashMap::new(),
@@ -30,23 +30,23 @@ where
       return existing;
     }
 
-    let interned = self.backing.alloc(value).unwrap();
+    let interned = self.backing.alloc(value);
     self.lookup.insert(value, interned);
     interned
   }
 }
 
-pub type StrInterner<'intern, const CHUNK_SIZE: usize = 4096> = Interner<'intern, str, CHUNK_SIZE>;
+pub type StrInterner<'intern> = Interner<'intern, str>;
 
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::Arena;
+  use crate::arena::DroplessArena;
 
   #[test]
   fn test_str_interner() {
-    let arena = Arena::new();
-    let mut interner = StrInterner::new(&arena);
+    let mut arena: DroplessArena = DroplessArena::new();
+    let mut interner = StrInterner::new(&mut arena);
     let str1 = "hello";
     let str2 = "world";
     let str3 = "hello"; // Duplicate

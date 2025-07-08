@@ -1,166 +1,186 @@
-extern crate alloc;
+use std::alloc::Layout;
+use std::mem::{self, MaybeUninit};
 
-use alloc::{
-  alloc::{
-    AllocError,
-    Allocator,
-    Global,
-  },
-  collections::LinkedList,
-};
-use core::{
-  alloc::Layout,
-  mem::{
-    self,
-    MaybeUninit,
-  },
-  ptr::{
-    self,
-    NonNull,
-  },
-};
-
-/// One arena chunk, with metadata at front
-struct BufNode {
-  size: usize,
+struct RawChunk {
+    ptr: *mut MaybeUninit<u8>,
+    cap: usize,
+    pos: usize,
 }
 
-pub struct Arena<A: Allocator = Global> {
-  allocator: A,
-  buffers: LinkedList<NonNull<BufNode>>,
-  offset: usize,
+/// Basic arena using Box-backed chunks.
+pub struct Arena {
+    chunks: Vec<RawChunk>,
+    chunk_size: usize,
 }
 
-impl Arena<Global> {
-  pub fn new() -> Self {
-    Self::with_allocator(Global)
-  }
-}
-
-impl<A: Allocator + Clone> Arena<A> {
-  pub fn with_allocator(allocator: A) -> Self {
-    Self {
-      allocator,
-      buffers: LinkedList::new(),
-      offset: 0,
+impl Arena {
+    pub fn new() -> Self {
+        Self::with_chunk_size(4096)
     }
-  }
 
-  pub fn reset(&mut self) {
-    while let Some(ptr) = self.buffers.pop_front() {
-      unsafe {
-        let size = ptr.as_ref().size;
-        let layout = Layout::from_size_align_unchecked(size, 8);
-        self.allocator.deallocate(ptr.cast(), layout);
-      }
+    pub fn with_chunk_size(chunk_size: usize) -> Self {
+        Self { chunks: Vec::new(), chunk_size: chunk_size.max(1) }
     }
-    self.offset = 0;
-  }
 
-  #[inline(always)]
-  fn align_up(addr: usize, align: usize) -> usize {
-    (addr + align - 1) & !(align - 1)
-  }
+    #[inline]
+    fn align_up(addr: usize, align: usize) -> usize {
+        (addr + align - 1) & !(align - 1)
+    }
 
-  fn ensure_capacity(&mut self, layout: Layout) -> Result<*mut u8, AllocError> {
-    let align = layout.align();
-    let size = layout.size();
+    fn alloc_raw(&mut self, layout: Layout) -> *mut u8 {
+        let align = layout.align();
+        let size = layout.size();
 
-    if let Some(&ptr) = self.buffers.front() {
-      unsafe {
-        let base = (ptr.as_ptr() as *mut u8).add(mem::size_of::<BufNode>());
-        let capacity = ptr.as_ref().size - mem::size_of::<BufNode>();
-
-        let raw = base.add(self.offset);
-        let aligned = Self::align_up(raw as usize, align);
-        let end = aligned + size;
-
-        if end <= base as usize + capacity {
-          self.offset = end - base as usize;
-          return Ok(aligned as *mut u8);
+        if let Some(chunk) = self.chunks.last_mut() {
+            let base = chunk.ptr as usize;
+            let aligned = Self::align_up(base + chunk.pos, align);
+            let end = aligned + size;
+            if end <= base + chunk.cap {
+                chunk.pos = end - base;
+                return aligned as *mut u8;
+            }
         }
-      }
+
+        let needed = size + align;
+        let mut cap = self.chunk_size.max(needed);
+        if let Some(last) = self.chunks.last() {
+            cap = cap.max(last.cap * 2);
+        }
+        let mut buf = vec![MaybeUninit::<u8>::uninit(); cap].into_boxed_slice();
+        let ptr = buf.as_mut_ptr();
+        let base = ptr as usize;
+        let aligned = Self::align_up(base, align);
+        let pos = aligned + size - base;
+        let raw = Box::into_raw(buf) as *mut MaybeUninit<u8>;
+        self.chunks.push(RawChunk { ptr: raw, cap, pos });
+        aligned as *mut u8
     }
 
-    // Allocate a new buffer
-    let alloc_size = (size + mem::size_of::<BufNode>()).max(1024);
-    let layout = Layout::from_size_align(alloc_size, 8).map_err(|_| AllocError)?;
-    let raw = self.allocator.allocate(layout)?;
-    let buf = raw.as_ptr();
-
-    unsafe {
-      let buf_ptr = buf as *mut u8;
-      buf_ptr
-        .cast::<BufNode>()
-        .write(BufNode { size: alloc_size });
-      self
-        .buffers
-        .push_front(NonNull::new_unchecked(buf_ptr.cast()));
-      let base = buf_ptr.add(mem::size_of::<BufNode>());
-      let aligned = Self::align_up(base as usize, align);
-      self.offset = aligned + size - base as usize;
-      Ok(aligned as *mut u8)
+    pub fn clear(&mut self) {
+        for chunk in self.chunks.drain(..) {
+            unsafe {
+                let slice = core::ptr::slice_from_raw_parts_mut(chunk.ptr, chunk.cap);
+                drop(Box::from_raw(slice));
+            }
+        }
     }
-  }
+}
 
-  pub fn alloc<T>(&mut self, value: T) -> Result<&mut T, AllocError> {
-    let layout = Layout::new::<T>();
-    let ptr = self.ensure_capacity(layout)?;
-    unsafe {
-      let typed = ptr.cast::<T>();
-      ptr::write(typed, value);
-      Ok(&mut *typed)
+impl Drop for Arena {
+    fn drop(&mut self) {
+        self.clear();
     }
+}
+
+pub struct DroplessArena {
+    arena: Arena,
+}
+
+impl DroplessArena {
+  pub fn new() -> Self {
+    Self::with_chunk_size(4096)
   }
 
-  pub fn alloc_default<T: Default>(&mut self) -> Result<&mut T, AllocError> {
-    self.alloc(T::default())
+  pub fn with_chunk_size(chunk_size: usize) -> Self {
+    Self { arena: Arena::with_chunk_size(chunk_size) }
   }
 
-  pub fn alloc_with<T>(&mut self, f: impl FnOnce() -> T) -> Result<&mut T, AllocError> {
+  fn alloc_raw(&mut self, layout: Layout) -> *mut u8 {
+    self.arena.alloc_raw(layout)
+  }
+
+  pub fn alloc<T>(&mut self, value: T) -> &mut T {
+    assert!(!mem::needs_drop::<T>());
+    let ptr = self.alloc_raw(Layout::new::<T>()) as *mut T;
+    unsafe { ptr.write(value); &mut *ptr }
+  }
+
+  pub fn alloc_with<T>(&mut self, f: impl FnOnce() -> T) -> &mut T {
     self.alloc(f())
   }
 
-  pub fn alloc_slice_copy<T: Copy>(&mut self, data: &[T]) -> Result<&mut [T], AllocError> {
-    let layout = Layout::array::<T>(data.len()).map_err(|_| AllocError)?;
-    let ptr = self.ensure_capacity(layout)?;
+  pub fn alloc_slice_copy<T: Copy>(&mut self, data: &[T]) -> &mut [T] {
+    assert!(!mem::needs_drop::<T>());
+    let layout = Layout::array::<T>(data.len()).unwrap();
+    let ptr = self.alloc_raw(layout) as *mut T;
     unsafe {
-      let dst = ptr.cast::<T>();
-      ptr::copy_nonoverlapping(data.as_ptr(), dst, data.len());
-      Ok(core::slice::from_raw_parts_mut(dst, data.len()))
+      ptr.copy_from_nonoverlapping(data.as_ptr(), data.len());
+      std::slice::from_raw_parts_mut(ptr, data.len())
     }
   }
 
-  pub fn alloc_slice_fill<T>(
-    &mut self,
-    len: usize,
-    mut f: impl FnMut(usize) -> T,
-  ) -> Result<&mut [T], AllocError> {
-    let layout = Layout::array::<T>(len).map_err(|_| AllocError)?;
-    let ptr = self.ensure_capacity(layout)?;
+  pub fn alloc_slice_with<T>(&mut self, len: usize, mut f: impl FnMut(usize) -> T) -> &mut [T] {
+    assert!(!mem::needs_drop::<T>());
+    let layout = Layout::array::<T>(len).unwrap();
+    let ptr = self.alloc_raw(layout) as *mut T;
     unsafe {
-      let dst = ptr.cast::<T>();
       for i in 0..len {
-        dst.add(i).write(f(i));
+        ptr.add(i).write(f(i));
       }
-      Ok(core::slice::from_raw_parts_mut(dst, len))
+      std::slice::from_raw_parts_mut(ptr, len)
     }
   }
 
-  fn free_all_buffers(&mut self) {
-    while let Some(ptr) = self.buffers.pop_front() {
-      unsafe {
-        let size = ptr.as_ref().size;
-        let layout = Layout::from_size_align_unchecked(size, 8);
-        self.allocator.deallocate(ptr.cast(), layout);
-      }
-    }
-    self.offset = 0;
+  pub fn alloc_str(&mut self, s: &str) -> &mut str {
+    let bytes = self.alloc_slice_copy::<u8>(s.as_bytes());
+    unsafe { std::str::from_utf8_unchecked_mut(bytes) }
+  }
+
+  pub fn clear(&mut self) {
+    self.arena.clear();
   }
 }
 
-impl<A: Allocator> Drop for Arena<A> {
+impl Drop for DroplessArena {
   fn drop(&mut self) {
-    self.free_all_buffers();
+    self.arena.clear();
+  }
+}
+
+pub struct TypedArena<T> {
+  arena: DroplessArena,
+  items: Vec<*mut T>,
+}
+
+impl<T> TypedArena<T> {
+  pub fn new() -> Self {
+    Self::with_chunk_size(4096)
+  }
+
+  pub fn with_chunk_size(chunk_size: usize) -> Self {
+    Self { arena: DroplessArena::with_chunk_size(chunk_size), items: Vec::new() }
+  }
+
+  pub fn alloc(&mut self, value: T) -> &mut T {
+    let ptr = self.arena.alloc_raw(Layout::new::<T>()) as *mut T;
+    unsafe {
+      ptr.write(value);
+      self.items.push(ptr);
+      &mut *ptr
+    }
+  }
+
+  pub fn alloc_with(&mut self, f: impl FnOnce() -> T) -> &mut T {
+    self.alloc(f())
+  }
+
+  pub fn clear(&mut self) {
+    unsafe {
+      for &ptr in &self.items {
+        ptr.drop_in_place();
+      }
+    }
+    self.items.clear();
+    self.arena.clear();
+  }
+}
+
+impl<T> Drop for TypedArena<T> {
+  fn drop(&mut self) {
+    unsafe {
+      for &ptr in &self.items {
+        ptr.drop_in_place();
+      }
+    }
   }
 }

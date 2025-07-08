@@ -6,5 +6,4 @@ pub mod def;
 pub mod resolution;
 pub mod types;
 
-pub type TypeInterner<'intern, const CHUNK_SIZE: usize = 4096> =
-  Interner<'intern, Type, CHUNK_SIZE>;
+pub type TypeInterner<'intern> = Interner<'intern, Type>;

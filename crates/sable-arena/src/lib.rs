@@ -5,4 +5,5 @@ pub mod interner;
 #[cfg(test)]
 mod tests;
 
-pub type Arena = arena::RawArena<4096>;
+pub use arena::{Arena, DroplessArena, TypedArena};
+pub type RawArena = Arena;
