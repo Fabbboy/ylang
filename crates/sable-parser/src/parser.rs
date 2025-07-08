@@ -480,6 +480,7 @@ impl<'ctx> Parser<'ctx> {
   where
     D: Sink + ?Sized,
   {
+    self.lexer.reset();
     let mut ast = Ast::new();
 
     let mut status = ParseStatus::Success;
