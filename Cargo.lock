@@ -273,6 +273,7 @@ dependencies = [
  "ariadne",
  "bumpalo",
  "getset",
+ "serde",
 ]
 
 [[package]]
@@ -292,18 +293,6 @@ version = "0.1.0"
 dependencies = [
  "bumpalo",
  "getset",
- "serde",
- "smallvec",
-]
-
-[[package]]
-name = "sable-middle"
-version = "0.1.0"
-dependencies = [
- "bumpalo",
- "getset",
- "sable-ast",
- "sable-hir",
  "serde",
  "smallvec",
 ]
@@ -332,7 +321,7 @@ dependencies = [
  "sable-ast",
  "sable-common",
  "sable-errors",
- "sable-middle",
+ "sable-hir",
  "sable-parse",
 ]
 

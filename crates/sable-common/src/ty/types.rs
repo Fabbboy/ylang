@@ -1,8 +1,9 @@
-use sable_ast::location::Location;
-
-use crate::ty::{
-  def::Definition,
-  resolution::Resolution,
+use crate::{
+  location::Location,
+  ty::{
+    def::Definition,
+    resolution::Resolution,
+  },
 };
 
 #[derive(Debug, PartialEq, Eq, Hash)]

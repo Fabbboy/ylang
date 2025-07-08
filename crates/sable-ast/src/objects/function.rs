@@ -1,10 +1,10 @@
 use getset::Getters;
+use sable_common::location::Location;
 use smallvec::SmallVec;
 use typed_builder::TypedBuilder;
 
 use crate::{
   expression::block_expression::BlockExpression,
-  location::Location,
   types::{
     Type,
     TypeNamePair,

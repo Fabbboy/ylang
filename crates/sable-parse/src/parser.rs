@@ -21,7 +21,6 @@ use sable_ast::{
       IntegerExpression,
     },
   },
-  location::Location,
   objects::function::Function,
   statement::{
     Statement,
@@ -39,6 +38,7 @@ use sable_ast::{
     TypeNamePair,
   },
 };
+use sable_common::location::Location;
 use sable_errors::{
   lex_error::{
     numeric_error::NumericError,

@@ -1,8 +1,7 @@
 use getset::Getters;
+use sable_common::location::Location;
 #[cfg(feature = "serde")]
 use serde::Serialize;
-
-use crate::location::Location;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
@@ -59,7 +58,7 @@ pub enum TokenData {
 pub struct Token<'ctx> {
   #[getset(get = "pub")]
   kind: TokenKind,
-  #[getset(skip)]
+  #[getset(get = "pub")]
   data: Option<TokenData>,
   #[getset(get = "pub")]
   lexeme: &'ctx str,
@@ -80,9 +79,5 @@ impl<'ctx> Token<'ctx> {
       lexeme,
       location,
     }
-  }
-
-  pub fn data(&self) -> Option<&TokenData> {
-    self.data.as_ref()
   }
 }

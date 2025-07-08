@@ -1,8 +1,6 @@
-use crate::{
-  expression::Expression,
-  location::Location,
-};
+use crate::expression::Expression;
 use getset::Getters;
+use sable_common::location::Location;
 use typed_builder::TypedBuilder;
 
 macro_rules! binary_expr_factory {

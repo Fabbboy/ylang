@@ -3,8 +3,10 @@ use ariadne::{
   Report,
   ReportKind,
 };
-use sable_ast::location::Location;
-use sable_common::file::Span;
+use sable_common::{
+  file::Span,
+  location::Location,
+};
 
 #[derive(Debug)]
 pub struct NumericError<'ctx> {

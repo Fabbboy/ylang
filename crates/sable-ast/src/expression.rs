@@ -9,6 +9,7 @@ pub use binary_expression::BinaryExpression;
 pub use block_expression::BlockExpression;
 pub use identifier_expression::IdentifierExpression;
 pub use literal_expression::LiteralExpression;
+use sable_common::location::Location;
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -21,7 +22,7 @@ pub enum Expression<'ctx> {
 }
 
 impl<'ctx> Expression<'ctx> {
-  pub fn location(&self) -> &crate::location::Location {
+  pub fn location(&self) -> &Location {
     match self {
       Expression::Block(block) => block.location(),
       Expression::Literal(literal) => literal.location(),

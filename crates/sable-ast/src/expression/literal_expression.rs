@@ -1,8 +1,7 @@
 use getset::Getters;
 use typed_builder::TypedBuilder;
 
-use crate::location::Location;
-
+use sable_common::location::Location;
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum LiteralExpression {

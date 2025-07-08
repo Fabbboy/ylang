@@ -1,11 +1,10 @@
-use getset::Getters;
-use typed_builder::TypedBuilder;
-
 use crate::{
   expression::Expression,
-  location::Location,
   types::Type,
 };
+use getset::Getters;
+use sable_common::location::Location;
+use typed_builder::TypedBuilder;
 
 #[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]

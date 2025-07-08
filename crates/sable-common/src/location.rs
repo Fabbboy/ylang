@@ -1,12 +1,11 @@
 use std::ops::Range;
 
 use getset::Getters;
-use sable_common::file::FileId;
-#[cfg(feature = "serde")]
-use serde::Serialize;
+
+use crate::file::FileId;
 
 #[derive(Getters, Default, Clone, Debug, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Location {
   #[getset(get = "pub")]
   range: Range<usize>,

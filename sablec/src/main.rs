@@ -7,7 +7,6 @@ use sable_errors::{
   cache::ErrorCache,
   writer::ReportWriter,
 };
-use sable_middle::gctx::GlobalContext;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -55,7 +54,4 @@ fn main() {
     }
   };
   println!("AST: {:#?}", ast);
-  let mut gctx = GlobalContext::new();
-  let _ = gctx.create_package();
-  println!("Global Context: {:#?}", gctx);
 }

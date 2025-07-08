@@ -1,15 +1,14 @@
-use std::sync::Arc;
-
-use sable_ast::{
-  location::Location,
-  token::{
-    Token,
-    TokenData,
-    TokenError,
-    TokenKind,
-  },
+use sable_ast::token::{
+  Token,
+  TokenData,
+  TokenError,
+  TokenKind,
 };
-use sable_common::file::source::Source;
+use sable_common::{
+  file::source::Source,
+  location::Location,
+};
+use std::sync::Arc;
 
 const KEYWORDS: phf::Map<&'static str, TokenKind> = phf::phf_map! {
   "func" => TokenKind::Func,

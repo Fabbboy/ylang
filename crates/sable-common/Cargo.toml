@@ -7,3 +7,9 @@ edition = "2024"
 getset = { workspace = true }
 bumpalo = { workspace = true, features = ["collections"] }
 ariadne = { workspace = true }
+
+serde = { workspace = true, optional = true, features = ["derive"] }
+
+[features]
+default = []
+serde = ["dep:serde"]
