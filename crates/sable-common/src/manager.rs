@@ -3,31 +3,36 @@ use std::{
   sync::Arc,
 };
 
+use bumpalo::Bump;
 use getset::Getters;
 
 use crate::{
   FileId,
-  context::Context,
   source::Source,
 };
 
 #[derive(Getters)]
-pub struct Manager<'ctx> {
+pub struct Manager<'src> {
   #[getset(get = "pub")]
-  sources: HashMap<FileId, Arc<Source<'ctx>>>,
-  ctx: &'ctx Context,
+  sources: HashMap<FileId, Arc<Source<'src>>>,
+  file_bump: Box<Bump>,
 }
 
-impl<'ctx> Manager<'ctx> {
-  pub fn new(ctx: &'ctx Context) -> Self {
+impl<'src> Manager<'src> {
+  pub fn new() -> Self {
     Self {
       sources: HashMap::new(),
-      ctx,
+      file_bump: Box::new(Bump::new()),
     }
   }
 
-  pub fn add_source(&mut self, source: &str, filename: &str) -> Arc<Source<'ctx>> {
-    let source = Source::new(source, filename, self.ctx);
+  pub fn file_bump(&'src self) -> &'src Bump {
+    &self.file_bump
+  }
+
+  pub fn add_source(&mut self, source: &str, filename: &str) -> Arc<Source<'src>> {
+    let bump: &'src Bump = unsafe { &*(self.file_bump.as_ref() as *const Bump) };
+    let source = Source::new(source, filename, bump);
     let id = source.filename().clone();
     let source = Arc::new(source);
     self.sources.insert(id, source.clone());

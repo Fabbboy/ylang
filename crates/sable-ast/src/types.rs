@@ -1,14 +1,10 @@
-use std::rc::Rc;
-
 use getset::Getters;
-#[cfg(feature = "serde")]
-use serde::Serialize;
 use typed_builder::TypedBuilder;
 
 use crate::location::Location;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum PrimitiveType {
   I8,
   I16,
@@ -18,28 +14,28 @@ pub enum PrimitiveType {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub enum Type {
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub enum Type<'ctx> {
   #[default]
   Inference,
   Primitive(PrimitiveType),
-  Custom(Rc<str>),
-  Pointer(Box<Type>),
+  Custom(&'ctx str),
+  Pointer(Box<Type<'ctx>>),
 }
 
-impl From<PrimitiveType> for Type {
+impl<'ctx> From<PrimitiveType> for Type<'ctx> {
   fn from(primitive_type: PrimitiveType) -> Self {
     Type::Primitive(primitive_type)
   }
 }
 
 #[derive(TypedBuilder, Getters)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct TypeNamePair {
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct TypeNamePair<'ctx> {
   #[getset(get = "pub")]
-  name: Rc<str>,
+  name: &'ctx str,
   #[getset(get = "pub")]
-  type_: Type,
+  type_: Type<'ctx>,
   #[getset(get = "pub")]
   location: Location,
 }

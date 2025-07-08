@@ -7,6 +7,7 @@ edition = "2024"
 bumpalo = { workspace = true }
 typed-builder = { workspace = true }
 getset = { workspace = true }
+serde = { workspace = true, optional = true, features = ["derive", "rc"] }
 
 sable-ast = { workspace = true }
 sable-common = { workspace = true }

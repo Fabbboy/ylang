@@ -7,7 +7,6 @@ use sable_ast::{
   ast::Ast,
   objects::function::Function,
 };
-use sable_common::context::Context;
 
 use crate::{
   module::HirModule,
@@ -16,18 +15,17 @@ use crate::{
 
 pub struct AstLowering<'lower, 'hir> {
   ast: &'lower Ast<'hir>,
-  hir: &'lower mut HirModule<'hir>,
-  ctx: &'lower Context,
 }
 
 impl<'lower, 'hir> AstLowering<'lower, 'hir> {
-  pub fn new(ast: &'lower Ast<'hir>, hir: &'lower mut HirModule<'hir>, ctx: &'hir Context) -> Self {
-    Self { ast, hir, ctx }
+  pub fn new(ast: &'lower Ast<'hir>) -> Self {
+    Self { ast }
   }
 
-  pub fn lower(&mut self) {
-    let funcs_uninit = self
-      .ctx
+  pub fn lower(&mut self) -> HirModule<'hir> {
+    let mut hir = HirModule::new();
+
+    let funcs_uninit = hir
       .hir_bump()
       .alloc_slice_fill_with::<MaybeUninit<&'hir HirFunction<'hir>>, _>(
         self.ast.funcs().len(),
@@ -48,10 +46,11 @@ impl<'lower, 'hir> AstLowering<'lower, 'hir> {
       )
     };
 
-    self.hir.set_funcs(funcs_slice);
+    hir.set_funcs(funcs_slice);
+    hir
   }
 
-  fn lower_func(&mut self, func: &Function<'hir>) -> &'hir HirFunction<'hir> {
+  fn lower_func(&mut self, _: &Function<'hir>) -> &'hir HirFunction<'hir> {
     todo!()
   }
 }

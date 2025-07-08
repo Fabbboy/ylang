@@ -1,4 +1,3 @@
-use bumpalo::collections::Vec as BumpVec;
 use std::rc::Rc;
 
 use either::Either;
@@ -64,7 +63,7 @@ use smallvec::{
 
 use crate::lexer::Lexer;
 
-pub enum ParseStatus {
+enum ParseStatus {
   Success,
   Error,
 }
@@ -73,14 +72,13 @@ fn expected_expression() -> SmallVec<[TokenKind; MAX_INLINE_KINDS]> {
   smallvec![TokenKind::Integer, TokenKind::Float, TokenKind::Identifier]
 }
 
-pub struct Parser<'ctx, 'p> {
+pub struct Parser<'ctx> {
   lexer: Lexer<'ctx>,
-  ast: &'p mut Ast<'ctx>,
 }
 
-impl<'ctx, 'p> Parser<'ctx, 'p> {
-  pub fn new(lexer: Lexer<'ctx>, ast: &'p mut Ast<'ctx>) -> Self {
-    Self { lexer, ast }
+impl<'ctx> Parser<'ctx> {
+  pub fn new(lexer: Lexer<'ctx>) -> Self {
+    Self { lexer }
   }
 
   fn handle_token_error(&self, token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
@@ -149,17 +147,14 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     }
   }
 
-  fn parse_type(&mut self) -> Result<(Type, Location), ParseError<'ctx>> {
+  fn parse_type(&mut self) -> Result<(Type<'ctx>, Location), ParseError<'ctx>> {
     let expected = smallvec![TokenKind::Identifier, TokenKind::Type];
     let token = self.expect(expected)?;
 
     let start_loc = token.location();
 
     let mut type_ = match token.kind() {
-      TokenKind::Identifier => {
-        let type_name = Rc::from(*token.lexeme());
-        (Type::Custom(type_name), start_loc.clone())
-      }
+      TokenKind::Identifier => (Type::Custom(token.lexeme()), start_loc.clone()),
       TokenKind::Type => {
         if let Some(TokenData::Type(primitive_type)) = token.data() {
           (primitive_type.clone().into(), start_loc.clone())
@@ -179,7 +174,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     Ok(type_)
   }
 
-  fn parse_tn_pair(&mut self) -> Result<TypeNamePair, ParseError<'ctx>> {
+  fn parse_tn_pair(&mut self) -> Result<TypeNamePair<'ctx>, ParseError<'ctx>> {
     let name_token = self.expect(smallvec![TokenKind::Identifier])?;
     self.expect(smallvec![TokenKind::Colon])?;
     let (type_, type_pos) = self.parse_type()?;
@@ -187,7 +182,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     let location = name_token.location().merge(&type_pos).unwrap();
     Ok(
       TypeNamePair::builder()
-        .name(Rc::from(*name_token.lexeme()))
+        .name(name_token.lexeme())
         .type_(type_)
         .location(location)
         .build(),
@@ -200,7 +195,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       Some(got) => got,
       _ => {
         let id_expr = IdentifierExpression::builder()
-          .name(Rc::from(*identifier.lexeme()))
+          .name(identifier.lexeme())
           .location(identifier.location().clone())
           .build();
         return Ok(Expression::Identifier(id_expr));
@@ -360,7 +355,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
     Ok(
       VariableStatement::builder()
-        .name(Rc::from(*var_name_tok.lexeme()))
+        .name(var_name_tok.lexeme())
         .initializer(initializer)
         .type_(type_)
         .location(combined_loc)
@@ -399,7 +394,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
   fn parse_block(&mut self) -> Result<BlockExpression<'ctx>, ParseErrorMOO<'ctx>> {
     let mut status = ParseStatus::Success;
-    let mut statements = BumpVec::new_in(self.ast.ast_bump());
+    let mut statements = Vec::new();
     let mut errors = SmallVec::new();
 
     let blk_start = self.expect(smallvec![TokenKind::Brace(true)])?;
@@ -453,7 +448,6 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     let func_start_loc = self.expect(smallvec![TokenKind::Func])?.location().clone();
 
     let name_token = self.expect(smallvec![TokenKind::Identifier])?;
-    let func_name = Rc::from(*name_token.lexeme());
 
     self.expect(smallvec![TokenKind::Paren(true)])?;
     let mut params = SmallVec::new();
@@ -481,7 +475,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
 
     Ok(
       Function::builder()
-        .name(func_name)
+        .name(name_token.lexeme())
         .params(params)
         .block(block)
         .return_type(return_type)
@@ -490,10 +484,12 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
     )
   }
 
-  pub fn parse<D>(&mut self, sink: &mut D) -> ParseStatus
+  pub fn parse<D>(&mut self, sink: &mut D) -> Result<Ast<'ctx>, ()>
   where
     D: Sink + ?Sized,
   {
+    let mut ast = Ast::new();
+
     let mut status = ParseStatus::Success;
     let expected = smallvec![TokenKind::Func, TokenKind::Eof];
 
@@ -520,7 +516,7 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
           let res = self.parse_function();
           match res {
             Ok(func) => {
-              self.ast.funcs_mut().push(func);
+              ast.funcs_mut().push(func);
             }
             Err(error) => {
               self.handle_parse_error(sink, error);
@@ -534,6 +530,9 @@ impl<'ctx, 'p> Parser<'ctx, 'p> {
       }
     }
 
-    status
+    match status {
+      ParseStatus::Success => Ok(ast),
+      ParseStatus::Error => Err(()),
+    }
   }
 }

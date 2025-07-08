@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use getset::Getters;
 use typed_builder::TypedBuilder;
 
@@ -13,11 +11,11 @@ use crate::{
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct VariableStatement<'ctx> {
   #[getset(get = "pub")]
-  name: Rc<str>,
+  name: &'ctx str,
   #[getset(get = "pub")]
   initializer: Expression<'ctx>,
   #[getset(get = "pub")]
-  type_: Type,
+  type_: Type<'ctx>,
   #[getset(get = "pub")]
   location: Location,
 }
