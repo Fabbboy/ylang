@@ -3,7 +3,6 @@ members = [
   "crates/sable-ast",
   "crates/sable-common",
   "crates/sable-errors",
-  "crates/sable-hir",
   "crates/sable-parse",
   "sablec",
 ]
@@ -28,7 +27,3 @@ sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }
 sable-parse = { path = "crates/sable-parse" }
 sable-errors = { path = "crates/sable-errors" }
-sable-hir = { path = "crates/sable-hir" }
-
-#[build-dependencies] => not allowed in virtual manifests/ workspace manifests
-#cxx-build = "1.0.160"

@@ -7,7 +7,6 @@ edition = "2024"
 sable-parse = { workspace = true }
 sable-ast = { workspace = true, features = ["serde"] }
 sable-common = { workspace = true }
-sable-hir = { workspace = true }
 
 bumpalo = { workspace = true }
 ariadne = { workspace = true }
