@@ -22,7 +22,7 @@ pub struct HirParam<'hir> {
 #[derive(TypedBuilder, Debug, Getters)]
 pub struct HirFunction<'hir> {
   #[getset(get = "pub")]
-  name: Rc<str>,
+  name: &'hir str,
   #[getset(get = "pub")]
   params: &'hir [&'hir HirParam<'hir>],
   #[getset(get = "pub")]
