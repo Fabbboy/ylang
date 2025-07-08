@@ -2,7 +2,7 @@ use crate::arena::RawArena;
 
 #[test]
 fn test_basic_allocation() {
-  let arena = RawArena::<1024>::new();
+  let arena = RawArena::with_chunk_size(1024);
 
   let ref1 = arena.alloc(42).unwrap();
   let ref2 = arena.alloc(24).unwrap();
@@ -16,7 +16,7 @@ fn test_basic_allocation() {
 
 #[test]
 fn test_slice_allocation_copy() {
-  let arena = RawArena::<1024>::new();
+  let arena = RawArena::with_chunk_size(1024);
 
   let values = [1, 2, 3, 4, 5];
   let slice_ref = arena.alloc_slice_copy(&values).unwrap();
@@ -28,7 +28,7 @@ fn test_slice_allocation_copy() {
 
 #[test]
 fn test_slice_allocation_with_closure() {
-  let arena = RawArena::<1024>::new();
+  let arena = RawArena::with_chunk_size(1024);
 
   let slice_ref = arena.alloc_slice_with(5, |i| i * 2).unwrap();
 
@@ -39,7 +39,7 @@ fn test_slice_allocation_with_closure() {
 
 #[test]
 fn test_string_allocation() {
-  let arena = RawArena::<1024>::new();
+  let arena = RawArena::with_chunk_size(1024);
 
   let text = arena.alloc_str("Hello, world!").unwrap();
   assert_eq!(text, "Hello, world!");
@@ -50,7 +50,7 @@ fn test_string_allocation() {
 
 #[test]
 fn test_soft_cleanup() {
-  let arena = RawArena::<1024>::new();
+  let arena = RawArena::with_chunk_size(1024);
 
   let ref1 = arena.alloc(42).unwrap();
   let ref2 = arena.alloc(24).unwrap();
@@ -67,7 +67,7 @@ fn test_soft_cleanup() {
 
 #[test]
 fn test_mixed_type_allocation() {
-  let arena = RawArena::<1024>::new();
+  let arena = RawArena::with_chunk_size(1024);
 
   let int_ref = arena.alloc(42i32).unwrap();
   let float_ref = arena.alloc(3.14f64).unwrap();
@@ -84,7 +84,7 @@ fn test_mixed_type_allocation() {
 
 #[test]
 fn test_zero_sized_types() {
-  let arena = RawArena::<1024>::new();
+  let arena = RawArena::with_chunk_size(1024);
 
   #[derive(Debug, PartialEq)]
   struct ZeroSized;
@@ -98,7 +98,7 @@ fn test_zero_sized_types() {
 
 #[test]
 fn test_large_allocation() {
-  let arena = RawArena::<64>::new(); // Small chunks
+  let arena = RawArena::with_chunk_size(64); // Small chunks
 
   let large_array = [1u8; 128]; // Larger than chunk size
   let slice_ref = arena.alloc_slice_copy(&large_array).unwrap();
@@ -109,7 +109,7 @@ fn test_large_allocation() {
 
 #[test]
 fn test_clear() {
-  let arena = RawArena::<1024>::new();
+  let arena = RawArena::with_chunk_size(1024);
 
   let _ref1 = arena.alloc(42).unwrap();
   let _ref2 = arena.alloc(24).unwrap();
@@ -125,7 +125,7 @@ fn test_clear() {
 
 #[test]
 fn test_non_copy_types_with_closure() {
-  let arena = RawArena::<1024>::new();
+  let arena = RawArena::with_chunk_size(1024);
 
   // Test with non-Copy types
   let strings = arena

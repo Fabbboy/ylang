@@ -5,20 +5,20 @@ use std::{
 
 use crate::arena::RawArena;
 
-pub struct Interner<'intern, T, const CHUNK_SIZE: usize = 4096>
+pub struct Interner<'intern, T>
 where
   T: Eq + Hash + ?Sized,
 {
-  backing: &'intern RawArena<CHUNK_SIZE>,
+  backing: &'intern RawArena,
   lookup: HashMap<&'intern T, &'intern T>,
 }
 
-impl<'intern, T, const CHUNK_SIZE: usize> Interner<'intern, T, CHUNK_SIZE>
+impl<'intern, T> Interner<'intern, T>
 where
   T: Eq + Hash + ?Sized + 'intern,
   for<'a> &'a T: Hash,
 {
-  pub fn new(backing: &'intern RawArena<CHUNK_SIZE>) -> Self {
+  pub fn new(backing: &'intern RawArena) -> Self {
     Self {
       backing,
       lookup: HashMap::new(),
@@ -36,7 +36,7 @@ where
   }
 }
 
-pub type StrInterner<'intern, const CHUNK_SIZE: usize = 4096> = Interner<'intern, str, CHUNK_SIZE>;
+pub type StrInterner<'intern> = Interner<'intern, str>;
 
 #[cfg(test)]
 mod tests {
