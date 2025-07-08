@@ -3,7 +3,7 @@ members = [
   "crates/sable-ast",
   "crates/sable-common",
   "crates/sable-errors",
-  "crates/sable-hir",
+  "crates/sable-hir", "crates/sable-middle",
   "crates/sable-parse",
   "sablec",
 ]
