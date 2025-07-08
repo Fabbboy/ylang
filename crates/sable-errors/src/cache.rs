@@ -1,19 +1,18 @@
 use ariadne::{
   Cache,
-  Source,
+  Source as AriadneSource,
+};
+use sable_common::file::{
+  FileId,
+  source::Source,
 };
 use std::{
   collections::HashMap,
   sync::Arc,
 };
 
-use crate::file::{
-  FileId,
-  source::Source as CommonSource,
-};
-
 pub struct ErrorCache {
-  files: HashMap<FileId, Source<FileId>>,
+  files: HashMap<FileId, AriadneSource<FileId>>,
 }
 
 impl ErrorCache {
@@ -23,10 +22,10 @@ impl ErrorCache {
     }
   }
 
-  pub fn add_file(&mut self, source: &CommonSource<'_>) {
+  pub fn add_file(&mut self, source: &Source<'_>) {
     self.files.insert(
       source.filename().clone(),
-      Source::from(Arc::<str>::from(*source.content())),
+      AriadneSource::from(Arc::<str>::from(*source.content())),
     );
   }
 }
@@ -34,7 +33,7 @@ impl ErrorCache {
 impl Cache<FileId> for ErrorCache {
   type Storage = FileId;
 
-  fn fetch(&mut self, id: &FileId) -> Result<&Source<Self::Storage>, impl std::fmt::Debug> {
+  fn fetch(&mut self, id: &FileId) -> Result<&AriadneSource<Self::Storage>, impl std::fmt::Debug> {
     self
       .files
       .get(id)

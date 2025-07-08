@@ -1,9 +1,8 @@
 use ariadne::Report;
-use sable_common::file::{
-  Span,
-  cache::ErrorCache,
-};
+use sable_common::file::Span;
 use std::io;
+
+use crate::cache::ErrorCache;
 
 pub trait Sink {
   type Error: std::fmt::Debug;

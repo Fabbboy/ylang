@@ -3,7 +3,6 @@ use std::{
   sync::Arc,
 };
 
-pub mod cache;
 pub mod manager;
 pub mod source;
 
