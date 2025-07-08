@@ -5,12 +5,18 @@ use std::{
 
 use sable_ast::{
   ast::Ast,
-  objects::function::Function,
+  objects::function::{
+    Function,
+    FunctionParam,
+  },
 };
 
 use crate::{
   module::HirModule,
-  objects::function::HirFunction,
+  objects::function::{
+    HirFunction,
+    HirParam,
+  },
 };
 
 pub struct AstLowering<'lower, 'hir> {
@@ -33,7 +39,7 @@ impl<'lower, 'hir> AstLowering<'lower, 'hir> {
       );
 
     for (idx, func) in self.ast.funcs().iter().enumerate() {
-      let hir_func = self.lower_func(func);
+      let hir_func = self.lower_func(func, &hir);
       if let Some(func_slot) = funcs_uninit.get_mut(idx) {
         *func_slot = MaybeUninit::new(hir_func);
       }
@@ -50,7 +56,34 @@ impl<'lower, 'hir> AstLowering<'lower, 'hir> {
     hir
   }
 
-  fn lower_func(&mut self, _: &Function<'hir>) -> &'hir HirFunction<'hir> {
+  fn lower_param(
+    &mut self,
+    param: &FunctionParam<'hir>,
+    hir: &HirModule<'hir>,
+  ) -> &'hir HirParam<'hir> {
+    let name_sym = hir.symbols().intern(param.name());
+
+    todo!()
+  }
+
+  fn lower_func(
+    &mut self,
+    func: &Function<'hir>,
+    hir: &HirModule<'hir>,
+  ) -> &'hir HirFunction<'hir> {
+    let param_slice = hir
+      .hir_bump()
+      .alloc_slice_fill_with::<MaybeUninit<&'hir HirParam<'hir>>, _>(func.params().len(), |_| {
+        MaybeUninit::uninit()
+      });
+
+    for (idx, param) in func.params().iter().enumerate() {
+      let hir_param = self.lower_param(param, hir);
+      if let Some(param_slot) = param_slice.get_mut(idx) {
+        *param_slot = MaybeUninit::new(hir_param);
+      }
+    }
+
     todo!()
   }
 }

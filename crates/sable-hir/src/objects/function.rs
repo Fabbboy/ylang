@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use getset::Getters;
 use sable_ast::{
   location::Location,
@@ -7,12 +5,15 @@ use sable_ast::{
 };
 use typed_builder::TypedBuilder;
 
-use crate::statement::HirStmt;
+use crate::{
+  statement::HirStmt,
+  symbol::HirSymbol,
+};
 
 #[derive(TypedBuilder, Debug, Getters)]
 pub struct HirParam<'hir> {
   #[getset(get = "pub")]
-  name: Rc<str>,
+  name: HirSymbol<'hir>,
   #[getset(get = "pub")]
   ty: Type<'hir>,
   #[getset(get = "pub")]
@@ -22,7 +23,7 @@ pub struct HirParam<'hir> {
 #[derive(TypedBuilder, Debug, Getters)]
 pub struct HirFunction<'hir> {
   #[getset(get = "pub")]
-  name: &'hir str,
+  name: HirSymbol<'hir>,
   #[getset(get = "pub")]
   params: &'hir [&'hir HirParam<'hir>],
   #[getset(get = "pub")]
