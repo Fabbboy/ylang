@@ -1,6 +1,3 @@
-extern crate alloc;
-use alloc::format;
-
 use crate::arena::RawArena;
 
 #[test]

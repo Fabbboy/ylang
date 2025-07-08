@@ -1,7 +1,5 @@
-#![no_std]
-
+pub mod arena;
 #[cfg(test)]
 mod tests;
-pub mod arena;
 
 pub type Arena = arena::RawArena<4096>;
