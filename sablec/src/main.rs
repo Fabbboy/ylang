@@ -19,7 +19,7 @@ use sable_parser::{
 #[command(version)]
 struct Args {
   /// Input source file to compile
-  #[arg(value_name = "FILE")]
+  #[arg(value_name = "FILE", short, long)]
   input: String,
 }
 
