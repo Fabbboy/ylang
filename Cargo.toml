@@ -30,3 +30,4 @@ sable-common = { path = "crates/sable-common" }
 sable-parse = { path = "crates/sable-parse" }
 sable-errors = { path = "crates/sable-errors" }
 sable-middle = { path = "crates/sable-middle" }
+sable-hir = { path = "crates/sable-hir" }

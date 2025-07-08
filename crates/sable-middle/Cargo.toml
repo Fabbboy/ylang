@@ -10,8 +10,8 @@ smallvec = { workspace = true }
 
 serde = { workspace = true, optional = true, features = ["derive", "rc"] }
 
+sable-hir = { workspace = true }
 sable-ast = { workspace = true }
-sable-common = { workspace = true }
 
 [features]
 default = []

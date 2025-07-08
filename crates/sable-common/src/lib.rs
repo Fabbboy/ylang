@@ -2,6 +2,7 @@ pub mod cache;
 pub mod manager;
 pub mod source;
 pub mod writer;
+pub mod file;
 
 use std::{
   ops::Range,

@@ -6,7 +6,7 @@ use sable_common::{
   manager::Manager,
   writer::ReportWriter,
 };
-use sable_middle::ty::tcx::TypeContext;
+use sable_middle::gctx::GlobalContext;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -47,15 +47,13 @@ fn main() {
   let lexer = Lexer::new(source.clone());
   let mut parser = Parser::new(lexer);
   let ast = match parser.parse(&mut writer) {
-    Ok(ast) => {
-      println!("AST: {:#?}", ast);
-      ast
-    }
+    Ok(ast) => ast,
     Err(_) => {
       eprintln!("Parsing failed. See errors above.");
       std::process::exit(1);
     }
   };
-
-  let tctx = TypeContext::new();
+  println!("AST: {:#?}", ast);
+  let gctx = GlobalContext::new();
+  println!("Global Context: {:#?}", gctx);
 }
