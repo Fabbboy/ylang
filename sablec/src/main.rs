@@ -4,7 +4,6 @@ use clap::Parser;
 use sable_ast::ast::Ast;
 use sable_common::{
   cache::AriadneCache,
-  context::Context,
   manager::Manager,
   writer::ReportWriter,
 };
@@ -33,9 +32,7 @@ struct Args {
 
 fn main() {
   let args = Args::parse();
-  let ctx = Context::default();
-
-  let mut manager = Manager::new(&ctx);
+  let mut manager = Manager::new();
   let mut cache = AriadneCache::new();
 
   let (source_code, filename) = {
@@ -55,7 +52,7 @@ fn main() {
   let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
   let lexer = Lexer::new(source.clone());
-  let mut ast = Ast::new(&ctx);
+  let mut ast = Ast::new();
   let mut parser = SableParser::new(lexer, &mut ast);
   match parser.parse(&mut writer) {
     ParseStatus::Success => {
@@ -68,7 +65,7 @@ fn main() {
   }
 
   let mut hir = HirModule::default();
-  let mut lowering = AstLowering::new(&ast, &mut hir, &ctx);
+  let mut lowering = AstLowering::new(&ast, &mut hir);
   lowering.lower();
   println!("HIR: {:#?}", hir);
 }

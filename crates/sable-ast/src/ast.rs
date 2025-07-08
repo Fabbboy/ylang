@@ -2,7 +2,7 @@ use getset::{
   Getters,
   MutGetters,
 };
-use sable_common::context::Context;
+use std::boxed::Box;
 
 use crate::objects::function::Function;
 use bumpalo::{
@@ -13,18 +13,21 @@ use bumpalo::{
 #[derive(Getters, MutGetters, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Ast<'ctx> {
-  #[getset(get = "pub")]
   #[cfg_attr(feature = "serde", serde(skip))]
-  ast_bump: &'ctx Bump,
+  ast_bump: Box<Bump>,
   #[getset(get_mut = "pub", get = "pub")]
   funcs: BumpVec<'ctx, Function<'ctx>>,
 }
 
 impl<'ctx> Ast<'ctx> {
-  pub fn new(ctx: &'ctx Context) -> Self {
-    Self {
-      ast_bump: ctx.ast_bump(),
-      funcs: BumpVec::new_in(ctx.ast_bump()),
-    }
+  pub fn new() -> Self {
+    let ast_bump = Box::new(Bump::new());
+    let bump_ptr: *const Bump = &*ast_bump;
+    let funcs = BumpVec::new_in(unsafe { &*bump_ptr });
+    Self { ast_bump, funcs }
+  }
+
+  pub fn ast_bump(&self) -> &Bump {
+    &self.ast_bump
   }
 }
