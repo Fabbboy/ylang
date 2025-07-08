@@ -149,27 +149,21 @@ impl<'ctx> Parser<'ctx> {
   }
 
   fn parse_type(&mut self) -> Result<(Type<'ctx>, Location), ParseError<'ctx>> {
-    let expected = smallvec![TokenKind::Identifier];
-    let token = self.expect(expected)?;
+    let token = self.expect(smallvec![TokenKind::Identifier])?;
 
     let start_loc = token.location();
+    let mut last_loc = start_loc.clone();
 
-    let mut type_ = match token.kind() {
-      TokenKind::Identifier => {
-        let type_name = token.lexeme();
-        let type_path = Type::Path(Path::builder().segments(vec![type_name]).build());
-        (type_path, start_loc.clone())
-      }
-      _ => unreachable!("Unhandled token kind: {:?}", token.kind()),
-    };
+    let mut ty = Type::Path(Path::builder().segments(vec![token.lexeme()]).build());
 
     while self.peek(smallvec![TokenKind::Star]).is_some() {
-      self.expect(smallvec![TokenKind::Star])?;
-      type_.0 = Type::Pointer(Box::new(type_.0));
-      type_.1 = type_.1.merge(&start_loc).unwrap();
+      let ptr_tok = self.expect(smallvec![TokenKind::Star])?;
+      ty = Type::Pointer(Box::new(ty));
+      last_loc = ptr_tok.location().clone();
     }
 
-    Ok(type_)
+    let final_loc = start_loc.merge(&last_loc).unwrap();
+    Ok((ty, final_loc))
   }
 
   fn parse_tn_pair(&mut self) -> Result<TypeNamePair<'ctx>, ParseError<'ctx>> {
