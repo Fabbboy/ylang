@@ -1,19 +1,19 @@
 use std::io;
 
-use clap::Parser;
+use clap::Parser as ClapParser;
 use sable_common::{
-  cache::AriadneCache,
+  cache::ErrorCache,
   manager::Manager,
   writer::ReportWriter,
 };
 use sable_hir::lowering::AstLowering;
-use sable_parser::{
+use sable_parse::{
   lexer::Lexer,
-  parser::Parser as SableParser,
+  parser::Parser,
 };
 
 /// Sable compiler
-#[derive(Parser, Debug)]
+#[derive(ClapParser, Debug)]
 #[command(name = "sablec")]
 #[command(about = "A compiler for the Sable programming language")]
 #[command(version)]
@@ -26,7 +26,7 @@ struct Args {
 fn main() {
   let args = Args::parse();
   let mut manager = Manager::new();
-  let mut cache = AriadneCache::new();
+  let mut cache = ErrorCache::new();
 
   let (source_code, filename) = {
     match std::fs::read_to_string(&args.input) {
@@ -45,7 +45,7 @@ fn main() {
   let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
   let lexer = Lexer::new(source.clone());
-  let mut parser = SableParser::new(lexer);
+  let mut parser = Parser::new(lexer);
   let ast = match parser.parse(&mut writer) {
     Ok(ast) => {
       println!("AST: {:#?}", ast);

@@ -4,7 +4,7 @@ members = [
   "crates/sable-common",
   "crates/sable-errors",
   "crates/sable-hir",
-  "crates/sable-parser",
+  "crates/sable-parse",
   "sablec",
 ]
 resolver = "3"
@@ -26,7 +26,7 @@ cxx = "1.0.160" # features: c++11, c++17, c++20
 
 sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }
-sable-parser = { path = "crates/sable-parser" }
+sable-parse = { path = "crates/sable-parse" }
 sable-errors = { path = "crates/sable-errors" }
 sable-hir = { path = "crates/sable-hir" }
 

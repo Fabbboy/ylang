@@ -12,11 +12,11 @@ use crate::{
   source::Source as CommonSource,
 };
 
-pub struct AriadneCache {
+pub struct ErrorCache {
   files: HashMap<FileId, Source<FileId>>,
 }
 
-impl AriadneCache {
+impl ErrorCache {
   pub fn new() -> Self {
     Self {
       files: HashMap::new(),
@@ -31,7 +31,7 @@ impl AriadneCache {
   }
 }
 
-impl Cache<FileId> for AriadneCache {
+impl Cache<FileId> for ErrorCache {
   type Storage = FileId;
 
   fn fetch(&mut self, id: &FileId) -> Result<&Source<Self::Storage>, impl std::fmt::Debug> {

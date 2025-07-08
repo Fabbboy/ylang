@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-sable-parser = { workspace = true }
+sable-parse = { workspace = true }
 sable-ast = { workspace = true, features = ["serde"] }
 sable-common = { workspace = true }
 sable-hir = { workspace = true }

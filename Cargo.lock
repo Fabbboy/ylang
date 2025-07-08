@@ -299,7 +299,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sable-parser"
+name = "sable-parse"
 version = "0.1.0"
 dependencies = [
  "bumpalo",
@@ -322,7 +322,7 @@ dependencies = [
  "sable-ast",
  "sable-common",
  "sable-hir",
- "sable-parser",
+ "sable-parse",
 ]
 
 [[package]]

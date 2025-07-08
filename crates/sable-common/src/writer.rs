@@ -3,7 +3,7 @@ use std::io;
 
 use super::{
   FileSpan,
-  cache::AriadneCache,
+  cache::ErrorCache,
 };
 
 pub trait Sink {
@@ -16,7 +16,7 @@ pub trait Reportable {
 }
 
 pub struct ReportWriter<'w, O> {
-  cache: &'w mut AriadneCache,
+  cache: &'w mut ErrorCache,
   out: &'w mut O,
 }
 
@@ -24,7 +24,7 @@ impl<'w, O> ReportWriter<'w, O>
 where
   O: io::Write,
 {
-  pub fn new(cache: &'w mut AriadneCache, out: &'w mut O) -> Self {
+  pub fn new(cache: &'w mut ErrorCache, out: &'w mut O) -> Self {
     Self { cache, out }
   }
 }
