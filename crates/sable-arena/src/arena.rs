@@ -1,9 +1,9 @@
 extern crate alloc;
 use alloc::{
   alloc::{
+    Allocator,
+    Global,
     Layout,
-    alloc,
-    dealloc,
   },
   vec::Vec,
 };
@@ -20,32 +20,31 @@ use core::{
 };
 
 /// A chunk of raw memory with a bump allocator
-struct Chunk {
+struct Chunk<A: Allocator> {
   /// Raw memory for this chunk
   storage: NonNull<u8>,
   /// Total size of this chunk in bytes
   size: usize,
   /// Current position in the chunk (bump pointer)
   pos: usize,
+  /// The allocator used for this chunk
+  allocator: A,
 }
 
-impl Chunk {
-  fn new(size: usize) -> Option<Self> {
+impl<A: Allocator> Chunk<A> {
+  fn new(size: usize, allocator: A) -> Result<Self, ()> {
     if size == 0 {
-      return None;
+      return Err(());
     }
 
-    let layout = Layout::from_size_align(size, 8).ok()?;
-    let storage = unsafe { alloc(layout) };
+    let layout = Layout::from_size_align(size, 8).map_err(|_| ())?;
+    let storage = allocator.allocate(layout).map_err(|_| ())?;
 
-    if storage.is_null() {
-      return None;
-    }
-
-    Some(Self {
-      storage: unsafe { NonNull::new_unchecked(storage) },
+    Ok(Self {
+      storage: storage.cast(),
       size,
       pos: 0,
+      allocator,
     })
   }
 
@@ -53,7 +52,9 @@ impl Chunk {
   fn alloc(&mut self, size: usize, align: usize) -> Option<NonNull<u8>> {
     if size == 0 {
       // Return a well-aligned non-null pointer for zero-sized allocations
-      return Some(NonNull::new(align as *mut u8).unwrap_or(NonNull::dangling()));
+      return Some(
+        NonNull::new(core::cmp::max(align, 1) as *mut u8).unwrap_or(NonNull::dangling()),
+      );
     }
 
     // Calculate aligned position
@@ -89,26 +90,29 @@ impl Chunk {
   }
 }
 
-impl Drop for Chunk {
+impl<A: Allocator> Drop for Chunk<A> {
   fn drop(&mut self) {
     let layout = Layout::from_size_align(self.size, 8).unwrap();
     unsafe {
-      dealloc(self.storage.as_ptr(), layout);
+      self.allocator.deallocate(self.storage.cast(), layout);
     }
   }
 }
 
 /// The main untyped arena allocator
-pub struct RawArena<const CHUNK_SIZE: usize = 4096> {
+pub struct RawArena<const CHUNK_SIZE: usize = 4096, A: Allocator = Global> {
   /// Chunks of memory
-  chunks: RefCell<Vec<Chunk>>,
+  chunks: RefCell<Vec<Chunk<A>>>,
+  /// The allocator to use for new chunks
+  allocator: A,
 }
 
-impl<const CHUNK_SIZE: usize> RawArena<CHUNK_SIZE> {
-  /// Create a new arena
-  pub fn new() -> Self {
+impl<const CHUNK_SIZE: usize, A: Allocator + Clone> RawArena<CHUNK_SIZE, A> {
+  /// Create a new arena with the specified allocator
+  pub fn new_in(allocator: A) -> Self {
     Self {
       chunks: RefCell::new(Vec::new()),
+      allocator,
     }
   }
 
@@ -175,6 +179,11 @@ impl<const CHUNK_SIZE: usize> RawArena<CHUNK_SIZE> {
 
   /// Allocate raw memory with the given layout
   pub fn alloc_raw(&self, layout: Layout) -> Option<NonNull<u8>> {
+    // Validate layout isn't too large
+    if layout.size() > isize::MAX as usize {
+      return None;
+    }
+
     let mut chunks = self.chunks.borrow_mut();
 
     // Try to allocate in existing chunks
@@ -186,7 +195,7 @@ impl<const CHUNK_SIZE: usize> RawArena<CHUNK_SIZE> {
 
     // Need a new chunk - make it big enough
     let needed_size = layout.size().max(CHUNK_SIZE);
-    let mut new_chunk = Chunk::new(needed_size)?;
+    let mut new_chunk = Chunk::new(needed_size, self.allocator.clone()).ok()?;
     let ptr = new_chunk.alloc(layout.size(), layout.align())?;
 
     chunks.push(new_chunk);
@@ -264,9 +273,34 @@ impl<const CHUNK_SIZE: usize> RawArena<CHUNK_SIZE> {
       chunk.pos = 0;
     }
   }
+
+  /// Check if a pointer was allocated by this arena
+  pub fn contains(&self, ptr: NonNull<u8>) -> bool {
+    let chunks = self.chunks.borrow();
+    chunks.iter().any(|chunk| {
+      let start = chunk.storage.as_ptr() as usize;
+      let end = start + chunk.size;
+      let ptr_addr = ptr.as_ptr() as usize;
+      ptr_addr >= start && ptr_addr < end
+    })
+  }
+
+  /// Compact the arena by removing empty chunks
+  pub fn compact(&self) {
+    let mut chunks = self.chunks.borrow_mut();
+    chunks.retain(|chunk| !chunk.is_empty());
+  }
 }
 
-impl<const CHUNK_SIZE: usize> Default for RawArena<CHUNK_SIZE> {
+// Convenience implementations for Global allocator
+impl<const CHUNK_SIZE: usize> RawArena<CHUNK_SIZE, Global> {
+  /// Create a new arena with the global allocator
+  pub fn new() -> Self {
+    Self::new_in(Global)
+  }
+}
+
+impl<const CHUNK_SIZE: usize> Default for RawArena<CHUNK_SIZE, Global> {
   fn default() -> Self {
     Self::new()
   }
