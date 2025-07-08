@@ -1,7 +1,6 @@
 use std::io;
 
 use clap::Parser as ClapParser;
-
 use sable_common::file::manager::Manager;
 use sable_errors::{
   cache::ErrorCache,

@@ -302,13 +302,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sable-middle"
-version = "0.1.0"
-dependencies = [
- "bumpalo",
-]
-
-[[package]]
 name = "sable-parse"
 version = "0.1.0"
 dependencies = [
@@ -329,6 +322,7 @@ dependencies = [
  "ariadne",
  "bumpalo",
  "clap",
+ "sable-arena",
  "sable-ast",
  "sable-common",
  "sable-errors",
