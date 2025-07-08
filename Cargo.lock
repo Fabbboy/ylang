@@ -277,6 +277,7 @@ dependencies = [
  "ariadne",
  "bumpalo",
  "getset",
+ "sable-arena",
  "serde",
 ]
 

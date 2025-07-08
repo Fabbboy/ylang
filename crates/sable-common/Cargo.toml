@@ -10,6 +10,8 @@ ariadne = { workspace = true }
 
 serde = { workspace = true, optional = true, features = ["derive"] }
 
+sable-arena = { workspace = true }
+
 [features]
 default = []
 serde = ["dep:serde"]
