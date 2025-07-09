@@ -24,15 +24,23 @@ where
       lookup: HashMap::new(),
     }
   }
+}
 
-  pub fn intern(&mut self, value: &'intern T) -> &'intern T {
+impl<'intern, T> Interner<'intern, T>
+where
+  T: Eq + Hash + ?Sized,
+  for<'a> &'a T: Hash,
+{
+  pub fn intern(&mut self, value: &T) -> &'intern T {
     if let Some(existing) = self.lookup.get(value) {
       return existing;
     }
 
     let interned = self.backing.alloc(value).unwrap();
-    self.lookup.insert(value, interned);
-    interned
+    let living_interned: &'intern T = unsafe { &*(*interned as *const T) };
+
+    self.lookup.insert(living_interned, living_interned);
+    living_interned
   }
 }
 
