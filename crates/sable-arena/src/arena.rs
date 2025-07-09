@@ -5,7 +5,7 @@ use alloc::{
   vec::Vec,
 };
 use core::{
-  alloc::Layout,
+  alloc::{AllocError, Allocator, Layout},
   cell::RefCell,
   mem::{
     self,
@@ -230,19 +230,26 @@ impl Arena {
     Some(ptr)
   }
 
+  fn dealloc_raw(&self, ptr: NonNull<u8>, layout: Layout) -> bool {
+    if layout.size() == 0 {
+      return true;
+    }
+    let mut chunks = self.chunks.borrow_mut();
+    for chunk in chunks.iter_mut() {
+      if chunk.try_retract(ptr, layout.size()) {
+        return true;
+      }
+    }
+    false
+  }
+
   pub fn dealloc<T>(&self, ptr: &mut T) -> bool {
     let raw = NonNull::new(ptr as *mut T as *mut u8).unwrap();
     let size = mem::size_of::<T>();
     if size == 0 {
       return true;
     }
-    let mut chunks = self.chunks.borrow_mut();
-    for chunk in chunks.iter_mut() {
-      if chunk.try_retract(raw, size) {
-        return true;
-      }
-    }
-    false
+    self.dealloc_raw(raw, Layout::new::<T>())
   }
 
   pub fn dealloc_slice<T>(&self, slice: &mut [T]) -> bool {
@@ -251,13 +258,10 @@ impl Arena {
     }
     let raw = NonNull::new(slice.as_mut_ptr() as *mut u8).unwrap();
     let size = mem::size_of::<T>() * slice.len();
-    let mut chunks = self.chunks.borrow_mut();
-    for chunk in chunks.iter_mut() {
-      if chunk.try_retract(raw, size) {
-        return true;
-      }
-    }
-    false
+    self.dealloc_raw(
+      raw,
+      Layout::from_size_align(size, mem::align_of::<T>()).unwrap(),
+    )
   }
 
   pub fn stats(&self) -> ArenaStats {
@@ -307,6 +311,19 @@ impl Arena {
 impl Default for Arena {
   fn default() -> Self {
     Self::new()
+  }
+}
+
+unsafe impl Allocator for Arena {
+  fn allocate(&self, layout: Layout) -> Result<NonNull<[u8]>, AllocError> {
+    self
+      .try_alloc_raw(layout)
+      .map(|ptr| NonNull::slice_from_raw_parts(ptr, layout.size()))
+      .ok_or(AllocError)
+  }
+
+  unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
+    let _ = self.dealloc_raw(ptr, layout);
   }
 }
 
@@ -474,5 +491,22 @@ mod tests {
     assert_eq!(strings[0], "item 0");
     assert_eq!(strings[1], "item 1");
     assert_eq!(strings[2], "item 2");
+  }
+
+  #[test]
+  fn test_std_allocator_api() {
+    use std::{rc::Rc, sync::Arc};
+
+    let arena = Arena::new();
+
+    let mut vec: Vec<u32, &Arena> = Vec::new_in(&arena);
+    vec.extend([1, 2, 3]);
+    assert_eq!(vec, [1, 2, 3]);
+
+    let rc = Rc::new_in(5u32, &arena);
+    assert_eq!(*rc, 5);
+
+    let arc = Arc::new_in("hi".to_string(), &arena);
+    assert_eq!(&*arc, "hi");
   }
 }
