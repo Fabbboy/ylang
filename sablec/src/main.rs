@@ -25,6 +25,7 @@ struct Args {
 
 fn main() {
   let file_arena = Arena::new();
+  let ast_arena = Arena::new();
 
   let args = Args::parse();
   let mut manager = Manager::new(&file_arena);
