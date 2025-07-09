@@ -63,12 +63,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bumpalo"
-version = "3.18.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db76d6187cd04dff33004d8e6c9cc4e05cd330500379d2394209271b4aeee"
-
-[[package]]
 name = "clap"
 version = "4.5.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -296,7 +290,6 @@ dependencies = [
 name = "sable-hir"
 version = "0.1.0"
 dependencies = [
- "bumpalo",
  "getset",
  "serde",
  "smallvec",
@@ -321,7 +314,6 @@ name = "sablec"
 version = "0.1.0"
 dependencies = [
  "ariadne",
- "bumpalo",
  "clap",
  "sable-arena",
  "sable-ast",
