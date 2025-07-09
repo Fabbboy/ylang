@@ -3,8 +3,8 @@ use std::{
   sync::Arc,
 };
 
-use bumpalo::Bump;
 use getset::Getters;
+use sable_arena::arena::Arena;
 
 use crate::file::{
   FileId,
@@ -15,24 +15,19 @@ use crate::file::{
 pub struct Manager<'src> {
   #[getset(get = "pub")]
   sources: HashMap<FileId, Arc<Source<'src>>>,
-  file_bump: Box<Bump>,
+  file_bump: &'src Arena,
 }
 
 impl<'src> Manager<'src> {
-  pub fn new() -> Self {
+  pub fn new(arena: &'src Arena) -> Self {
     Self {
       sources: HashMap::new(),
-      file_bump: Box::new(Bump::new()),
+      file_bump: arena,
     }
   }
 
-  pub fn file_bump(&'src self) -> &'src Bump {
-    &self.file_bump
-  }
-
   pub fn add_source(&mut self, source: &str, filename: &str) -> Arc<Source<'src>> {
-    let bump: &'src Bump = unsafe { &*(self.file_bump.as_ref() as *const Bump) };
-    let source = Source::new(source, filename, bump);
+    let source = Source::new(source, filename, self.file_bump);
     let id = source.filename().clone();
     let source = Arc::new(source);
     self.sources.insert(id, source.clone());

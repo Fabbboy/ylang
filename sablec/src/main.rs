@@ -1,6 +1,7 @@
 use std::io;
 
 use clap::Parser as ClapParser;
+use sable_arena::arena::Arena;
 use sable_common::file::manager::Manager;
 use sable_errors::{
   cache::ErrorCache,
@@ -23,8 +24,10 @@ struct Args {
 }
 
 fn main() {
+  let file_arena = Arena::new();
+
   let args = Args::parse();
-  let mut manager = Manager::new();
+  let mut manager = Manager::new(&file_arena);
   let mut cache = ErrorCache::new();
 
   let (source_code, filename) = {

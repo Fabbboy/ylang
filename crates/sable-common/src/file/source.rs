@@ -1,5 +1,5 @@
-use bumpalo::Bump;
 use getset::Getters;
+use sable_arena::arena::Arena;
 use std::sync::Arc;
 
 use crate::file::FileId;
@@ -13,9 +13,9 @@ pub struct Source<'ctx> {
 }
 
 impl<'ctx> Source<'ctx> {
-  pub fn new(content: &str, filename: &str, bump: &'ctx Bump) -> Self {
+  pub fn new(content: &str, filename: &str, arena: &'ctx Arena) -> Self {
     Self {
-      content: bump.alloc_str(content),
+      content: arena.alloc_str(content),
       filename: Arc::from(filename),
     }
   }

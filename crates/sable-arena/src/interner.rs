@@ -3,13 +3,13 @@ use std::{
   hash::Hash,
 };
 
-use crate::arena::RawArena;
+use crate::arena::Arena;
 
 pub struct Interner<'intern, T>
 where
   T: Eq + Hash + ?Sized,
 {
-  backing: &'intern RawArena,
+  backing: &'intern Arena,
   lookup: HashMap<&'intern T, &'intern T>,
 }
 
@@ -18,7 +18,7 @@ where
   T: Eq + Hash + ?Sized + 'intern,
   for<'a> &'a T: Hash,
 {
-  pub fn new(backing: &'intern RawArena) -> Self {
+  pub fn new(backing: &'intern Arena) -> Self {
     Self {
       backing,
       lookup: HashMap::new(),
@@ -36,7 +36,7 @@ where
       return existing;
     }
 
-    let interned = self.backing.alloc(value).unwrap();
+    let interned = self.backing.alloc(value);
     let living_interned = unsafe { &*(*interned as *const T) };
 
     self.lookup.insert(living_interned, living_interned);
@@ -49,7 +49,6 @@ pub type StrInterner<'intern> = Interner<'intern, str>;
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::Arena;
 
   #[test]
   fn test_str_interner() {

@@ -275,7 +275,6 @@ name = "sable-common"
 version = "0.1.0"
 dependencies = [
  "ariadne",
- "bumpalo",
  "getset",
  "sable-arena",
  "serde",
