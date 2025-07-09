@@ -5,7 +5,11 @@ use alloc::{
   vec::Vec,
 };
 use core::{
-  alloc::{AllocError, Allocator, Layout},
+  alloc::{
+    AllocError,
+    Allocator,
+    Layout,
+  },
   cell::RefCell,
   mem::{
     self,
@@ -18,7 +22,7 @@ use core::{
   slice,
 };
 
-/// A chunk of raw memory backed by a leaked `Box`.
+#[derive(Debug)]
 struct Chunk {
   /// Pointer to the start of the allocation.
   storage: NonNull<u8>,
@@ -86,7 +90,7 @@ impl Drop for Chunk {
   }
 }
 
-/// Untyped bump arena.
+#[derive(Debug)]
 pub struct Arena {
   default_chunk_size: usize,
   chunks: RefCell<Vec<Chunk>>,
@@ -495,7 +499,10 @@ mod tests {
 
   #[test]
   fn test_std_allocator_api() {
-    use std::{rc::Rc, sync::Arc};
+    use std::{
+      rc::Rc,
+      sync::Arc,
+    };
 
     let arena = Arena::new();
 

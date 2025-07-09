@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use either::Either;
+use sable_arena::arena::Arena;
 use sable_ast::{
   ast::Ast,
   expression::{
@@ -476,12 +477,12 @@ impl<'ctx> Parser<'ctx> {
     )
   }
 
-  pub fn parse<D>(&mut self, sink: &mut D) -> Result<Ast<'ctx>, ()>
+  pub fn parse<D>(&mut self, sink: &mut D, arena: &'ctx Arena) -> Result<Ast<'ctx>, ()>
   where
     D: Sink + ?Sized,
   {
     self.lexer.reset();
-    let mut ast = Ast::new();
+    let mut ast = Ast::new(arena);
 
     let mut status = ParseStatus::Success;
     let expected = smallvec![TokenKind::Func, TokenKind::Eof];

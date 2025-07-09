@@ -264,6 +264,7 @@ dependencies = [
  "ariadne",
  "getset",
  "paste",
+ "sable-arena",
  "sable-common",
  "serde",
  "smallvec",

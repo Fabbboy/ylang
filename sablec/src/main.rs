@@ -49,7 +49,7 @@ fn main() {
 
   let lexer = Lexer::new(source.clone());
   let mut parser = Parser::new(lexer);
-  let ast = match parser.parse(&mut writer) {
+  let ast = match parser.parse(&mut writer, &ast_arena) {
     Ok(ast) => ast,
     Err(_) => {
       eprintln!("Parsing failed. See errors above.");
