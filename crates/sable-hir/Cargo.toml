@@ -5,10 +5,10 @@ edition = "2024"
 
 [dependencies]
 getset = { workspace = true }
-smallvec = { workspace = true }
+sable-arena = { workspace = true }
 
 serde = { workspace = true, optional = true, features = ["derive", "rc"] }
 
 [features]
 default = []
-serde = ["dep:serde", "smallvec/serde"]
+serde = ["dep:serde", "sable-arena/serde"]

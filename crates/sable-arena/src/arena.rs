@@ -34,6 +34,20 @@ struct Chunk {
   raw: *mut [MaybeUninit<u8>],
 }
 
+#[cfg(feature = "serde")]
+impl serde::Serialize for Chunk {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+  where
+    S: serde::Serializer,
+  {
+    use serde::ser::SerializeStruct;
+    let mut state = serializer.serialize_struct("Chunk", 2)?;
+    state.serialize_field("size", &self.size)?;
+    state.serialize_field("pos", &self.pos)?;
+    state.end()
+  }
+}
+
 impl Chunk {
   fn new(size: usize) -> Option<Self> {
     if size == 0 {
@@ -91,6 +105,7 @@ impl Drop for Chunk {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Arena {
   default_chunk_size: usize,
   chunks: RefCell<Vec<Chunk>>,
