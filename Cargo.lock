@@ -305,10 +305,10 @@ dependencies = [
 name = "sable-parse"
 version = "0.1.0"
 dependencies = [
- "bumpalo",
  "either",
  "getset",
  "phf",
+ "sable-arena",
  "sable-ast",
  "sable-common",
  "sable-errors",

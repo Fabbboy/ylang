@@ -7,9 +7,9 @@ edition = "2024"
 sable-ast = { workspace = true }
 sable-common = { workspace = true }
 sable-errors = { workspace = true }
+sable-arena = { workspace = true }
 
 getset = { workspace = true }
 smallvec = { workspace = true }
 either = { workspace = true }
-phf = { workspace = true, features = ["macros"]}
-bumpalo = { workspace = true, features = ["collections"] }
+phf = { workspace = true, features = ["macros"] }

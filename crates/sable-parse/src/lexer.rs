@@ -1,3 +1,4 @@
+use sable_arena::arc::ArenaArc;
 use sable_ast::token::{
   Token,
   TokenData,
@@ -8,7 +9,6 @@ use sable_common::{
   file::source::Source,
   location::Location,
 };
-use std::sync::Arc;
 
 const KEYWORDS: phf::Map<&'static str, TokenKind> = phf::phf_map! {
   "func" => TokenKind::Func,
@@ -16,7 +16,7 @@ const KEYWORDS: phf::Map<&'static str, TokenKind> = phf::phf_map! {
 };
 
 pub struct Lexer<'ctx> {
-  source: Arc<Source<'ctx>>,
+  source: ArenaArc<'ctx, Source<'ctx>>,
 
   pos: usize,
   start: usize,
@@ -25,7 +25,7 @@ pub struct Lexer<'ctx> {
 }
 
 impl<'ctx> Lexer<'ctx> {
-  pub fn new(source: Arc<Source<'ctx>>) -> Self {
+  pub fn new(source: ArenaArc<'ctx, Source<'ctx>>) -> Self {
     let mut lexer = Self {
       source,
 
