@@ -37,7 +37,7 @@ where
     }
 
     let interned = self.backing.alloc(value).unwrap();
-    let living_interned: &'intern T = unsafe { &*(*interned as *const T) };
+    let living_interned = unsafe { &*(*interned as *const T) };
 
     self.lookup.insert(living_interned, living_interned);
     living_interned
