@@ -1,38 +1,13 @@
 use std::io;
 
 use clap::Parser as ClapParser;
-use sable_arena::{
-  arena::Arena,
-  interner::{
-    StrInterner,
-    Symbol,
-  },
-};
-use sable_common::{
-  file::manager::Manager,
-  location::Location,
-};
+use sable_arena::arena::Arena;
+use sable_common::file::manager::Manager;
 use sable_errors::{
   cache::ErrorCache,
   writer::ReportWriter,
 };
-use sable_hir::{
-  context::TyContext,
-  item::{
-    DefId,
-    Item,
-  },
-  module::{
-    ModId,
-    Module,
-  },
-  object::function::HirFunction,
-  ty::{
-    Type,
-    TypeInterner,
-    TypeKind,
-  },
-};
+use sable_hir::context::TyContext;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,

@@ -1,5 +1,4 @@
 use getset::Getters;
-use sable_arena::interner::Interner;
 use typed_builder::TypedBuilder;
 
 use crate::item::DefId;
@@ -18,4 +17,3 @@ pub struct Type {
 }
 
 pub type TypeId<'hir> = &'hir Type;
-pub type TypeInterner<'hir> = Interner<'hir, Type>;
