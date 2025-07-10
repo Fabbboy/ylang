@@ -27,5 +27,3 @@ pub struct Item<'hir> {
 pub enum ItemKind<'hir> {
   Func(HirFunctionId<'hir>),
 }
-
-pub type ItemId<'hir> = &'hir Item<'hir>;
