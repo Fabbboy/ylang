@@ -14,8 +14,10 @@ pub struct Source<'ctx> {
 
 impl<'ctx> Source<'ctx> {
   pub fn new(content: &str, filename: &str, arena: &'ctx Arena) -> Self {
-    let raw_filename: *const str = filename;
-    let arc = unsafe { Arc::from_raw_in(raw_filename, arena) };
+    let arced = Arc::from(filename);
+    let arced_raw_ptr = Arc::into_raw(arced); // is leaking we need to recreate the original again without copying to destruct it properly
+
+    let arc = unsafe { Arc::<str, &'ctx Arena>::from_raw_in(arced_raw_ptr, arena) }; // from_raw expects an Arc not a str but its the only way we can create a arc with custom allocator KEEP IT!!!!
 
     Self {
       content: arena.alloc_str(content),

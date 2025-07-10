@@ -22,7 +22,7 @@ pub enum ParseError<'ctx> {
 }
 
 impl<'ctx> Reportable<'ctx> for ParseError<'ctx> {
-  fn report(&self) -> Report<'ctx, Span<'ctx>> {
+  fn report(&self) -> Report<'_, Span<'ctx>> {
     match self {
       ParseError::UnexpectedToken(unexpected_token) => unexpected_token.report(),
       ParseError::UnknownChar(unknown_char) => unknown_char.report(),

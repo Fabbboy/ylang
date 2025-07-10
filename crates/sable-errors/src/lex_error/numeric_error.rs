@@ -19,7 +19,7 @@ impl<'ctx> NumericError<'ctx> {
     Self { lexeme, location }
   }
 
-  pub fn report(&self) -> ariadne::Report<'ctx, Span<'ctx>> {
+  pub fn report(&self) -> ariadne::Report<'_, Span<'ctx>> {
     let span = (
       self.location.filename().clone(),
       self.location.range().clone(),
