@@ -7,7 +7,7 @@ use crate::{
   object::function::HirFunctionId,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Hash, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct DefId(pub ModId, pub usize);
 

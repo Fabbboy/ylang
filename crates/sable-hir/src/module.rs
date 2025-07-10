@@ -15,6 +15,6 @@ pub struct Module<'hir> {
   items: &'hir [ItemId<'hir>],
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Hash, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ModId(pub usize);
