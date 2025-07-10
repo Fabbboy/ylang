@@ -3,13 +3,9 @@ use sable_common::location::Location;
 use typed_builder::TypedBuilder;
 
 use crate::{
-  module::ModId,
+  module::DefId,
   object::function::HirFunctionId,
 };
-
-#[derive(Debug, PartialEq, Hash, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct DefId(pub ModId, pub usize);
 
 #[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]

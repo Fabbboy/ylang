@@ -8,7 +8,7 @@ use crate::item::Item;
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Module<'hir> {
   #[getset(get = "pub")]
-  id: ModId,
+  id: DefId,
   #[getset(get = "pub")]
   arena: &'hir Arena,
   #[getset(get = "pub")]
@@ -18,3 +18,11 @@ pub struct Module<'hir> {
 #[derive(Debug, PartialEq, Hash, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct ModId(pub usize);
+
+#[derive(Debug, PartialEq, Hash, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct OwnerId(pub usize);
+
+#[derive(Debug, PartialEq, Hash, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct DefId(pub OwnerId, pub ModId);

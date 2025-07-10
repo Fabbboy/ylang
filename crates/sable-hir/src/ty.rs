@@ -1,7 +1,7 @@
 use getset::Getters;
 use typed_builder::TypedBuilder;
 
-use crate::item::DefId;
+use crate::module::DefId;
 
 #[derive(Debug, PartialEq, Hash, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
