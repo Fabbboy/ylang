@@ -319,6 +319,7 @@ version = "0.1.0"
 dependencies = [
  "getset",
  "sable-arena",
+ "sable-ast",
  "sable-common",
  "serde",
  "typed-builder",

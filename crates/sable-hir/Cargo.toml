@@ -9,6 +9,7 @@ typed-builder = { workspace = true }
 
 sable-arena = { workspace = true }
 sable-common = { workspace = true }
+sable-ast = { workspace = true }
 
 serde = { workspace = true, optional = true, features = ["derive", "rc"] }
 

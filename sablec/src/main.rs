@@ -7,6 +7,7 @@ use sable_errors::{
   cache::ErrorCache,
   writer::ReportWriter,
 };
+use sable_hir::{context::Context, lower::AstLowerer};
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -27,7 +28,6 @@ fn main() {
   let file_arena = Arena::new();
   let ast_arena = Arena::new();
   let hir_arena = Arena::new();
-  let intern_arena = Arena::new();
 
   let args = Args::parse();
   let mut manager = Manager::new(&file_arena);
@@ -58,6 +58,9 @@ fn main() {
       std::process::exit(1);
     }
   };
+
+  let context = Context::new(&hir_arena);
+  let lowerer = AstLowerer::new(&context);
 
   println!("AST: {:#?}", ast);
 }
