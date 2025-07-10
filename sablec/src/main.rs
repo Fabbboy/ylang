@@ -57,8 +57,8 @@ fn main() {
 
   let mut ast = Ast::new(&ast_arena);
 
-  let mut parser = Parser::new(lexer, &mut ast);
-  match parser.parse(&mut writer) {
+  let mut parser = Parser::new(lexer, &mut ast, &mut writer);
+  match parser.parse() {
     Ok(_) => {}
     Err(_) => {
       eprintln!("Parsing failed. See errors above.");

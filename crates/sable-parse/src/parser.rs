@@ -73,14 +73,25 @@ fn expected_expression() -> SmallVec<[TokenKind; MAX_INLINE_KINDS]> {
   smallvec![TokenKind::Integer, TokenKind::Float, TokenKind::Identifier]
 }
 
-pub struct Parser<'parser, 'ctx> {
+pub struct Parser<'parser, 'ctx, D>
+where
+  D: Sink<'ctx> + ?Sized,
+{
   lexer: Lexer<'ctx>,
   ast: &'parser mut Ast<'ctx>,
+  sink: &'parser mut D,
 }
 
-impl<'parser, 'ctx> Parser<'parser, 'ctx> {
-  pub fn new(lexer: Lexer<'ctx>, ast: &'parser mut Ast<'ctx>) -> Self {
-    Self { lexer, ast }
+impl<'parser, 'ctx, D> Parser<'parser, 'ctx, D>
+where
+  D: Sink<'ctx> + ?Sized,
+{
+  pub fn new(lexer: Lexer<'ctx>, ast: &'parser mut Ast<'ctx>, sink: &'parser mut D) -> Self {
+    Self {
+      lexer,
+      ast,
+      sink,
+    }
   }
 
   fn handle_token_error(&self, token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
@@ -95,15 +106,12 @@ impl<'parser, 'ctx> Parser<'parser, 'ctx> {
     }
   }
 
-  fn handle_parse_error<D>(&self, sink: &mut D, error: ParseErrorMOO<'ctx>)
-  where
-    D: Sink<'ctx> + ?Sized,
-  {
+  fn handle_parse_error(&mut self, error: ParseErrorMOO<'ctx>) {
     match error.0 {
-      Either::Left(parse_error) => sink.report(parse_error.report()).unwrap(),
+      Either::Left(parse_error) => self.sink.report(parse_error.report()).unwrap(),
       Either::Right(errors) => {
         for parse_error in errors {
-          sink.report(parse_error.report()).unwrap();
+          self.sink.report(parse_error.report()).unwrap();
         }
       }
     }
@@ -477,10 +485,7 @@ impl<'parser, 'ctx> Parser<'parser, 'ctx> {
     )
   }
 
-  pub fn parse<D>(&mut self, sink: &mut D) -> Result<(), ()>
-  where
-    D: Sink<'ctx> + ?Sized,
-  {
+  pub fn parse(&mut self) -> Result<(), ()> {
     self.lexer.reset();
 
     let mut status = ParseStatus::Success;
@@ -492,7 +497,7 @@ impl<'parser, 'ctx> Parser<'parser, 'ctx> {
         None => {
           if let Err(error) = self.expect(expected.clone()) {
             status = ParseStatus::Error;
-            self.handle_parse_error(sink, error.into());
+            self.handle_parse_error(error.into());
             self.sync(expected.clone());
             continue;
           }
@@ -512,7 +517,7 @@ impl<'parser, 'ctx> Parser<'parser, 'ctx> {
               self.ast.funcs_mut().push(func);
             }
             Err(error) => {
-              self.handle_parse_error(sink, error);
+              self.handle_parse_error(error);
               status = ParseStatus::Error;
               self.sync(expected.clone());
               continue;
