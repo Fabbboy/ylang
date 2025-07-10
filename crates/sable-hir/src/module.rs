@@ -1,9 +1,10 @@
 use getset::Getters;
 use sable_arena::arena::Arena;
+use typed_builder::TypedBuilder;
 
-use crate::item::Item;
+use crate::item::ItemId;
 
-#[derive(Debug, Getters)]
+#[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Module<'hir> {
   #[getset(get = "pub")]
@@ -11,7 +12,7 @@ pub struct Module<'hir> {
   #[getset(get = "pub")]
   arena: &'hir Arena,
   #[getset(get = "pub")]
-  items: &'hir [&'hir Item],
+  items: &'hir [ItemId<'hir>],
 }
 
 #[derive(Debug)]

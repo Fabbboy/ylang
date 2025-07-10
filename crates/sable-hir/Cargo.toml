@@ -5,8 +5,11 @@ edition = "2024"
 
 [dependencies]
 getset = { workspace = true }
+typed-builder = { workspace = true }
+
 sable-arena = { workspace = true }
 sable-common = { workspace = true }
+
 
 serde = { workspace = true, optional = true, features = ["derive", "rc"] }
 

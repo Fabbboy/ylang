@@ -297,6 +297,7 @@ dependencies = [
  "sable-arena",
  "sable-common",
  "serde",
+ "typed-builder",
 ]
 
 [[package]]

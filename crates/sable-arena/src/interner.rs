@@ -46,6 +46,10 @@ where
 
 pub type StrInterner<'intern> = Interner<'intern, str>;
 
+#[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct Symbol<'hir>(pub &'hir str);
+
 #[cfg(test)]
 mod tests {
   use super::*;
