@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use either::Either;
-use sable_arena::arena::Arena;
 use sable_ast::{
   ast::Ast,
   expression::{
@@ -74,13 +73,14 @@ fn expected_expression() -> SmallVec<[TokenKind; MAX_INLINE_KINDS]> {
   smallvec![TokenKind::Integer, TokenKind::Float, TokenKind::Identifier]
 }
 
-pub struct Parser<'ctx> {
+pub struct Parser<'parser, 'ctx> {
   lexer: Lexer<'ctx>,
+  ast: &'parser mut Ast<'ctx>,
 }
 
-impl<'ctx> Parser<'ctx> {
-  pub fn new(lexer: Lexer<'ctx>) -> Self {
-    Self { lexer }
+impl<'parser, 'ctx> Parser<'parser, 'ctx> {
+  pub fn new(lexer: Lexer<'ctx>, ast: &'parser mut Ast<'ctx>) -> Self {
+    Self { lexer, ast }
   }
 
   fn handle_token_error(&self, token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
@@ -477,12 +477,11 @@ impl<'ctx> Parser<'ctx> {
     )
   }
 
-  pub fn parse<D>(&mut self, sink: &mut D, arena: &'ctx Arena) -> Result<Ast<'ctx>, ()>
+  pub fn parse<D>(&mut self, sink: &mut D) -> Result<(), ()>
   where
     D: Sink<'ctx> + ?Sized,
   {
     self.lexer.reset();
-    let mut ast = Ast::new(arena);
 
     let mut status = ParseStatus::Success;
     let expected = smallvec![TokenKind::Func, TokenKind::Eof];
@@ -510,7 +509,7 @@ impl<'ctx> Parser<'ctx> {
           let res = self.parse_function();
           match res {
             Ok(func) => {
-              ast.funcs_mut().push(func);
+              self.ast.funcs_mut().push(func);
             }
             Err(error) => {
               self.handle_parse_error(sink, error);
@@ -525,7 +524,7 @@ impl<'ctx> Parser<'ctx> {
     }
 
     match status {
-      ParseStatus::Success => Ok(ast),
+      ParseStatus::Success => Ok(()),
       ParseStatus::Error => Err(()),
     }
   }

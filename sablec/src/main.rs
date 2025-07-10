@@ -2,12 +2,16 @@ use std::io;
 
 use clap::Parser as ClapParser;
 use sable_arena::arena::Arena;
+use sable_ast::ast::Ast;
 use sable_common::file::manager::Manager;
 use sable_errors::{
   cache::ErrorCache,
   writer::ReportWriter,
 };
-use sable_hir::{context::Context, lower::AstLowerer};
+use sable_hir::{
+  context::Context,
+  lower::AstLowerer,
+};
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -50,17 +54,20 @@ fn main() {
   let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
   let lexer = Lexer::new(source.clone());
-  let mut parser = Parser::new(lexer);
-  let ast = match parser.parse(&mut writer, &ast_arena) {
-    Ok(ast) => ast,
+
+  let mut ast = Ast::new(&ast_arena);
+
+  let mut parser = Parser::new(lexer, &mut ast);
+  match parser.parse(&mut writer) {
+    Ok(_) => {}
     Err(_) => {
       eprintln!("Parsing failed. See errors above.");
       std::process::exit(1);
     }
   };
 
+  println!("AST: {:#?}", ast);
+
   let context = Context::new(&hir_arena);
   let lowerer = AstLowerer::new(&context);
-
-  println!("AST: {:#?}", ast);
 }
