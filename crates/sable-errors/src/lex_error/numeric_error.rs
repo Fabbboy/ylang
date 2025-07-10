@@ -20,10 +20,7 @@ impl<'ctx> NumericError<'ctx> {
   }
 
   pub fn report(&self) -> ariadne::Report<'_, Span<'ctx>> {
-    let span = (
-      *self.location.filename(),
-      self.location.range().clone(),
-    );
+    let span = (*self.location.filename(), self.location.range().clone());
 
     Report::build(ReportKind::Error, span.clone())
       .with_message(format!("Invalid number: `{}`", self.lexeme))
