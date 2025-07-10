@@ -24,13 +24,12 @@ use core::{
 
 #[derive(Debug)]
 struct Chunk {
-  /// Pointer to the start of the allocation.
   storage: NonNull<u8>,
-  /// Total size of the chunk.
+
   size: usize,
-  /// Current bump position.
+
   pos: usize,
-  /// Raw handle used to reconstruct the box on drop.
+
   raw: *mut [MaybeUninit<u8>],
 }
 
@@ -112,15 +111,12 @@ pub struct Arena {
 }
 
 impl Arena {
-  /// Default chunk size used when none is specified.
   pub const DEFAULT_CHUNK_SIZE: usize = 4096;
 
-  /// Create a new empty arena using [`DEFAULT_CHUNK_SIZE`].
   pub fn new() -> Self {
     Self::with_chunk_size(Self::DEFAULT_CHUNK_SIZE)
   }
 
-  /// Create a new arena with a custom default chunk size.
   pub fn with_chunk_size(chunk_size: usize) -> Self {
     Self {
       default_chunk_size: chunk_size,
@@ -128,14 +124,10 @@ impl Arena {
     }
   }
 
-  /// Allocate space for a value and write it to the arena.
-  /// Panics if allocation fails.
   pub fn alloc<T>(&self, value: T) -> &mut T {
     self.try_alloc(value).expect("Arena allocation failed")
   }
 
-  /// Try to allocate space for a value and write it to the arena.
-  /// Returns None if allocation fails.
   pub fn try_alloc<T>(&self, value: T) -> Option<&mut T> {
     let layout = Layout::new::<T>();
     let ptr = self.try_alloc_raw(layout)?;
@@ -146,16 +138,12 @@ impl Arena {
     }
   }
 
-  /// Allocate a slice using a function to generate each element.
-  /// Panics if allocation fails.
   pub fn alloc_slice_with<T>(&self, len: usize, f: impl FnMut(usize) -> T) -> &mut [T] {
     self
       .try_alloc_slice_with(len, f)
       .expect("Arena allocation failed")
   }
 
-  /// Try to allocate a slice using a function to generate each element.
-  /// Returns None if allocation fails.
   pub fn try_alloc_slice_with<T>(
     &self,
     len: usize,
@@ -175,16 +163,12 @@ impl Arena {
     }
   }
 
-  /// Allocate a slice by copying from an existing slice.
-  /// Panics if allocation fails.
   pub fn alloc_slice_copy<T: Copy>(&self, values: &[T]) -> &mut [T] {
     self
       .try_alloc_slice_copy(values)
       .expect("Arena allocation failed")
   }
 
-  /// Try to allocate a slice by copying from an existing slice.
-  /// Returns None if allocation fails.
   pub fn try_alloc_slice_copy<T: Copy>(&self, values: &[T]) -> Option<&mut [T]> {
     if values.is_empty() {
       return Some(&mut []);
@@ -198,14 +182,10 @@ impl Arena {
     }
   }
 
-  /// Allocate a string by copying from an existing string.
-  /// Panics if allocation fails.
   pub fn alloc_str(&self, string: &str) -> &mut str {
     self.try_alloc_str(string).expect("Arena allocation failed")
   }
 
-  /// Try to allocate a string by copying from an existing string.
-  /// Returns None if allocation fails.
   pub fn try_alloc_str(&self, string: &str) -> Option<&mut str> {
     if string.is_empty() {
       let empty = self.try_alloc_slice_copy(&[])?;
@@ -215,14 +195,10 @@ impl Arena {
     Some(unsafe { core::str::from_utf8_unchecked_mut(bytes) })
   }
 
-  /// Allocate raw memory with the given layout.
-  /// Panics if allocation fails.
   pub fn alloc_raw(&self, layout: Layout) -> NonNull<u8> {
     self.try_alloc_raw(layout).expect("Arena allocation failed")
   }
 
-  /// Try to allocate raw memory with the given layout.
-  /// Returns None if allocation fails.
   pub fn try_alloc_raw(&self, layout: Layout) -> Option<NonNull<u8>> {
     if layout.size() > isize::MAX as usize {
       return None;
@@ -234,8 +210,7 @@ impl Arena {
       }
     }
     let needed_size = layout.size().max(self.default_chunk_size);
-    // Grow the chunk to the next power of two so subsequent allocations
-    // have room without immediately requiring another chunk.
+
     let alloc_size = needed_size
       .checked_next_power_of_two()
       .unwrap_or(needed_size)
@@ -346,7 +321,6 @@ unsafe impl Allocator for Arena {
   }
 }
 
-/// Information about arena memory usage.
 #[derive(Debug)]
 pub struct ArenaStats {
   pub total_chunks: usize,
@@ -433,13 +407,10 @@ mod tests {
     let ref1 = arena.alloc(42);
     let ref2 = arena.alloc(24);
 
-    // This should not be retractable (not at end)
     assert!(!arena.dealloc(ref1));
 
-    // This should be retractable (at end)
     assert!(arena.dealloc(ref2));
 
-    // Now ref1 should be retractable
     assert!(arena.dealloc(ref1));
   }
 
@@ -455,7 +426,6 @@ mod tests {
     assert_eq!(*float_ref, 3.14);
     assert_eq!(string_ref, "test");
 
-    // Test closure-based allocation with different types
     let int_slice = arena.alloc_slice_with(3, |i| (i as i32) * 10);
     assert_eq!(int_slice, &mut [0, 10, 20]);
   }
@@ -476,9 +446,9 @@ mod tests {
 
   #[test]
   fn test_large_allocation() {
-    let arena = Arena::with_chunk_size(64); // Small chunks
+    let arena = Arena::with_chunk_size(64);
 
-    let large_array = [1u8; 128]; // Larger than chunk size
+    let large_array = [1u8; 128];
     let slice_ref = arena.alloc_slice_copy(&large_array);
 
     assert_eq!(slice_ref.len(), 128);
@@ -505,7 +475,6 @@ mod tests {
   fn test_non_copy_types_with_closure() {
     let arena = Arena::with_chunk_size(1024);
 
-    // Test with non-Copy types
     let strings = arena.alloc_slice_with(3, |i| format!("item {}", i));
     assert_eq!(strings[0], "item 0");
     assert_eq!(strings[1], "item 1");
