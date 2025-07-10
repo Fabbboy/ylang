@@ -1,6 +1,5 @@
 use getset::Getters;
 use sable_arena::arena::Arena;
-use std::sync::Arc;
 
 use crate::file::FileId;
 

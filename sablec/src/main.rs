@@ -105,7 +105,7 @@ fn main() {
   let item = Item::builder()
     .id(def_id)
     .kind(sable_hir::item::ItemKind::Func(hir_func_id))
-    .location(Location::new(0..0, source.filename().clone()))
+    .location(Location::new(0..0, *source.filename()))
     .build();
   let item_id = hir_arena.alloc(item);
   let items: [&Item; 1] = [item_id];

@@ -28,7 +28,7 @@ impl<'src> Manager<'src> {
 
   pub fn add_source(&mut self, source: &str, filename: &str) -> Arc<Source<'src>, &'src Arena> {
     let source = Source::new(source, filename, self.file_bump);
-    let id = source.filename().clone();
+    let id = *source.filename();
     let source = Arc::new_in(source, self.file_bump);
     self.sources.insert(id, source.clone());
     source

@@ -21,7 +21,7 @@ impl<'ctx> NumericError<'ctx> {
 
   pub fn report(&self) -> ariadne::Report<'_, Span<'ctx>> {
     let span = (
-      self.location.filename().clone(),
+      *self.location.filename(),
       self.location.range().clone(),
     );
 

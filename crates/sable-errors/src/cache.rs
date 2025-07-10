@@ -21,8 +21,8 @@ impl<'ctx> ErrorCache<'ctx> {
 
   pub fn add_file(&mut self, source: &Source<'ctx>) {
     self.files.insert(
-      source.filename().clone(),
-      AriadneSource::from(source.filename().clone()),
+      *source.filename(),
+      AriadneSource::from(*source.filename()),
     );
   }
 }

@@ -52,7 +52,7 @@ impl<'ctx> Lexer<'ctx> {
 
   #[inline]
   fn make_location(&self) -> Location<'ctx> {
-    Location::new(self.start..self.pos, self.source.filename().clone())
+    Location::new(self.start..self.pos, *self.source.filename())
   }
 
   #[inline]

@@ -25,6 +25,6 @@ impl<'ctx> Location<'ctx> {
 
     let start = self.range.start.min(other.range.start);
     let end = self.range.end.max(other.range.end);
-    Some(Self::new(start..end, self.filename.clone()))
+    Some(Self::new(start..end, self.filename))
   }
 }

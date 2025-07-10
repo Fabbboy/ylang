@@ -30,7 +30,7 @@ impl<'ctx> UnexpectedTokenError<'ctx> {
 impl<'ctx> Reportable<'ctx> for UnexpectedTokenError<'ctx> {
   fn report(&self) -> Report<'_, Span<'ctx>> {
     let span: Span = (
-      self.found.location().filename().clone(),
+      *self.found.location().filename(),
       self.found.location().range().clone(),
     );
 
