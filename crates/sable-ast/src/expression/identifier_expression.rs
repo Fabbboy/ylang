@@ -8,5 +8,5 @@ pub struct IdentifierExpression<'ctx> {
   #[getset(get = "pub")]
   pub name: &'ctx str,
   #[getset(get = "pub")]
-  pub location: Location,
+  pub location: Location<'ctx>,
 }

@@ -21,7 +21,7 @@ pub struct FunctionParam<'ctx> {
   #[getset(get = "pub")]
   type_: Type<'ctx>,
   #[getset(get = "pub")]
-  location: Location,
+  location: Location<'ctx>,
 }
 
 impl<'ctx> From<TypeNamePair<'ctx>> for FunctionParam<'ctx> {
@@ -44,7 +44,7 @@ pub struct Function<'ctx> {
   #[getset(get = "pub")]
   return_type: Type<'ctx>,
   #[getset(get = "pub")]
-  location: Location,
+  location: Location<'ctx>,
   #[getset(get = "pub")]
   block: Option<BlockExpression<'ctx>>,
 }

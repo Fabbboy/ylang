@@ -23,21 +23,19 @@ pub struct Lexer<'ctx> {
   pos: usize,
   start: usize,
 
-  next: Token<'ctx>,
+  next: Option<Token<'ctx>>,
 }
 
 impl<'ctx> Lexer<'ctx> {
   pub fn new(source: Arc<Source<'ctx>, &'ctx Arena>) -> Self {
-    let mut lexer = Self {
+    Self {
       source,
 
       pos: 0,
       start: 0,
 
-      next: Token::default(),
-    };
-    lexer.next = lexer.lex();
-    lexer
+      next: None,
+    }
   }
 
   #[inline]
@@ -53,7 +51,7 @@ impl<'ctx> Lexer<'ctx> {
   }
 
   #[inline]
-  fn make_location(&self) -> Location {
+  fn make_location(&self) -> Location<'ctx> {
     Location::new(self.start..self.pos, self.source.filename().clone())
   }
 
@@ -181,14 +179,16 @@ impl<'ctx> Lexer<'ctx> {
     )
   }
 
-  pub fn peek(&self) -> Token<'ctx> {
-    self.next.clone()
+  pub fn peek(&mut self) -> Token<'ctx> {
+    if self.next.is_none() {
+      self.next = Some(self.lex());
+    }
+    self.next.clone().unwrap()
   }
 
   pub fn reset(&mut self) {
     self.pos = 0;
     self.start = 0;
-    self.next = self.lex();
   }
 }
 
@@ -196,8 +196,12 @@ impl<'ctx> Iterator for Lexer<'ctx> {
   type Item = Token<'ctx>;
 
   fn next(&mut self) -> Option<Self::Item> {
+    if self.next.is_none() {
+      self.next = Some(self.lex());
+    }
+
     let cache = self.next.clone();
-    self.next = self.lex();
-    return Some(cache);
+    self.next = Some(self.lex());
+    return cache;
   }
 }

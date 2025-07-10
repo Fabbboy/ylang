@@ -14,5 +14,5 @@ pub struct AssignExpression<'ctx> {
   #[getset(get = "pub")]
   value: Box<Expression<'ctx>>,
   #[getset(get = "pub")]
-  location: Location,
+  location: Location<'ctx>,
 }

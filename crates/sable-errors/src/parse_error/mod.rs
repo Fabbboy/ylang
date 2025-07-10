@@ -10,18 +10,19 @@ use crate::{
     numeric_error::NumericError,
     unknown_char::UnknownCharError,
   },
+  parse_error::unexpected_token::UnexpectedTokenError,
   writer::Reportable,
 };
 
 #[derive(Debug)]
 pub enum ParseError<'ctx> {
-  UnexpectedToken(unexpected_token::UnexpectedTokenError<'ctx>),
+  UnexpectedToken(UnexpectedTokenError<'ctx>),
   UnknownChar(UnknownCharError<'ctx>),
   NumericError(NumericError<'ctx>),
 }
 
-impl<'ctx> Reportable for ParseError<'ctx> {
-  fn report(&self) -> Report<'_, Span> {
+impl<'ctx> Reportable<'ctx> for ParseError<'ctx> {
+  fn report(&self) -> Report<'ctx, Span<'ctx>> {
     match self {
       ParseError::UnexpectedToken(unexpected_token) => unexpected_token.report(),
       ParseError::UnknownChar(unknown_char) => unknown_char.report(),

@@ -1,7 +1,4 @@
-use std::{
-  io,
-  sync::Arc,
-};
+use std::io;
 
 use clap::Parser as ClapParser;
 use sable_arena::{
@@ -108,7 +105,7 @@ fn main() {
   let item = Item::builder()
     .id(def_id)
     .kind(sable_hir::item::ItemKind::Func(hir_func_id))
-    .location(Location::new(0..0, Arc::from("lol")))
+    .location(Location::new(0..0, source.filename().clone()))
     .build();
   let item_id = hir_arena.alloc(item);
   let items: [&Item; 1] = [item_id];

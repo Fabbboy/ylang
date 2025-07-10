@@ -97,7 +97,7 @@ impl<'ctx> Parser<'ctx> {
 
   fn handle_parse_error<D>(&self, sink: &mut D, error: ParseErrorMOO<'ctx>)
   where
-    D: Sink + ?Sized,
+    D: Sink<'ctx> + ?Sized,
   {
     match error.0 {
       Either::Left(parse_error) => sink.report(parse_error.report()).unwrap(),
@@ -140,7 +140,7 @@ impl<'ctx> Parser<'ctx> {
     }
   }
 
-  fn peek(&self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) -> Option<TokenKind> {
+  fn peek(&mut self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) -> Option<TokenKind> {
     let next = self.lexer.peek();
     if expected.contains(next.kind()) {
       Some(*next.kind())
@@ -149,7 +149,7 @@ impl<'ctx> Parser<'ctx> {
     }
   }
 
-  fn parse_type(&mut self) -> Result<(Type<'ctx>, Location), ParseError<'ctx>> {
+  fn parse_type(&mut self) -> Result<(Type<'ctx>, Location<'ctx>), ParseError<'ctx>> {
     let token = self.expect(smallvec![TokenKind::Identifier])?;
 
     let start_loc = token.location();
@@ -479,7 +479,7 @@ impl<'ctx> Parser<'ctx> {
 
   pub fn parse<D>(&mut self, sink: &mut D, arena: &'ctx Arena) -> Result<Ast<'ctx>, ()>
   where
-    D: Sink + ?Sized,
+    D: Sink<'ctx> + ?Sized,
   {
     self.lexer.reset();
     let mut ast = Ast::new(arena);

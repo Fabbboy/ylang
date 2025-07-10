@@ -16,5 +16,5 @@ pub struct VariableStatement<'ctx> {
   #[getset(get = "pub")]
   type_: Type<'ctx>,
   #[getset(get = "pub")]
-  location: Location,
+  location: Location<'ctx>,
 }

@@ -19,7 +19,7 @@ pub struct Item<'hir> {
   #[getset(get = "pub")]
   kind: ItemKind<'hir>,
   #[getset(get = "pub")]
-  location: Location,
+  location: Location<'hir>,
 }
 
 #[derive(Debug)]

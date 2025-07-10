@@ -4,13 +4,13 @@ use typed_builder::TypedBuilder;
 use sable_common::location::Location;
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub enum LiteralExpression {
-  Integer(IntegerExpression),
-  Float(FloatExpression),
+pub enum LiteralExpression<'ctx> {
+  Integer(IntegerExpression<'ctx>),
+  Float(FloatExpression<'ctx>),
 }
 
-impl LiteralExpression {
-  pub fn location(&self) -> &Location {
+impl<'ctx> LiteralExpression<'ctx> {
+  pub fn location(&self) -> &Location<'ctx> {
     match self {
       LiteralExpression::Integer(expr) => expr.location(),
       LiteralExpression::Float(expr) => expr.location(),
@@ -20,18 +20,18 @@ impl LiteralExpression {
 
 #[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct IntegerExpression {
+pub struct IntegerExpression<'ctx> {
   #[getset(get = "pub")]
   value: i64,
   #[getset(get = "pub")]
-  location: Location,
+  location: Location<'ctx>,
 }
 
 #[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct FloatExpression {
+pub struct FloatExpression<'ctx> {
   #[getset(get = "pub")]
   value: f64,
   #[getset(get = "pub")]
-  location: Location,
+  location: Location<'ctx>,
 }

@@ -4,17 +4,17 @@ use getset::Getters;
 
 use crate::file::FileId;
 
-#[derive(Getters, Default, Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Getters, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct Location {
+pub struct Location<'ctx> {
   #[getset(get = "pub")]
   range: Range<usize>,
   #[getset(get = "pub")]
-  filename: FileId,
+  filename: FileId<'ctx>,
 }
 
-impl Location {
-  pub fn new(range: Range<usize>, filename: FileId) -> Self {
+impl<'ctx> Location<'ctx> {
+  pub fn new(range: Range<usize>, filename: FileId<'ctx>) -> Self {
     Self { range, filename }
   }
 

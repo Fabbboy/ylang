@@ -53,7 +53,7 @@ pub enum TokenData {
   Float(f64),
 }
 
-#[derive(Getters, Default, Clone, Debug)]
+#[derive(Getters, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct Token<'ctx> {
   #[getset(get = "pub")]
@@ -63,7 +63,7 @@ pub struct Token<'ctx> {
   #[getset(get = "pub")]
   lexeme: &'ctx str,
   #[getset(get = "pub")]
-  location: Location,
+  location: Location<'ctx>,
 }
 
 impl<'ctx> Token<'ctx> {
@@ -71,7 +71,7 @@ impl<'ctx> Token<'ctx> {
     kind: TokenKind,
     data: Option<TokenData>,
     lexeme: &'ctx str,
-    location: Location,
+    location: Location<'ctx>,
   ) -> Self {
     Self {
       kind,

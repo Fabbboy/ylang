@@ -11,15 +11,15 @@ use sable_common::{
 #[derive(Debug)]
 pub struct NumericError<'ctx> {
   pub lexeme: &'ctx str,
-  pub location: Location,
+  pub location: Location<'ctx>,
 }
 
 impl<'ctx> NumericError<'ctx> {
-  pub fn new(lexeme: &'ctx str, location: Location) -> Self {
+  pub fn new(lexeme: &'ctx str, location: Location<'ctx>) -> Self {
     Self { lexeme, location }
   }
 
-  pub fn report(&self) -> ariadne::Report<'_, Span> {
+  pub fn report(&self) -> ariadne::Report<'ctx, Span<'ctx>> {
     let span = (
       self.location.filename().clone(),
       self.location.range().clone(),

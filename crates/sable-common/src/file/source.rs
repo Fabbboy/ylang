@@ -9,14 +9,17 @@ pub struct Source<'ctx> {
   #[getset(get = "pub")]
   content: &'ctx str,
   #[getset(get = "pub")]
-  filename: FileId,
+  filename: FileId<'ctx>,
 }
 
 impl<'ctx> Source<'ctx> {
   pub fn new(content: &str, filename: &str, arena: &'ctx Arena) -> Self {
+    let raw_filename: *const str = filename;
+    let arc = unsafe { Arc::from_raw_in(raw_filename, arena) };
+
     Self {
       content: arena.alloc_str(content),
-      filename: Arc::from(filename),
+      filename: FileId(arc),
     }
   }
 }

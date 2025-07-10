@@ -6,41 +6,41 @@ use sable_common::file::{
   FileId,
   source::Source,
 };
-use std::{
-  collections::HashMap,
-  sync::Arc,
-};
+use std::collections::HashMap;
 
-pub struct ErrorCache {
-  files: HashMap<FileId, AriadneSource<FileId>>,
+pub struct ErrorCache<'ctx> {
+  files: HashMap<FileId<'ctx>, AriadneSource<FileId<'ctx>>>,
 }
 
-impl ErrorCache {
+impl<'ctx> ErrorCache<'ctx> {
   pub fn new() -> Self {
     Self {
       files: HashMap::new(),
     }
   }
 
-  pub fn add_file(&mut self, source: &Source<'_>) {
+  pub fn add_file(&mut self, source: &Source<'ctx>) {
     self.files.insert(
       source.filename().clone(),
-      AriadneSource::from(Arc::<str>::from(*source.content())),
+      AriadneSource::from(source.filename().clone()),
     );
   }
 }
 
-impl Cache<FileId> for ErrorCache {
-  type Storage = FileId;
+impl<'ctx> Cache<FileId<'ctx>> for ErrorCache<'ctx> {
+  type Storage = FileId<'ctx>;
 
-  fn fetch(&mut self, id: &FileId) -> Result<&AriadneSource<Self::Storage>, impl std::fmt::Debug> {
+  fn fetch(
+    &mut self,
+    id: &FileId<'ctx>,
+  ) -> Result<&AriadneSource<Self::Storage>, impl std::fmt::Debug> {
     self
       .files
       .get(id)
       .ok_or_else(|| format!("unknown file: {}", id))
   }
 
-  fn display<'a>(&self, id: &'a FileId) -> Option<impl std::fmt::Display + 'a> {
+  fn display<'a>(&self, id: &'a FileId<'ctx>) -> Option<impl std::fmt::Display + 'a> {
     Some(id)
   }
 }

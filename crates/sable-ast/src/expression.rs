@@ -15,14 +15,14 @@ use sable_common::location::Location;
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum Expression<'ctx> {
   Block(BlockExpression<'ctx>),
-  Literal(LiteralExpression),
+  Literal(LiteralExpression<'ctx>),
   Assign(AssignExpression<'ctx>),
   Binary(BinaryExpression<'ctx>),
   Identifier(IdentifierExpression<'ctx>),
 }
 
 impl<'ctx> Expression<'ctx> {
-  pub fn location(&self) -> &Location {
+  pub fn location(&self) -> &Location<'ctx> {
     match self {
       Expression::Block(block) => block.location(),
       Expression::Literal(literal) => literal.location(),

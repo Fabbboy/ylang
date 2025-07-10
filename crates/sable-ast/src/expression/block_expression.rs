@@ -9,5 +9,5 @@ pub struct BlockExpression<'ctx> {
   #[getset(get = "pub")]
   body: Vec<Statement<'ctx>>,
   #[getset(get = "pub")]
-  location: Location,
+  location: Location<'ctx>
 }

@@ -14,7 +14,7 @@ use crate::file::{
 #[derive(Getters)]
 pub struct Manager<'src> {
   #[getset(get = "pub")]
-  sources: HashMap<FileId, Arc<Source<'src>, &'src Arena>>,
+  sources: HashMap<FileId<'src>, Arc<Source<'src>, &'src Arena>>,
   file_bump: &'src Arena,
 }
 

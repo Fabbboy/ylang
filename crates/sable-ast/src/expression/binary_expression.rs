@@ -15,7 +15,7 @@ macro_rules! binary_expr_factory {
           #[getset(get = "pub")]
           right: Box<Expression<'ctx>>,
           #[getset(get = "pub")]
-          location: Location,
+          location: Location<'ctx>,
         }
       )*
 
@@ -28,7 +28,7 @@ macro_rules! binary_expr_factory {
       }
 
       impl <'ctx>BinaryExpression<'ctx> {
-        pub fn location(&self) -> &Location {
+        pub fn location(&self) -> &Location<'ctx> {
           match self {
             $(
               BinaryExpression::$name(expr) => expr.location(),
