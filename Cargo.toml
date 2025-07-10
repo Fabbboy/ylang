@@ -17,6 +17,7 @@ typed-builder = "0.21.0"
 ariadne = "0.5.1"
 phf = "0.11.3"
 either = "1.15.0"
+indexmap = "2.10.0"
 
 serde = "1.0.219"
 clap = "4.5.40"

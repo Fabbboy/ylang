@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 getset = { workspace = true }
 ariadne = { workspace = true }
+indexmap = { workspace = true }
 
 serde = { workspace = true, optional = true, features = ["derive"] }
 
@@ -13,4 +14,4 @@ sable-arena = { workspace = true }
 
 [features]
 default = []
-serde = ["dep:serde"]
+serde = ["dep:serde", "indexmap/serde"]
