@@ -7,7 +7,6 @@ use sable_errors::{
   cache::ErrorCache,
   writer::ReportWriter,
 };
-use sable_hir::context::TyContext;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -61,7 +60,4 @@ fn main() {
   };
 
   println!("AST: {:#?}", ast);
-
-  let ctx = TyContext::new(&intern_arena);
-  println!("Context: {:#?}", ctx);
 }
