@@ -5,6 +5,8 @@ use std::{
 
 use crate::arena::Arena;
 
+#[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Interner<'intern, T>
 where
   T: Eq + Hash + ?Sized,
