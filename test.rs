@@ -1,5 +1,7 @@
-struct Test {}
+struct Test<T> {
+  type_: T,
+}
 
 pub fn main() {
-    let t = Test {};
+  let t = Test { type_: 42 };
 }
