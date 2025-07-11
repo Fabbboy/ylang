@@ -68,6 +68,6 @@ fn main() {
 
   println!("AST: {:#?}", ast);
 
-  let context = Context::new(&hir_arena);
-  let lowerer = AstLowerer::new(&context);
+  let mut context = Context::new(&hir_arena);
+  let lowerer = AstLowerer::new(&mut context);
 }

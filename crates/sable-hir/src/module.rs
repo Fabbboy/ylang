@@ -15,14 +15,14 @@ pub struct Module<'hir> {
   items: &'hir [Item<'hir>],
 }
 
-#[derive(Debug, PartialEq, Hash, Eq)]
+#[derive(Debug, PartialEq, Hash, Eq, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct ModId(pub usize);
+pub struct ItemId(pub usize);
 
-#[derive(Debug, PartialEq, Hash, Eq)]
+#[derive(Debug, PartialEq, Hash, Eq, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct OwnerId(pub usize);
 
-#[derive(Debug, PartialEq, Hash, Eq)]
+#[derive(Debug, PartialEq, Hash, Eq, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct DefId(pub OwnerId, pub ModId);
+pub struct DefId(pub OwnerId, pub ItemId);
