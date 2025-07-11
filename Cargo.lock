@@ -321,6 +321,7 @@ dependencies = [
  "sable-arena",
  "sable-ast",
  "sable-common",
+ "sable-resolve",
  "serde",
  "typed-builder",
 ]
@@ -337,6 +338,13 @@ dependencies = [
  "sable-common",
  "sable-errors",
  "smallvec",
+]
+
+[[package]]
+name = "sable-resolve"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

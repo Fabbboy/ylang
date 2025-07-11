@@ -10,9 +10,10 @@ typed-builder = { workspace = true }
 sable-arena = { workspace = true }
 sable-common = { workspace = true }
 sable-ast = { workspace = true }
+sable-resolve = { workspace = true }
 
 serde = { workspace = true, optional = true, features = ["derive", "rc"] }
 
 [features]
 default = []
-serde = ["dep:serde", "sable-arena/serde"]
+serde = ["dep:serde", "sable-arena/serde", "sable-resolve/serde"]

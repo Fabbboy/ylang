@@ -1,4 +1,5 @@
-use getset::Getters; 
+use getset::Getters;
+use sable_resolve::Symbol;
 use typed_builder::TypedBuilder;
 
 use crate::ty::TypeId;

@@ -1,11 +1,8 @@
 use getset::Getters;
-use sable_ast::types::Type as AstType;
+use sable_resolve::Symbol;
 use typed_builder::TypedBuilder;
 
-use crate::{
-  context::Context,
-  module::DefId,
-};
+use crate::module::DefId;
 
 #[derive(Debug, PartialEq, Hash, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
