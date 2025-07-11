@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 getset = { workspace = true }
 typed-builder = { workspace = true }
-indexmap = { workspace = true }
 
 sable-arena = { workspace = true }
 sable-common = { workspace = true }
@@ -16,4 +15,4 @@ serde = { workspace = true, optional = true, features = ["derive", "rc"] }
 
 [features]
 default = []
-serde = ["dep:serde", "sable-arena/serde", "indexmap/serde"]
+serde = ["dep:serde", "sable-arena/serde"]

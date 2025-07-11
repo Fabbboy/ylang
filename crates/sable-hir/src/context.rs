@@ -1,5 +1,4 @@
 use getset::Getters;
-use indexmap::IndexMap;
 use sable_arena::arena::Arena;
 use sable_common::interner::Interner;
 
@@ -13,7 +12,7 @@ pub struct Context<'hir> {
   #[getset(get = "pub")]
   str_map: Interner<&'hir str>,
   #[getset(get = "pub")]
-  type_map: IndexMap<TypeId<'hir>, usize>,
+  type_map: Interner<TypeId<'hir>>,
 }
 
 impl<'hir> Context<'hir> {
@@ -21,7 +20,7 @@ impl<'hir> Context<'hir> {
     Self {
       hir_arena,
       str_map: Interner::new(),
-      type_map: IndexMap::new(),
+      type_map: Interner::new(),
     }
   }
 }

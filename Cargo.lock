@@ -318,7 +318,6 @@ name = "sable-hir"
 version = "0.1.0"
 dependencies = [
  "getset",
- "indexmap",
  "sable-arena",
  "sable-ast",
  "sable-common",
