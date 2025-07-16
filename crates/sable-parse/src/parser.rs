@@ -461,6 +461,8 @@ where
       }
     }
 
+    self.expect(smallvec![TokenKind::Brace(false)])?;
+
     match status {
       ParseStatus::Error => Err(ParseErrorMOO(Either::Right(errors))),
       ParseStatus::Success => Ok(BlockExpression::builder().body(statements).build()),
