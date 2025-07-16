@@ -1,16 +1,16 @@
 use getset::Getters;
-use sable_common::location::Location;
 use typed_builder::TypedBuilder;
 
-use crate::expression::Expression;
+use crate::{
+  expression::Expression,
+  located::Located,
+};
 
 #[derive(Debug, TypedBuilder, Getters)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AssignExpression<'ctx> {
   #[getset(get = "pub")]
-  identifier: &'ctx str,
+  identifier: Located<'ctx, &'ctx str>,
   #[getset(get = "pub")]
-  value: Box<Expression<'ctx>>,
-  #[getset(get = "pub")]
-  location: Location<'ctx>,
+  value: Located<'ctx, Box<Expression<'ctx>>>,
 }

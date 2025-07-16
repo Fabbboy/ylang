@@ -1,6 +1,8 @@
-use crate::expression::Expression;
+use crate::{
+  expression::Expression,
+  located::Located,
+};
 use getset::Getters;
-use sable_common::location::Location;
 use typed_builder::TypedBuilder;
 
 macro_rules! binary_expr_factory {
@@ -11,11 +13,9 @@ macro_rules! binary_expr_factory {
         #[cfg_attr(feature = "serde", derive(serde::Serialize))]
         pub struct [<$name Expression>]<'ctx> {
           #[getset(get = "pub")]
-          left: Box<Expression<'ctx>>,
+          left: Located<'ctx, Box<Expression<'ctx>>>,
           #[getset(get = "pub")]
-          right: Box<Expression<'ctx>>,
-          #[getset(get = "pub")]
-          location: Location<'ctx>,
+          right: Located<'ctx, Box<Expression<'ctx>>>,
         }
       )*
 
@@ -25,32 +25,6 @@ macro_rules! binary_expr_factory {
         $(
           $name([<$name Expression>]<'ctx>),
         )*
-      }
-
-      impl <'ctx>BinaryExpression<'ctx> {
-        pub fn location(&self) -> &Location<'ctx> {
-          match self {
-            $(
-              BinaryExpression::$name(expr) => expr.location(),
-            )*
-          }
-        }
-
-        pub fn left(&self) -> &Expression<'ctx> {
-          match self {
-            $(
-              BinaryExpression::$name(expr) => expr.left(),
-            )*
-          }
-        }
-
-        pub fn right(&self) -> &Expression<'ctx> {
-          match self {
-            $(
-              BinaryExpression::$name(expr) => expr.right(),
-            )*
-          }
-        }
       }
     }
   };

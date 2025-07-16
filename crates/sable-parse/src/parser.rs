@@ -19,6 +19,7 @@ use sable_ast::{
       IntegerExpression,
     },
   },
+  located::Located,
   objects::function::Function,
   statement::{
     Statement,
@@ -201,11 +202,16 @@ where
       TokenKind::Assign => {
         self.expect(smallvec![TokenKind::Assign])?;
         let value = self.parse_expression()?;
+
+        let value = Located::builder()
+          .value(Box::new(value))
+          .location(identifier.location().clone())
+          .build();
+
         let assign_expr = Expression::Assign(
           AssignExpression::builder()
-            .identifier(identifier.lexeme())
-            .value(Box::new(value))
-            .location(identifier.location().clone())
+            .identifier(identifier.into())
+            .value(value)
             .build(),
         );
         Ok(assign_expr)
@@ -268,21 +274,28 @@ where
       let op_token = self.expect(expected.clone())?;
       let rhs = self.parse_factor()?;
 
-      let combined_loc = lhs.location().merge(rhs.location()).unwrap();
+      let lhs_located = Located::builder()
+        .value(Box::new(lhs))
+        .location(op_token.location().clone())
+        .build();
+
+      let rhs_located = Located::builder()
+        .value(Box::new(rhs))
+        .location(op_token.location().clone())
+        .build();
+
       match op_token.kind() {
         TokenKind::Star => {
           let expr = MultiplyExpression::builder()
-            .left(Box::new(lhs))
-            .right(Box::new(rhs))
-            .location(combined_loc)
+            .left(lhs_located)
+            .right(rhs_located)
             .build();
           lhs = Expression::Binary(BinaryExpression::Multiply(expr));
         }
         TokenKind::Slash => {
           let expr = DivideExpression::builder()
-            .left(Box::new(lhs))
-            .right(Box::new(rhs))
-            .location(combined_loc)
+            .left(lhs_located)
+            .right(rhs_located)
             .build();
           lhs = Expression::Binary(BinaryExpression::Divide(expr));
         }
@@ -301,13 +314,21 @@ where
       let op_token = self.expect(expected)?;
       let rhs = self.parse_term()?;
 
-      let combined_loc = lhs.location().merge(rhs.location()).unwrap();
+      let lhs_located = Located::builder()
+        .value(Box::new(lhs))
+        .location(op_token.location().clone())
+        .build();
+
+      let rhs_located = Located::builder()
+        .value(Box::new(rhs))
+        .location(op_token.location().clone())
+        .build();
+
       match op_token.kind() {
         TokenKind::Plus => {
           let expr = AddExpression::builder()
-            .left(Box::new(lhs))
-            .right(Box::new(rhs))
-            .location(combined_loc)
+            .left(lhs_located)
+            .right(rhs_located)
             .build();
 
           lhs = Expression::Binary(BinaryExpression::Add(expr));
@@ -315,9 +336,8 @@ where
         TokenKind::Minus => {
           let expr = BinaryExpression::Subtract(
             SubtractExpression::builder()
-              .left(Box::new(lhs))
-              .right(Box::new(rhs))
-              .location(combined_loc)
+              .left(lhs_located)
+              .right(rhs_located)
               .build(),
           );
           lhs = Expression::Binary(expr);
