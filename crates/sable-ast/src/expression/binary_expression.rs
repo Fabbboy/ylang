@@ -1,7 +1,4 @@
-use crate::{
-  expression::Expression,
-  located::Located,
-};
+use crate::expression::Expression;
 use getset::Getters;
 use typed_builder::TypedBuilder;
 
@@ -13,9 +10,9 @@ macro_rules! binary_expr_factory {
         #[cfg_attr(feature = "serde", derive(serde::Serialize))]
         pub struct [<$name Expression>]<'ctx> {
           #[getset(get = "pub")]
-          left: Located<'ctx, Box<Expression<'ctx>>>,
+          left: Box<Expression<'ctx>>,
           #[getset(get = "pub")]
-          right: Located<'ctx, Box<Expression<'ctx>>>,
+          right: Box<Expression<'ctx>>,
         }
       )*
 

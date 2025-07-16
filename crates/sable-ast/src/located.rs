@@ -21,3 +21,12 @@ impl<'ctx> From<Token<'ctx>> for Located<'ctx, &'ctx str> {
     }
   }
 }
+
+impl<'loc, T> From<Located<'loc, T>> for Located<'loc, Box<T>> {
+  fn from(located: Located<'loc, T>) -> Self {
+    Self {
+      value: Box::new(located.value),
+      location: located.location,
+    }
+  }
+}

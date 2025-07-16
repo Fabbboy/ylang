@@ -1,4 +1,7 @@
-use crate::expression::Expression;
+use crate::{
+  expression::Expression,
+  located::Located,
+};
 
 pub mod variable_statement;
 
@@ -8,14 +11,19 @@ pub use variable_statement::VariableStatement;
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum Statement<'ctx> {
   Expression(Expression<'ctx>),
-  Variable(VariableStatement<'ctx>),
+  Variable(Located<'ctx, VariableStatement<'ctx>>),
 }
 
 pub trait VisitStatement<'ctx> {
-  fn visit_expression<T>(&mut self, expression: &Expression<'ctx>) -> T;
-  fn visit_variable_statement<T>(&mut self, variable_statement: &VariableStatement<'ctx>) -> T;
+  type Result;
 
-  fn visit_statement<T>(&mut self, statement: &Statement<'ctx>) -> T {
+  fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Result;
+  fn visit_variable_statement(
+    &mut self,
+    variable_statement: &Located<'ctx, VariableStatement<'ctx>>,
+  ) -> Self::Result;
+
+  fn visit_statement(&mut self, statement: &Statement<'ctx>) -> Self::Result {
     match statement {
       Statement::Expression(expression) => self.visit_expression(expression),
       Statement::Variable(variable_statement) => self.visit_variable_statement(variable_statement),
