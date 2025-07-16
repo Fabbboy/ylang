@@ -314,19 +314,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sable-hir"
-version = "0.1.0"
-dependencies = [
- "getset",
- "sable-arena",
- "sable-ast",
- "sable-common",
- "sable-resolve",
- "serde",
- "typed-builder",
-]
-
-[[package]]
 name = "sable-parse"
 version = "0.1.0"
 dependencies = [
@@ -341,13 +328,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sable-resolve"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
 name = "sablec"
 version = "0.1.0"
 dependencies = [
@@ -357,7 +337,6 @@ dependencies = [
  "sable-ast",
  "sable-common",
  "sable-errors",
- "sable-hir",
  "sable-parse",
 ]
 

@@ -8,10 +8,6 @@ use sable_errors::{
   cache::ErrorCache,
   writer::ReportWriter,
 };
-use sable_hir::{
-  context::Context,
-  lower::AstLowerer,
-};
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -31,7 +27,6 @@ struct Args {
 fn main() {
   let file_arena = Arena::new();
   let ast_arena = Arena::new();
-  let hir_arena = Arena::new();
 
   let args = Args::parse();
   let mut manager = Manager::new(&file_arena);
@@ -67,7 +62,4 @@ fn main() {
   };
 
   println!("AST: {:#?}", ast);
-
-  let mut context = Context::new(&hir_arena);
-  let lowerer = AstLowerer::new(&mut context);
 }
