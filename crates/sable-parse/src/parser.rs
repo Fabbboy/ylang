@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use either::Either;
 use sable_ast::{
   ast::Ast,
@@ -87,11 +85,7 @@ where
   D: Sink<'ctx> + ?Sized,
 {
   pub fn new(lexer: Lexer<'ctx>, ast: &'parser mut Ast<'ctx>, sink: &'parser mut D) -> Self {
-    Self {
-      lexer,
-      ast,
-      sink,
-    }
+    Self { lexer, ast, sink }
   }
 
   fn handle_token_error(&self, token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
@@ -209,7 +203,7 @@ where
         let value = self.parse_expression()?;
         let assign_expr = Expression::Assign(
           AssignExpression::builder()
-            .identifier(Rc::from(*identifier.lexeme()))
+            .identifier(identifier.lexeme())
             .value(Box::new(value))
             .location(identifier.location().clone())
             .build(),
