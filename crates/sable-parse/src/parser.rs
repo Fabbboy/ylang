@@ -51,7 +51,7 @@ use sable_errors::{
       UnexpectedTokenError,
     },
   },
-  writer::{
+  sink::{
     Reportable,
     Sink,
   },
@@ -103,10 +103,10 @@ where
 
   fn handle_parse_error(&mut self, error: ParseErrorMOO<'ctx>) {
     match error.0 {
-      Either::Left(parse_error) => self.sink.report(parse_error.report()).unwrap(),
+      Either::Left(parse_error) => self.sink.emit(parse_error.diagnostic()).unwrap(),
       Either::Right(errors) => {
         for parse_error in errors {
-          self.sink.report(parse_error.report()).unwrap();
+          self.sink.emit(parse_error.diagnostic()).unwrap();
         }
       }
     }

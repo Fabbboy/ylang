@@ -1,17 +1,16 @@
 pub mod unexpected_token;
 
-use ariadne::Report;
 use either::Either;
-use sable_common::file::Span;
 use smallvec::SmallVec;
 
 use crate::{
+  diagnostic::Diagnostic,
   lex_error::{
     numeric_error::NumericError,
     unknown_char::UnknownCharError,
   },
   parse_error::unexpected_token::UnexpectedTokenError,
-  writer::Reportable,
+  sink::Reportable,
 };
 
 #[derive(Debug)]
@@ -22,11 +21,11 @@ pub enum ParseError<'ctx> {
 }
 
 impl<'ctx> Reportable<'ctx> for ParseError<'ctx> {
-  fn report(&self) -> Report<'_, Span<'ctx>> {
+  fn diagnostic(&self) -> Diagnostic<'ctx> {
     match self {
-      ParseError::UnexpectedToken(unexpected_token) => unexpected_token.report(),
-      ParseError::UnknownChar(unknown_char) => unknown_char.report(),
-      ParseError::NumericError(numeric_error) => numeric_error.report(),
+      ParseError::UnexpectedToken(unexpected_token) => unexpected_token.diagnostic(),
+      ParseError::UnknownChar(unknown_char) => unknown_char.diagnostic(),
+      ParseError::NumericError(numeric_error) => numeric_error.diagnostic(),
     }
   }
 }

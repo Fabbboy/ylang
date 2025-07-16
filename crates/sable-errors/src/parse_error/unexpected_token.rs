@@ -1,8 +1,3 @@
-use ariadne::{
-  Label,
-  Report,
-  ReportKind,
-};
 use sable_ast::token::{
   Token,
   TokenKind,
@@ -11,7 +6,13 @@ use sable_ast::token::{
 use sable_common::file::Span;
 use smallvec::SmallVec;
 
-use crate::writer::Reportable;
+use crate::{
+  diagnostic::{
+    Diagnostic,
+    Severity,
+  },
+  sink::Reportable,
+};
 
 pub const MAX_INLINE_KINDS: usize = 8;
 
@@ -28,8 +29,8 @@ impl<'ctx> UnexpectedTokenError<'ctx> {
 }
 
 impl<'ctx> Reportable<'ctx> for UnexpectedTokenError<'ctx> {
-  fn report(&self) -> Report<'_, Span<'ctx>> {
-    let span: Span = (
+  fn diagnostic(&self) -> Diagnostic<'ctx> {
+    let span: Span<'ctx> = (
       *self.found.location().filename(),
       self.found.location().range().clone(),
     );
@@ -44,9 +45,12 @@ impl<'ctx> Reportable<'ctx> for UnexpectedTokenError<'ctx> {
         .join(", ")
     );
 
-    Report::build(ReportKind::Error, span.clone())
-      .with_message(format!("Unexpected token: `{:?}`", self.found.kind()))
-      .with_label(Label::new(span).with_message(expected))
-      .finish()
+    Diagnostic {
+      range: span,
+      severity: Severity::Error,
+      message: format!("Unexpected token: `{:?}`. {}", self.found.kind(), expected),
+      code: None,
+      source: None,
+    }
   }
 }

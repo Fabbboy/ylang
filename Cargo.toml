@@ -18,6 +18,8 @@ phf = "0.11.3"
 either = "1.15.0"
 indexmap = "2.10.0"
 
+lsp-types = "0.95.1"
+
 serde = "1.0.219"
 clap = "4.5.40"
 paste = "1.0.15"

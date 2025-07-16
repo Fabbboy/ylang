@@ -1,12 +1,14 @@
-use ariadne::{
-  Label,
-  Report,
-  ReportKind,
+use sable_common::location::Location;
+
+use crate::{
+  diagnostic::{
+    Diagnostic,
+    Severity,
+  },
+  sink::Reportable,
 };
-use sable_common::{
-  file::Span,
-  location::Location,
-};
+
+use sable_common::file::Span;
 
 #[derive(Debug)]
 pub struct NumericError<'ctx> {
@@ -19,12 +21,21 @@ impl<'ctx> NumericError<'ctx> {
     Self { lexeme, location }
   }
 
-  pub fn report(&self) -> ariadne::Report<'_, Span<'ctx>> {
-    let span = (*self.location.filename(), self.location.range().clone());
+  pub fn report(&self) -> Diagnostic<'ctx> {
+    let span: Span<'ctx> = (*self.location.filename(), self.location.range().clone());
 
-    Report::build(ReportKind::Error, span.clone())
-      .with_message(format!("Invalid number: `{}`", self.lexeme))
-      .with_label(Label::new(span).with_message("This number literal is invalid."))
-      .finish()
+    Diagnostic {
+      range: span,
+      severity: Severity::Error,
+      message: format!("Invalid number: `{}`", self.lexeme),
+      code: None,
+      source: None,
+    }
+  }
+}
+
+impl<'ctx> Reportable<'ctx> for NumericError<'ctx> {
+  fn diagnostic(&self) -> Diagnostic<'ctx> {
+    self.report()
   }
 }

@@ -6,7 +6,7 @@ use sable_ast::ast::Ast;
 use sable_common::file::manager::Manager;
 use sable_errors::{
   cache::ErrorCache,
-  writer::ReportWriter,
+  console_sink::ConsoleSink,
 };
 use sable_parse::{
   lexer::Lexer,
@@ -46,7 +46,7 @@ fn main() {
   cache.add_file(&source);
 
   let mut stdout = io::stdout();
-  let mut writer = ReportWriter::new(&mut cache, &mut stdout);
+  let mut writer = ConsoleSink::new(&mut cache, &mut stdout);
 
   let lexer = Lexer::new(source.clone());
 
