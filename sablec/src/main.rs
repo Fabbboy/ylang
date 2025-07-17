@@ -54,12 +54,13 @@ fn main() {
 
   let mut parser = Parser::new(lexer, &mut ast, &mut writer);
   match parser.parse() {
-    Ok(_) => {}
+    Ok(_) => {
+      println!("Successfully parsed {} function(s).", ast.funcs().len());
+      println!("\nAST: {:#?}", ast);
+    }
     Err(_) => {
       eprintln!("Parsing failed. See errors above.");
       std::process::exit(1);
     }
   };
-
-  println!("AST: {:#?}", ast);
 }

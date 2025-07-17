@@ -1,17 +1,23 @@
-use crate::{
-  expression::Expression,
-  located::Located,
-};
+use crate::expression::Expression;
+use getset::Getters;
+use typed_builder::TypedBuilder;
 
 pub mod variable_statement;
 
 pub use variable_statement::VariableStatement;
 
+#[derive(Debug, Getters, TypedBuilder)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+pub struct Statement<'ctx> {
+  #[getset(get = "pub")]
+  value: StatementKind<'ctx>,
+}
+
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub enum Statement<'ctx> {
+pub enum StatementKind<'ctx> {
   Expression(Expression<'ctx>),
-  Variable(Located<'ctx, VariableStatement<'ctx>>),
+  Variable(VariableStatement<'ctx>),
 }
 
 pub trait VisitStatement<'ctx> {
@@ -20,13 +26,15 @@ pub trait VisitStatement<'ctx> {
   fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Result;
   fn visit_variable_statement(
     &mut self,
-    variable_statement: &Located<'ctx, VariableStatement<'ctx>>,
+    variable_statement: &VariableStatement<'ctx>,
   ) -> Self::Result;
 
   fn visit_statement(&mut self, statement: &Statement<'ctx>) -> Self::Result {
-    match statement {
-      Statement::Expression(expression) => self.visit_expression(expression),
-      Statement::Variable(variable_statement) => self.visit_variable_statement(variable_statement),
+    match statement.value() {
+      StatementKind::Expression(expression) => self.visit_expression(expression),
+      StatementKind::Variable(variable_statement) => {
+        self.visit_variable_statement(variable_statement)
+      }
     }
   }
 }
