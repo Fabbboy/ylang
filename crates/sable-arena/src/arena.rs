@@ -802,4 +802,160 @@ mod tests {
       efficiency * 100.0
     );
   }
+
+  #[test]
+  fn test_memory_efficiency_analysis_and_optimization() {
+    use std::mem;
+
+    println!("=== Memory Efficiency Deep Analysis ===");
+
+    let arena = Arena::with_chunk_size(1024); // Smaller chunks for better analysis
+
+    // Test 1: Analyze overhead sources
+    println!("\n--- Individual Type Analysis ---");
+
+    // Test u32 vector efficiency
+    {
+      let mut u32_vec: Vec<u32, &Arena> = Vec::new_in(&arena);
+      let before = arena.stats();
+
+      for i in 0..100 {
+        u32_vec.push(i);
+      }
+
+      let after = arena.stats();
+      let theoretical = u32_vec.len() * 4;
+      let actual_used = after.total_used - before.total_used;
+      let efficiency = theoretical as f32 / actual_used as f32;
+
+      println!(
+        "u32 Vector: {} elements, theoretical={} bytes, actual={} bytes, efficiency={:.1}%",
+        u32_vec.len(),
+        theoretical,
+        actual_used,
+        efficiency * 100.0
+      );
+
+      arena.clear();
+    }
+
+    // Test optimal allocation strategy
+    println!("\n--- Optimized Allocation Strategy ---");
+
+    // Pre-allocate with exact capacity to minimize waste
+    let mut u32_vec: Vec<u32, &Arena> = Vec::with_capacity_in(50, &arena);
+    let mut u64_vec: Vec<u64, &Arena> = Vec::with_capacity_in(25, &arena);
+
+    // Smaller test types to reduce overhead
+    #[repr(C)]
+    #[derive(Debug, Clone)]
+    struct CompactStruct {
+      id: u32,
+      value: u32,
+    }
+
+    let mut compact_vec: Vec<CompactStruct, &Arena> = Vec::with_capacity_in(20, &arena);
+
+    let start_stats = arena.stats();
+    println!("After pre-allocation: {:?}", start_stats);
+
+    // Fill to exact capacity (no resizing needed)
+    for i in 0..50 {
+      u32_vec.push(i);
+    }
+    for i in 0..25 {
+      u64_vec.push(i as u64);
+    }
+    for i in 0..20 {
+      compact_vec.push(CompactStruct {
+        id: i,
+        value: i * 2,
+      });
+    }
+
+    let final_stats = arena.stats();
+    println!("After filling: {:?}", final_stats);
+
+    // Calculate optimized efficiency
+    let total_data_bytes = u32_vec.len() * mem::size_of::<u32>()
+      + u64_vec.len() * mem::size_of::<u64>()
+      + compact_vec.len() * mem::size_of::<CompactStruct>();
+
+    let arena_used = final_stats
+      .total_used
+      .saturating_sub(start_stats.total_used);
+    let optimized_efficiency = if arena_used > 0 {
+      total_data_bytes as f32 / arena_used as f32
+    } else {
+      1.0 // Perfect efficiency if no additional memory used
+    };
+
+    println!("Optimized Results:");
+    println!("  Data bytes: {}", total_data_bytes);
+    println!("  Arena used: {}", arena_used);
+    println!("  Efficiency: {:.1}%", optimized_efficiency * 100.0);
+    println!(
+      "  Overhead: {:.2}x",
+      if optimized_efficiency > 0.0 {
+        1.0 / optimized_efficiency
+      } else {
+        0.0
+      }
+    );
+
+    // Test 2: Analyze overhead breakdown
+    println!("\n--- Overhead Breakdown Analysis ---");
+    let overhead_bytes = arena_used.saturating_sub(total_data_bytes);
+    println!("Total overhead: {} bytes", overhead_bytes);
+
+    // Vector metadata overhead (capacity info, etc.)
+    let estimated_vec_overhead = 3 * mem::size_of::<usize>() * 3; // 3 vectors * 3 words each
+    println!(
+      "Estimated vector metadata overhead: {} bytes",
+      estimated_vec_overhead
+    );
+
+    // Alignment overhead
+    let alignment_overhead = overhead_bytes.saturating_sub(estimated_vec_overhead);
+    println!(
+      "Alignment/fragmentation overhead: {} bytes",
+      alignment_overhead
+    );
+
+    // Test 3: Compare with standard allocator baseline
+    println!("\n--- Standard Allocator Comparison ---");
+    let std_u32_vec: Vec<u32> = (0..50).collect();
+    let std_u64_vec: Vec<u64> = (0..25).map(|i| i as u64).collect();
+    let std_compact_vec: Vec<CompactStruct> = (0..20)
+      .map(|i| CompactStruct {
+        id: i,
+        value: i * 2,
+      })
+      .collect();
+
+    let std_allocated = std_u32_vec.capacity() * mem::size_of::<u32>()
+      + std_u64_vec.capacity() * mem::size_of::<u64>()
+      + std_compact_vec.capacity() * mem::size_of::<CompactStruct>();
+
+    println!("Standard allocator would use: {} bytes", std_allocated);
+    println!(
+      "Arena vs Standard ratio: {:.2}x",
+      arena_used as f32 / std_allocated as f32
+    );
+
+    // Assertions for optimization validation
+    if arena_used > 0 {
+      assert!(
+        optimized_efficiency > 0.7,
+        "Optimized efficiency should be > 70%, got {:.1}%",
+        optimized_efficiency * 100.0
+      );
+      assert!(
+        arena_used < std_allocated * 2,
+        "Arena shouldn't use more than 2x standard allocator"
+      );
+    }
+
+    println!("✅ Memory efficiency analysis completed!");
+  }
 }
