@@ -81,13 +81,61 @@ impl Chunk {
       return true;
     }
     let start = self.storage.as_ptr() as usize;
-    let off = ptr.as_ptr() as usize - start;
+    let ptr_addr = ptr.as_ptr() as usize;
+
+    // Check if the pointer is within our chunk bounds
+    if ptr_addr < start || ptr_addr >= start + self.size {
+      return false;
+    }
+
+    let off = ptr_addr - start;
     if off + size == self.pos {
       self.pos = off;
       true
     } else {
       false
     }
+  }
+
+  fn can_grow_in_place(
+    &self,
+    ptr: NonNull<u8>,
+    old_size: usize,
+    new_size: usize,
+    align: usize,
+  ) -> bool {
+    if new_size <= old_size {
+      return true;
+    }
+    let start = self.storage.as_ptr() as usize;
+    let ptr_addr = ptr.as_ptr() as usize;
+
+    // Check if the pointer is within our chunk bounds
+    if ptr_addr < start || ptr_addr >= start + self.size {
+      return false;
+    }
+
+    let off = ptr_addr - start;
+    let aligned_new_end = (off + new_size + align - 1) & !(align - 1);
+    off + old_size == self.pos && aligned_new_end <= self.size
+  }
+
+  fn try_grow_in_place(
+    &mut self,
+    ptr: NonNull<u8>,
+    old_size: usize,
+    new_size: usize,
+    align: usize,
+  ) -> bool {
+    if !self.can_grow_in_place(ptr, old_size, new_size, align) {
+      return false;
+    }
+    let start = self.storage.as_ptr() as usize;
+    let ptr_addr = ptr.as_ptr() as usize;
+    let off = ptr_addr - start;
+    let aligned_new_end = (off + new_size + align - 1) & !(align - 1);
+    self.pos = aligned_new_end;
+    true
   }
 
   fn is_empty(&self) -> bool {
@@ -224,6 +272,61 @@ impl Arena {
     Some(ptr)
   }
 
+  pub fn try_grow_raw(
+    &self,
+    ptr: NonNull<u8>,
+    old_layout: Layout,
+    new_layout: Layout,
+  ) -> Option<NonNull<u8>> {
+    if new_layout.size() <= old_layout.size() {
+      return Some(ptr);
+    }
+
+    let mut chunks = self.chunks.borrow_mut();
+    for chunk in chunks.iter_mut() {
+      if chunk.can_grow_in_place(
+        ptr,
+        old_layout.size(),
+        new_layout.size(),
+        new_layout.align(),
+      ) {
+        if chunk.try_grow_in_place(
+          ptr,
+          old_layout.size(),
+          new_layout.size(),
+          new_layout.align(),
+        ) {
+          return Some(ptr);
+        }
+      }
+    }
+
+    // Can't grow in place, need to allocate new memory
+    drop(chunks);
+    let new_ptr = self.try_alloc_raw(new_layout)?;
+    unsafe {
+      ptr::copy_nonoverlapping(ptr.as_ptr(), new_ptr.as_ptr(), old_layout.size());
+    }
+    // Try to deallocate old memory
+    let _ = self.dealloc_raw(ptr, old_layout);
+    Some(new_ptr)
+  }
+
+  pub fn try_shrink_raw(
+    &self,
+    ptr: NonNull<u8>,
+    old_layout: Layout,
+    new_layout: Layout,
+  ) -> Option<NonNull<u8>> {
+    if new_layout.size() >= old_layout.size() {
+      return Some(ptr);
+    }
+
+    // For shrinking, we can just return the same pointer
+    // The extra memory becomes unavailable but we don't need to move data
+    Some(ptr)
+  }
+
   fn dealloc_raw(&self, ptr: NonNull<u8>, layout: Layout) -> bool {
     if layout.size() == 0 {
       return true;
@@ -318,6 +421,40 @@ unsafe impl Allocator for Arena {
 
   unsafe fn deallocate(&self, ptr: NonNull<u8>, layout: Layout) {
     let _ = self.dealloc_raw(ptr, layout);
+  }
+
+  unsafe fn grow(
+    &self,
+    ptr: NonNull<u8>,
+    old_layout: Layout,
+    new_layout: Layout,
+  ) -> Result<NonNull<[u8]>, AllocError> {
+    debug_assert!(
+      new_layout.size() >= old_layout.size(),
+      "`new_layout.size()` must be greater than or equal to `old_layout.size()`"
+    );
+
+    self
+      .try_grow_raw(ptr, old_layout, new_layout)
+      .map(|ptr| NonNull::slice_from_raw_parts(ptr, new_layout.size()))
+      .ok_or(AllocError)
+  }
+
+  unsafe fn shrink(
+    &self,
+    ptr: NonNull<u8>,
+    old_layout: Layout,
+    new_layout: Layout,
+  ) -> Result<NonNull<[u8]>, AllocError> {
+    debug_assert!(
+      new_layout.size() <= old_layout.size(),
+      "`new_layout.size()` must be smaller than or equal to `old_layout.size()`"
+    );
+
+    self
+      .try_shrink_raw(ptr, old_layout, new_layout)
+      .map(|ptr| NonNull::slice_from_raw_parts(ptr, new_layout.size()))
+      .ok_or(AllocError)
   }
 }
 
@@ -499,5 +636,170 @@ mod tests {
 
     let arc = Arc::new_in("hi".to_string(), &arena);
     assert_eq!(&*arc, "hi");
+  }
+
+  #[test]
+  fn test_improved_vector_resizing() {
+    let arena = Arena::with_chunk_size(1024);
+
+    // Test that in-place growth reduces fragmentation
+    let mut vec: Vec<u32, &Arena> = Vec::with_capacity_in(4, &arena);
+
+    println!("Initial stats: {:?}", arena.stats());
+
+    // Add elements to force multiple reallocations
+    let mut previous_used = 0;
+    let mut growth_in_place_count = 0;
+
+    for i in 0..50 {
+      vec.push(i);
+      let stats = arena.stats();
+
+      if vec.capacity().is_power_of_two() && vec.len() == vec.capacity() {
+        let used_growth = stats.total_used - previous_used;
+        let expected_new_size = vec.len() * 4; // 4 bytes per u32
+
+        if used_growth <= expected_new_size {
+          growth_in_place_count += 1;
+        }
+
+        println!(
+          "After {} pushes: len={}, cap={}, arena used={}, growth={}",
+          i + 1,
+          vec.len(),
+          vec.capacity(),
+          stats.total_used,
+          used_growth
+        );
+        previous_used = stats.total_used;
+      }
+    }
+
+    let final_stats = arena.stats();
+    println!("Final stats: {:?}", final_stats);
+    println!("Growth in place count: {}", growth_in_place_count);
+    println!("Utilization: {:.2}%", final_stats.utilization() * 100.0);
+
+    // The improved implementation should have perfect growth patterns
+    // Each growth should be exactly the size needed (no fragmentation)
+    assert!(
+      growth_in_place_count >= 3,
+      "Should have at least 3 in-place growths, got {}",
+      growth_in_place_count
+    );
+
+    // Test that fragmentation is minimal
+    let expected_final_size = vec.len() * 4; // 4 bytes per u32
+    let fragmentation_ratio = final_stats.total_used as f32 / expected_final_size as f32;
+    assert!(
+      fragmentation_ratio <= 2.0,
+      "Fragmentation ratio should be <= 2.0, got {:.2}",
+      fragmentation_ratio
+    );
+  }
+
+  #[test]
+  fn test_vector_resizing_and_memory_fragmentation() {
+    let arena = Arena::with_chunk_size(1024);
+
+    // Test vector growth and memory behavior
+    let mut vec: Vec<u32, &Arena> = Vec::new_in(&arena);
+
+    println!("Initial stats: {:?}", arena.stats());
+
+    // Add elements to force multiple reallocations
+    for i in 0..100 {
+      vec.push(i);
+      if vec.capacity().is_power_of_two() && vec.len() == vec.capacity() {
+        let stats = arena.stats();
+        println!(
+          "After {} pushes: len={}, cap={}, arena used={}, chunks={}",
+          i + 1,
+          vec.len(),
+          vec.capacity(),
+          stats.total_used,
+          stats.total_chunks
+        );
+      }
+    }
+
+    let final_stats = arena.stats();
+    println!("Final stats: {:?}", final_stats);
+    println!("Utilization: {:.2}%", final_stats.utilization() * 100.0);
+
+    // Test memory compaction
+    drop(vec);
+    arena.compact();
+    let after_compact = arena.stats();
+    println!("After compact: {:?}", after_compact);
+  }
+
+  #[test]
+  fn test_arena_memory_reclamation() {
+    let arena = Arena::with_chunk_size(512);
+
+    // Allocate and deallocate in LIFO order (stack-like)
+    let ptr1 = arena.alloc(42u64);
+    let ptr2 = arena.alloc(84u64);
+    let ptr3 = arena.alloc(128u64);
+
+    let stats_after_alloc = arena.stats();
+    println!("After allocations: {:?}", stats_after_alloc);
+
+    // Deallocate in reverse order (most recent first)
+    assert!(arena.dealloc(ptr3)); // Should succeed - top of stack
+    assert!(arena.dealloc(ptr2)); // Should succeed - now top of stack  
+    assert!(arena.dealloc(ptr1)); // Should succeed - now top of stack
+
+    let stats_after_dealloc = arena.stats();
+    println!("After deallocations: {:?}", stats_after_dealloc);
+    assert_eq!(stats_after_dealloc.total_used, 0);
+
+    // Test out-of-order deallocation (should fail to reclaim)
+    let ptr1 = arena.alloc(42u64);
+    let ptr2 = arena.alloc(84u64);
+    let ptr3 = arena.alloc(128u64);
+
+    // Try to deallocate middle allocation first
+    assert!(!arena.dealloc(ptr2)); // Should fail - not top of stack
+    assert!(arena.dealloc(ptr3)); // Should succeed
+    assert!(arena.dealloc(ptr2)); // Should now succeed
+    assert!(arena.dealloc(ptr1)); // Should succeed
+  }
+
+  #[test]
+  fn test_arena_efficiency_comparison() {
+    // Test to demonstrate the efficiency improvements
+    let arena = Arena::with_chunk_size(2048);
+
+    // Create a single vector and grow it
+    let mut vec: Vec<u64, &Arena> = Vec::new_in(&arena);
+
+    // Simulate adding AST nodes
+    for i in 0..100 {
+      vec.push(i as u64);
+    }
+
+    let stats = arena.stats();
+    println!("Vector growth stats: {:?}", stats);
+
+    // Calculate theoretical minimum memory needed
+    let total_elements = vec.len();
+    let min_memory_needed = total_elements * 8; // 8 bytes per u64
+    let efficiency = min_memory_needed as f32 / stats.total_used as f32;
+
+    println!(
+      "Elements: {}, Min memory: {}, Actual used: {}",
+      total_elements, min_memory_needed, stats.total_used
+    );
+    println!("Efficiency: {:.2}% (higher is better)", efficiency * 100.0);
+    println!("Memory overhead: {:.2}x", 1.0 / efficiency);
+
+    // With in-place growth, efficiency should be reasonably good
+    assert!(
+      efficiency > 0.4,
+      "Memory efficiency should be > 40%, got {:.2}%",
+      efficiency * 100.0
+    );
   }
 }

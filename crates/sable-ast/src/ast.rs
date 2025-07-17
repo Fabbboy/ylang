@@ -7,7 +7,6 @@ use sable_arena::arena::Arena;
 use crate::objects::function::Function;
 
 #[derive(Getters, MutGetters, Debug)]
-//#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Ast<'ctx> {
   #[getset(get_mut = "pub", get = "pub")]
   funcs: Vec<Function<'ctx>, &'ctx Arena>,
