@@ -10,12 +10,15 @@ use crate::objects::function::Function;
 pub struct Ast<'ctx> {
   #[getset(get_mut = "pub", get = "pub")]
   funcs: Vec<Function<'ctx>, &'ctx Arena>,
+  #[getset(get = "pub")]
+  arena: &'ctx Arena,
 }
 
 impl<'ctx> Ast<'ctx> {
   pub fn new(arena: &'ctx Arena) -> Self {
     Ast {
       funcs: Vec::new_in(arena),
+      arena,
     }
   }
 }

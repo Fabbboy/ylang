@@ -1,5 +1,4 @@
 use getset::Getters;
-use smallvec::SmallVec;
 use typed_builder::TypedBuilder;
 
 use crate::{
@@ -43,7 +42,7 @@ pub struct Function<'ctx> {
   #[getset(get = "pub")]
   name: Located<'ctx, &'ctx str>,
   #[getset(get = "pub")]
-  params: SmallVec<[FunctionParam<'ctx>; MAX_INLINE_PARAMS]>,
+  params: &'ctx [FunctionParam<'ctx>],
   #[getset(get = "pub")]
   return_type: Located<'ctx, Type<'ctx>>,
   #[getset(get = "pub")]

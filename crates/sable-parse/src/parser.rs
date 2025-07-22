@@ -1,3 +1,5 @@
+use std::mem::MaybeUninit;
+
 use either::Either;
 use sable_ast::{
   ast::Ast,
@@ -21,7 +23,11 @@ use sable_ast::{
     },
   },
   located::Located,
-  objects::function::Function,
+  objects::function::{
+    Function,
+    FunctionParam,
+    MAX_INLINE_PARAMS,
+  },
   statement::{
     Statement,
     StatementKind,
@@ -478,19 +484,28 @@ where
   }
 
   fn parse_function(&mut self) -> Result<Function<'ctx>, ParseErrorMOO<'ctx>> {
-    let _func_start_loc = self.expect(smallvec![TokenKind::Func])?.location().clone();
+    self.expect(smallvec![TokenKind::Func])?;
 
     let name_token = self.expect(smallvec![TokenKind::Identifier])?;
 
     self.expect(smallvec![TokenKind::Paren(true)])?;
-    let mut params = SmallVec::new();
+    let mut pre_params = SmallVec::<[FunctionParam<'ctx>; MAX_INLINE_PARAMS]>::new();
     while self.peek(smallvec![TokenKind::Identifier]).is_some() {
       let param = self.parse_tn_pair()?;
-      params.push(param.into());
+      pre_params.push(param.into());
       if self.peek(smallvec![TokenKind::Comma]).is_some() {
         self.expect(smallvec![TokenKind::Comma])?;
       }
     }
+
+    let raw_params = self
+      .ast
+      .arena()
+      .alloc_slice_with(pre_params.len(), |_| MaybeUninit::uninit());
+    for (i, param) in pre_params.into_iter().enumerate() {
+      raw_params[i] = MaybeUninit::new(param);
+    }
+    let final_params: &'ctx [FunctionParam<'ctx>] = unsafe { std::mem::transmute(raw_params) };
 
     self.expect(smallvec![TokenKind::Paren(false)])?;
     self.expect(smallvec![TokenKind::Colon])?;
@@ -509,7 +524,7 @@ where
     Ok(
       Function::builder()
         .name(name_located)
-        .params(params)
+        .params(final_params)
         .block(block)
         .return_type(return_type)
         .build(),
