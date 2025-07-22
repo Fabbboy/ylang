@@ -70,6 +70,17 @@ use smallvec::{
 
 use crate::lexer::Lexer;
 
+macro_rules! switch {
+  ($expr:expr => {
+    $($pattern:pat => $body:expr),* $(,)?
+  }) => {
+    match $expr {
+      $($pattern => $body,)*
+      _ => unreachable!("Unhandled case: {:?}", $expr)
+    }
+  };
+}
+
 enum ParseStatus {
   Success,
   Error,
@@ -215,7 +226,7 @@ where
       }
     };
 
-    match maybe_next {
+    switch!(maybe_next => {
       TokenKind::Assign => {
         self.expect(smallvec![TokenKind::Assign])?;
         let value = self.parse_expression()?;
@@ -238,8 +249,7 @@ where
             .build(),
         )
       }
-      _ => unreachable!("Expected assignment operator but got: {:?}", maybe_next),
-    }
+    })
   }
 
   fn parse_factor(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
@@ -252,7 +262,7 @@ where
       }
     };
 
-    match expr_type {
+    switch!(expr_type => {
       TokenKind::Integer => {
         let value_expr = self.expect(smallvec![TokenKind::Integer])?;
 
@@ -274,7 +284,7 @@ where
             .location(value_expr.location().clone())
             .build(),
         )
-      }
+      },
       TokenKind::Float => {
         let value_expr = self.expect(smallvec![TokenKind::Float])?;
 
@@ -296,10 +306,9 @@ where
             .location(value_expr.location().clone())
             .build(),
         )
-      }
-      TokenKind::Identifier => Ok(self.parse_identifier()?),
-      _ => unreachable!("Unhandled token kind: {:?}", expr_type),
-    }
+      },
+      TokenKind::Identifier => Ok(self.parse_identifier()?)
+    })
   }
 
   fn parse_term(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
@@ -317,7 +326,7 @@ where
       let lhs_heaped = self.ast.arena().alloc(lhs);
       let rhs_heaped = self.ast.arena().alloc(rhs);
 
-      match op_token.kind() {
+      switch!(op_token.kind() => {
         TokenKind::Star => {
           let expr = MultiplyExpression::builder()
             .left(lhs_heaped)
@@ -328,21 +337,19 @@ where
             .value(ExpressionKind::Binary(BinaryExpression::Multiply(expr)))
             .location(combined.clone())
             .build();
-        }
+        },
         TokenKind::Slash => {
           let expr = DivideExpression::builder()
             .left(lhs_heaped)
             .right(rhs_heaped)
             .location(combined.clone())
             .build();
-
           lhs = Expression::builder()
             .value(ExpressionKind::Binary(BinaryExpression::Divide(expr)))
             .location(combined.clone())
             .build();
         }
-        _ => unreachable!("Unhandled token kind: {:?}", op_token.kind()),
-      };
+      });
     }
 
     Ok(lhs)
@@ -363,7 +370,7 @@ where
       let lhs_heaped = self.ast.arena().alloc(lhs);
       let rhs_heaped = self.ast.arena().alloc(rhs);
 
-      match op_token.kind() {
+      switch!(op_token.kind() => {
         TokenKind::Plus => {
           let expr = AddExpression::builder()
             .left(lhs_heaped)
@@ -375,7 +382,7 @@ where
             .value(ExpressionKind::Binary(BinaryExpression::Add(expr)))
             .location(combined.clone())
             .build();
-        }
+        },
         TokenKind::Minus => {
           let expr = BinaryExpression::Subtract(
             SubtractExpression::builder()
@@ -390,9 +397,7 @@ where
             .location(combined.clone())
             .build();
         }
-
-        _ => unreachable!("Unhandled token kind: {:?}", op_token.kind()),
-      };
+      });
     }
 
     Ok(lhs)
@@ -451,7 +456,7 @@ where
       }
     };
 
-    match stmt_start {
+    switch!(stmt_start => {
       TokenKind::Var => {
         let var_stmt = self.parse_variable_stmt()?;
         let stmt_location = var_stmt.name().location().clone();
@@ -461,8 +466,7 @@ where
           .build();
         return Ok(Statement::Variable(var_stmt_located));
       }
-      _ => unreachable!("Unhandled token kind: {:?}", stmt_start),
-    }
+    })
   }
 
   fn parse_block(&mut self) -> Result<BlockExpression<'ctx>, ParseErrorMOO<'ctx>> {
@@ -602,7 +606,7 @@ where
         break;
       }
 
-      match kind_tag {
+      switch!(kind_tag => {
         TokenKind::Func => {
           let res = self.parse_function();
           match res {
@@ -617,8 +621,7 @@ where
             }
           }
         }
-        _ => unreachable!("Unhandled token kind: {:?}", kind_tag),
-      }
+      })
     }
 
     match status {
