@@ -7,7 +7,7 @@ use sable_errors::{
   cache::ErrorCache,
   writer::ReportWriter,
 };
-use sable_middle::module::Module;
+use sable_middle::tu::TranslationUnit;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -28,7 +28,7 @@ fn main() {
   let file_arena = Arena::new();
   let middle_arena = Arena::new();
 
-  let mut module = Module::new(&middle_arena, 1);
+  let mut module = TranslationUnit::new(&middle_arena, 1);
 
   let args = Args::parse();
   let mut manager = Manager::new(&file_arena);
