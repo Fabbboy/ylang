@@ -8,18 +8,24 @@ use sable_ast::ast::Ast;
 use crate::hir::module::Module;
 
 #[derive(Debug, Getters, MutGetters)]
-pub struct TranslationUnit<'ast, 'middle> {
+pub struct Package<'ast, 'hir> {
+  #[getset(get = "pub")]
+  hir_arena: &'hir Arena,
   #[getset(get_mut = "pub", get = "pub")]
-  trees: &'middle mut [Option<Ast<'ast>>],
+  trees: &'hir mut [Option<Ast<'ast>>],
   #[getset(get_mut = "pub", get = "pub")]
-  mods: &'middle mut [Option<Module>],
+  mods: &'hir mut [Option<Module<'hir>>],
 }
 
-impl<'ast, 'middle> TranslationUnit<'ast, 'middle> {
-  pub fn new(tree_arena: &'middle Arena, trees: usize) -> Self {
+impl<'ast, 'hir> Package<'ast, 'hir> {
+  pub fn new(tree_arena: &'hir Arena, hir_arena: &'hir Arena, trees: usize) -> Self {
     let trees = tree_arena.alloc_slice_with(trees, |_| None);
-    let mods = tree_arena.alloc_slice_with(trees.len(), |_| None);
-    TranslationUnit { trees, mods }
+    let mods = hir_arena.alloc_slice_with(trees.len(), |_| None);
+    Package {
+      trees,
+      mods,
+      hir_arena,
+    }
   }
 
   pub fn obtain(&mut self, arena: &'ast Arena, idx: usize) -> Option<&mut Ast<'ast>> {

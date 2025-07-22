@@ -1,3 +1,3 @@
-pub mod tu;
+pub mod package;
 pub mod ty;
 pub mod hir;

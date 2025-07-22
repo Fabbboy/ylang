@@ -321,6 +321,7 @@ dependencies = [
  "sable-arena",
  "sable-ast",
  "sable-common",
+ "typed-builder",
 ]
 
 [[package]]
