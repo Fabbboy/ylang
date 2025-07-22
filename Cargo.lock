@@ -342,6 +342,10 @@ dependencies = [
 [[package]]
 name = "sable-sema"
 version = "0.1.0"
+dependencies = [
+ "sable-ast",
+ "sable-hir",
+]
 
 [[package]]
 name = "sablec"
