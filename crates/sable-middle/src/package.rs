@@ -55,4 +55,8 @@ impl<'ast, 'hir> Package<'ast, 'hir> {
       Symbol(idx)
     }
   }
+
+  pub fn get_str(&self, symbol: Symbol) -> Option<&'hir str> {
+    self.strintern.get_index(symbol.0).copied()
+  }
 }
