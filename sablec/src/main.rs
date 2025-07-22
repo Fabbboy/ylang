@@ -62,7 +62,6 @@ fn main() {
         "Successfully parsed {} function(s).",
         main_ast.funcs().len()
       );
-      println!("\nAST: {:#?}", main_ast);
     }
     Err(_) => {
       eprintln!("Parsing failed. See errors above.");
