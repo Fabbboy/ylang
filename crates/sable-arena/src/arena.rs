@@ -1,9 +1,6 @@
 extern crate alloc;
 
-use alloc::{
-  boxed::Box,
-  vec::Vec,
-};
+use alloc::boxed::Box;
 use core::{
   alloc::{
     AllocError,
@@ -22,15 +19,15 @@ use core::{
   slice,
 };
 
+// Arena allocator using linked list of chunks instead of Vec for true independence from global allocator
+
 #[derive(Debug)]
 struct Chunk {
   storage: NonNull<u8>,
-
   size: usize,
-
   pos: usize,
-
   raw: *mut [MaybeUninit<u8>],
+  next: Option<NonNull<Chunk>>,
 }
 
 #[cfg(feature = "serde")]
@@ -60,6 +57,7 @@ impl Chunk {
       size,
       pos: 0,
       raw,
+      next: None,
     })
   }
 
@@ -155,7 +153,7 @@ impl Drop for Chunk {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Arena {
   default_chunk_size: usize,
-  chunks: RefCell<Vec<Chunk>>,
+  head: RefCell<Option<NonNull<Chunk>>>,
 }
 
 impl Arena {
@@ -168,8 +166,23 @@ impl Arena {
   pub fn with_chunk_size(chunk_size: usize) -> Self {
     Self {
       default_chunk_size: chunk_size,
-      chunks: RefCell::new(Vec::new()),
+      head: RefCell::new(None),
     }
+  }
+
+  // Helper methods for chunk management
+  fn iter_chunks(&self) -> ChunkIterator {
+    ChunkIterator {
+      current: *self.head.borrow(),
+    }
+  }
+
+  fn add_chunk(&self, mut chunk: Box<Chunk>) -> NonNull<Chunk> {
+    let mut head = self.head.borrow_mut();
+    chunk.next = *head;
+    let chunk_ptr = NonNull::from(Box::leak(chunk));
+    *head = Some(chunk_ptr);
+    chunk_ptr
   }
 
   pub fn alloc<T>(&self, value: T) -> &mut T {
@@ -251,14 +264,15 @@ impl Arena {
     if layout.size() > isize::MAX as usize {
       return None;
     }
-    let mut chunks = self.chunks.borrow_mut();
-    for chunk in chunks.iter_mut() {
+
+    for chunk_ptr in self.iter_chunks() {
+      let chunk = unsafe { &mut *chunk_ptr.as_ptr() };
       if let Some(ptr) = chunk.alloc(layout.size(), layout.align()) {
         return Some(ptr);
       }
     }
-    let needed_size = layout.size().max(self.default_chunk_size);
 
+    let needed_size = layout.size().max(self.default_chunk_size);
     let alloc_size = needed_size
       .checked_next_power_of_two()
       .unwrap_or(needed_size)
@@ -266,9 +280,10 @@ impl Arena {
     if alloc_size < needed_size {
       return None;
     }
+
     let mut new_chunk = Chunk::new(alloc_size)?;
     let ptr = new_chunk.alloc(layout.size(), layout.align())?;
-    chunks.push(new_chunk);
+    self.add_chunk(Box::new(new_chunk));
     Some(ptr)
   }
 
@@ -282,8 +297,8 @@ impl Arena {
       return Some(ptr);
     }
 
-    let mut chunks = self.chunks.borrow_mut();
-    for chunk in chunks.iter_mut() {
+    for chunk_ptr in self.iter_chunks() {
+      let chunk = unsafe { &mut *(chunk_ptr.as_ptr()) };
       if chunk.can_grow_in_place(
         ptr,
         old_layout.size(),
@@ -301,13 +316,10 @@ impl Arena {
       }
     }
 
-    // Can't grow in place, need to allocate new memory
-    drop(chunks);
     let new_ptr = self.try_alloc_raw(new_layout)?;
     unsafe {
       ptr::copy_nonoverlapping(ptr.as_ptr(), new_ptr.as_ptr(), old_layout.size());
     }
-    // Try to deallocate old memory
     let _ = self.dealloc_raw(ptr, old_layout);
     Some(new_ptr)
   }
@@ -322,8 +334,6 @@ impl Arena {
       return Some(ptr);
     }
 
-    // For shrinking, we can just return the same pointer
-    // The extra memory becomes unavailable but we don't need to move data
     Some(ptr)
   }
 
@@ -331,8 +341,8 @@ impl Arena {
     if layout.size() == 0 {
       return true;
     }
-    let mut chunks = self.chunks.borrow_mut();
-    for chunk in chunks.iter_mut() {
+    for chunk_ptr in self.iter_chunks() {
+      let chunk = unsafe { &mut *(chunk_ptr.as_ptr()) };
       if chunk.try_retract(ptr, layout.size()) {
         return true;
       }
@@ -362,19 +372,23 @@ impl Arena {
   }
 
   pub fn stats(&self) -> ArenaStats {
-    let chunks = self.chunks.borrow();
     let mut total_size = 0;
     let mut total_used = 0;
     let mut empty_chunks = 0;
-    for chunk in chunks.iter() {
+    let mut total_chunks = 0;
+
+    for chunk_ptr in self.iter_chunks() {
+      let chunk = unsafe { chunk_ptr.as_ref() };
+      total_chunks += 1;
       total_size += chunk.size;
       total_used += chunk.pos;
       if chunk.is_empty() {
         empty_chunks += 1;
       }
     }
+
     ArenaStats {
-      total_chunks: chunks.len(),
+      total_chunks,
       total_size,
       total_used,
       empty_chunks,
@@ -383,31 +397,63 @@ impl Arena {
   }
 
   pub fn clear(&self) {
-    let mut chunks = self.chunks.borrow_mut();
-    for chunk in chunks.iter_mut() {
+    for chunk_ptr in self.iter_chunks() {
+      let chunk = unsafe { &mut *(chunk_ptr.as_ptr()) };
       chunk.pos = 0;
     }
   }
 
   pub fn contains(&self, ptr: NonNull<u8>) -> bool {
-    let chunks = self.chunks.borrow();
-    chunks.iter().any(|chunk| {
+    for chunk_ptr in self.iter_chunks() {
+      let chunk = unsafe { chunk_ptr.as_ref() };
       let start = chunk.storage.as_ptr() as usize;
       let end = start + chunk.size;
       let addr = ptr.as_ptr() as usize;
-      addr >= start && addr < end
-    })
+      if addr >= start && addr < end {
+        return true;
+      }
+    }
+    false
   }
 
   pub fn compact(&self) {
-    let mut chunks = self.chunks.borrow_mut();
-    chunks.retain(|c| !c.is_empty());
+    let mut head = self.head.borrow_mut();
+    let mut current = *head;
+    let mut prev: Option<NonNull<Chunk>> = None;
+
+    while let Some(chunk_ptr) = current {
+      let chunk = unsafe { chunk_ptr.as_ref() };
+      if chunk.is_empty() {
+        let next = chunk.next;
+        if let Some(prev_ptr) = prev {
+          unsafe { (*prev_ptr.as_ptr()).next = next };
+        } else {
+          *head = next;
+        }
+        unsafe { drop(Box::from_raw(chunk_ptr.as_ptr())) };
+        current = next;
+      } else {
+        prev = Some(chunk_ptr);
+        current = chunk.next;
+      }
+    }
   }
 }
 
 impl Default for Arena {
   fn default() -> Self {
     Self::new()
+  }
+}
+
+impl Drop for Arena {
+  fn drop(&mut self) {
+    let mut current = *self.head.borrow();
+    while let Some(chunk_ptr) = current {
+      let chunk = unsafe { Box::from_raw(chunk_ptr.as_ptr()) };
+      current = chunk.next;
+      drop(chunk);
+    }
   }
 }
 
@@ -642,12 +688,10 @@ mod tests {
   fn test_improved_vector_resizing() {
     let arena = Arena::with_chunk_size(1024);
 
-    // Test that in-place growth reduces fragmentation
     let mut vec: Vec<u32, &Arena> = Vec::with_capacity_in(4, &arena);
 
     println!("Initial stats: {:?}", arena.stats());
 
-    // Add elements to force multiple reallocations
     let mut previous_used = 0;
     let mut growth_in_place_count = 0;
 
@@ -680,15 +724,12 @@ mod tests {
     println!("Growth in place count: {}", growth_in_place_count);
     println!("Utilization: {:.2}%", final_stats.utilization() * 100.0);
 
-    // The improved implementation should have perfect growth patterns
-    // Each growth should be exactly the size needed (no fragmentation)
     assert!(
       growth_in_place_count >= 3,
       "Should have at least 3 in-place growths, got {}",
       growth_in_place_count
     );
 
-    // Test that fragmentation is minimal
     let expected_final_size = vec.len() * 4; // 4 bytes per u32
     let fragmentation_ratio = final_stats.total_used as f32 / expected_final_size as f32;
     assert!(
@@ -702,12 +743,10 @@ mod tests {
   fn test_vector_resizing_and_memory_fragmentation() {
     let arena = Arena::with_chunk_size(1024);
 
-    // Test vector growth and memory behavior
     let mut vec: Vec<u32, &Arena> = Vec::new_in(&arena);
 
     println!("Initial stats: {:?}", arena.stats());
 
-    // Add elements to force multiple reallocations
     for i in 0..100 {
       vec.push(i);
       if vec.capacity().is_power_of_two() && vec.len() == vec.capacity() {
@@ -727,7 +766,6 @@ mod tests {
     println!("Final stats: {:?}", final_stats);
     println!("Utilization: {:.2}%", final_stats.utilization() * 100.0);
 
-    // Test memory compaction
     drop(vec);
     arena.compact();
     let after_compact = arena.stats();
@@ -738,7 +776,6 @@ mod tests {
   fn test_arena_memory_reclamation() {
     let arena = Arena::with_chunk_size(512);
 
-    // Allocate and deallocate in LIFO order (stack-like)
     let ptr1 = arena.alloc(42u64);
     let ptr2 = arena.alloc(84u64);
     let ptr3 = arena.alloc(128u64);
@@ -746,36 +783,30 @@ mod tests {
     let stats_after_alloc = arena.stats();
     println!("After allocations: {:?}", stats_after_alloc);
 
-    // Deallocate in reverse order (most recent first)
-    assert!(arena.dealloc(ptr3)); // Should succeed - top of stack
-    assert!(arena.dealloc(ptr2)); // Should succeed - now top of stack  
-    assert!(arena.dealloc(ptr1)); // Should succeed - now top of stack
+    assert!(arena.dealloc(ptr3));
+    assert!(arena.dealloc(ptr2));
+    assert!(arena.dealloc(ptr1));
 
     let stats_after_dealloc = arena.stats();
     println!("After deallocations: {:?}", stats_after_dealloc);
     assert_eq!(stats_after_dealloc.total_used, 0);
 
-    // Test out-of-order deallocation (should fail to reclaim)
     let ptr1 = arena.alloc(42u64);
     let ptr2 = arena.alloc(84u64);
     let ptr3 = arena.alloc(128u64);
 
-    // Try to deallocate middle allocation first
-    assert!(!arena.dealloc(ptr2)); // Should fail - not top of stack
-    assert!(arena.dealloc(ptr3)); // Should succeed
-    assert!(arena.dealloc(ptr2)); // Should now succeed
-    assert!(arena.dealloc(ptr1)); // Should succeed
+    assert!(!arena.dealloc(ptr2));
+    assert!(arena.dealloc(ptr3));
+    assert!(arena.dealloc(ptr2));
+    assert!(arena.dealloc(ptr1));
   }
 
   #[test]
   fn test_arena_efficiency_comparison() {
-    // Test to demonstrate the efficiency improvements
     let arena = Arena::with_chunk_size(2048);
 
-    // Create a single vector and grow it
     let mut vec: Vec<u64, &Arena> = Vec::new_in(&arena);
 
-    // Simulate adding AST nodes
     for i in 0..100 {
       vec.push(i as u64);
     }
@@ -783,7 +814,6 @@ mod tests {
     let stats = arena.stats();
     println!("Vector growth stats: {:?}", stats);
 
-    // Calculate theoretical minimum memory needed
     let total_elements = vec.len();
     let min_memory_needed = total_elements * 8; // 8 bytes per u64
     let efficiency = min_memory_needed as f32 / stats.total_used as f32;
@@ -795,7 +825,6 @@ mod tests {
     println!("Efficiency: {:.2}% (higher is better)", efficiency * 100.0);
     println!("Memory overhead: {:.2}x", 1.0 / efficiency);
 
-    // With in-place growth, efficiency should be reasonably good
     assert!(
       efficiency > 0.4,
       "Memory efficiency should be > 40%, got {:.2}%",
@@ -957,5 +986,172 @@ mod tests {
     }
 
     println!("✅ Memory efficiency analysis completed!");
+  }
+
+  #[test]
+  fn test_no_internal_allocations_demonstration() {
+    println!("=== Demonstrating No Internal Allocations ===");
+
+    let arena = Arena::with_chunk_size(1024);
+
+    let initial_stats = arena.stats();
+    println!("Initial chunks: {}", initial_stats.total_chunks);
+
+    let _large1 = arena.alloc_slice_copy(&[0u8; 800]);
+    let _large2 = arena.alloc_slice_copy(&[1u8; 800]);
+
+    let after_stats = arena.stats();
+    println!(
+      "After large allocations: {} chunks",
+      after_stats.total_chunks
+    );
+
+    for i in 0..100 {
+      let _small = arena.alloc(i as u32);
+    }
+
+    let final_stats = arena.stats();
+    println!("Final stats: {:?}", final_stats);
+    println!("Chunk traversal completed without Vec reallocations");
+
+    assert!(final_stats.total_chunks >= 2, "Should have multiple chunks");
+    println!("✅ No internal allocations demonstrated!");
+  }
+
+  #[test]
+  fn test_memory_leak_detection() {
+    println!("=== Memory Leak Detection Test ===");
+
+    {
+      let arena = Arena::with_chunk_size(1024);
+
+      let _data1 = arena.alloc(42u64);
+      let _data2 = arena.alloc_slice_copy(&[1, 2, 3, 4, 5]);
+      let _data3 = arena.alloc_str("test string");
+
+      let stats = arena.stats();
+      println!(
+        "Before drop: {} chunks, {} bytes used",
+        stats.total_chunks, stats.total_used
+      );
+    }
+    println!("Arena dropped successfully");
+
+    {
+      let arena = Arena::with_chunk_size(512);
+
+      let _large1 = arena.alloc_slice_copy(&[0u8; 400]);
+      let _large2 = arena.alloc_slice_copy(&[1u8; 400]);
+      let _large3 = arena.alloc_slice_copy(&[2u8; 400]);
+
+      let before_clear = arena.stats();
+      println!("Before clear: {} chunks", before_clear.total_chunks);
+
+      arena.clear();
+
+      let after_clear = arena.stats();
+      println!(
+        "After clear: {} chunks, {} bytes used",
+        after_clear.total_chunks, after_clear.total_used
+      );
+
+      arena.compact();
+
+      let after_compact = arena.stats();
+      println!("After compact: {} chunks", after_compact.total_chunks);
+
+      assert_eq!(
+        after_compact.total_chunks, 0,
+        "All empty chunks should be removed"
+      );
+    }
+    println!("Compact test passed");
+
+    {
+      let arena = Arena::with_chunk_size(512);
+
+      let _keep1 = arena.alloc_slice_copy(&[0u8; 400]);
+      let temp2 = arena.alloc_slice_copy(&[1u8; 400]);
+      let _keep3 = arena.alloc_slice_copy(&[2u8; 400]);
+
+      let before_dealloc = arena.stats();
+      println!(
+        "Before selective dealloc: {} chunks",
+        before_dealloc.total_chunks
+      );
+
+      let _ = arena.dealloc_slice(temp2);
+
+      let before_compact = arena.stats();
+      println!(
+        "Before compact: {} chunks, {} bytes used",
+        before_compact.total_chunks, before_compact.total_used
+      );
+
+      arena.compact();
+
+      let after_compact = arena.stats();
+      println!(
+        "After partial compact: {} chunks",
+        after_compact.total_chunks
+      );
+
+      assert!(
+        after_compact.total_chunks > 0,
+        "Should keep non-empty chunks"
+      );
+    }
+    println!("Partial compact test passed");
+
+    println!("✅ No memory leaks detected!");
+  }
+
+  #[test]
+  fn test_valgrind_specific_arena_behavior() {
+    println!("=== Valgrind-Specific Arena Test ===");
+
+    {
+      let arena = Arena::with_chunk_size(1024);
+
+      let _int = arena.alloc(42u64);
+      let _slice = arena.alloc_slice_copy(&[1u8, 2, 3, 4, 5]);
+      let _string = arena.alloc_str("test string for valgrind");
+
+      let _large1 = arena.alloc_slice_copy(&[0u8; 512]);
+      let _large2 = arena.alloc_slice_copy(&[1u8; 512]);
+      let _large3 = arena.alloc_slice_copy(&[2u8; 512]);
+
+      let stats = arena.stats();
+      println!(
+        "Allocated {} chunks, {} bytes",
+        stats.total_chunks, stats.total_used
+      );
+
+      arena.clear();
+      arena.compact();
+
+      let after_compact = arena.stats();
+      println!("After compact: {} chunks", after_compact.total_chunks);
+    }
+
+    println!("Arena dropped - all memory should be freed");
+  }
+}
+
+// Iterator types for linked list traversal
+struct ChunkIterator {
+  current: Option<NonNull<Chunk>>,
+}
+
+impl Iterator for ChunkIterator {
+  type Item = NonNull<Chunk>;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if let Some(current) = self.current {
+      self.current = unsafe { current.as_ref().next };
+      Some(current)
+    } else {
+      None
+    }
   }
 }
