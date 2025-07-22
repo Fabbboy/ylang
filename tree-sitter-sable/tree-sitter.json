@@ -10,7 +10,11 @@
         "sable"
       ],
       "injection-regex": "^sable$",
-      "class-name": "TreeSitterSable"
+      "class-name": "TreeSitterSable",
+      "highlights": "queries/highlights.scm",
+      "locals": "queries/locals.scm",
+      "tags": "queries/tags.scm",
+      "injections": "queries/injections.scm"
     }
   ],
   "metadata": {
