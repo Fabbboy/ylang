@@ -137,7 +137,7 @@ where
     let found_peek = self.lexer.peek();
 
     if let Some(TokenData::Error(token_error)) = found_peek.data() {
-      let _ = self.lexer.next();
+      self.lexer.next();
       let error = self.handle_token_error(&found_peek, token_error);
       return Err(error);
     }
@@ -181,7 +181,7 @@ where
     let mut ty = Type::Path(Path::builder().segments(vec![segment_located]).build());
 
     while self.peek(smallvec![TokenKind::Star]).is_some() {
-      let _ptr_tok = self.expect(smallvec![TokenKind::Star])?;
+      self.expect(smallvec![TokenKind::Star])?;
       ty = Type::Pointer(Box::new(ty));
     }
 
@@ -501,7 +501,7 @@ where
           self.sync(sync_points.clone());
 
           if self.peek(smallvec![TokenKind::Semicolon]).is_some() {
-            let _ = self.expect(smallvec![TokenKind::Semicolon]);
+            self.expect(smallvec![TokenKind::Semicolon])?;
           }
         }
       }
