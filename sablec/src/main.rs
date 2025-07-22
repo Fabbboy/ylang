@@ -7,7 +7,7 @@ use sable_errors::{
   cache::ErrorCache,
   writer::ReportWriter,
 };
-use sable_middle::package::Package;
+use sable_hir::package::Package;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,

@@ -314,7 +314,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sable-middle"
+name = "sable-hir"
 version = "0.1.0"
 dependencies = [
  "getset",
@@ -349,7 +349,7 @@ dependencies = [
  "sable-ast",
  "sable-common",
  "sable-errors",
- "sable-middle",
+ "sable-hir",
  "sable-parse",
 ]
 
