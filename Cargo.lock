@@ -318,6 +318,7 @@ name = "sable-middle"
 version = "0.1.0"
 dependencies = [
  "getset",
+ "indexmap",
  "sable-arena",
  "sable-ast",
  "sable-common",
