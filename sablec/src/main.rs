@@ -2,12 +2,12 @@ use std::io;
 
 use clap::Parser as ClapParser;
 use sable_arena::arena::Arena;
-use sable_ast::ast::Ast;
 use sable_common::file::manager::Manager;
 use sable_errors::{
   cache::ErrorCache,
   writer::ReportWriter,
 };
+use sable_middle::module::Module;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -26,7 +26,9 @@ struct Args {
 
 fn main() {
   let file_arena = Arena::new();
-  let ast_arena = Arena::new();
+  let middle_arena = Arena::new();
+
+  let mut module = Module::new(&middle_arena, 1);
 
   let args = Args::parse();
   let mut manager = Manager::new(&file_arena);
@@ -50,17 +52,23 @@ fn main() {
 
   let lexer = Lexer::new(source.clone());
 
-  let mut ast = Ast::new(&ast_arena);
+  let main_ast_arena = Arena::new();
+  let mut main_ast = module.obtain(&main_ast_arena, 0).unwrap();
 
-  let mut parser = Parser::new(lexer, &mut ast, &mut writer);
+  let mut parser = Parser::new(lexer, &mut main_ast, &mut writer);
   match parser.parse() {
     Ok(_) => {
-      println!("Successfully parsed {} function(s).", ast.funcs().len());
-      println!("\nAST: {:#?}", ast);
+      println!(
+        "Successfully parsed {} function(s).",
+        main_ast.funcs().len()
+      );
+      println!("\nAST: {:#?}", main_ast);
     }
     Err(_) => {
       eprintln!("Parsing failed. See errors above.");
       std::process::exit(1);
     }
   };
+
+  println!("{:#?}", module);
 }

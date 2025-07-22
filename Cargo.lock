@@ -316,6 +316,12 @@ dependencies = [
 [[package]]
 name = "sable-middle"
 version = "0.1.0"
+dependencies = [
+ "getset",
+ "sable-arena",
+ "sable-ast",
+ "sable-common",
+]
 
 [[package]]
 name = "sable-parse"
@@ -341,6 +347,7 @@ dependencies = [
  "sable-ast",
  "sable-common",
  "sable-errors",
+ "sable-middle",
  "sable-parse",
 ]
 

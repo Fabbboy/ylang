@@ -9,6 +9,7 @@ sable-ast = { workspace = true, features = ["serde"] }
 sable-common = { workspace = true }
 sable-errors = { workspace = true }
 sable-arena = { workspace = true }
+sable-middle = { workspace = true }
 
 ariadne = { workspace = true }
 
