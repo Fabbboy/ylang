@@ -8,5 +8,5 @@ pub trait Analyzer<'ast, 'sema>
 where
   Self: VisitStatement<'ast> + VisitExpression<'ast>,
 {
-  fn new(package: &mut Package<'ast, 'sema>) -> Self;
+  fn new(package: &mut Package<'sema>) -> Self;
 }

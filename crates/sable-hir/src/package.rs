@@ -12,38 +12,23 @@ use crate::hir::module::Module;
 pub struct Symbol(pub usize);
 
 #[derive(Debug, Getters, MutGetters)]
-pub struct Package<'ast, 'hir> {
+pub struct Package<'hir> {
   #[getset(get = "pub")]
   hir_arena: &'hir Arena,
-  #[getset(get_mut = "pub", get = "pub")]
-  trees: &'hir mut [Option<Ast<'ast>>],
   #[getset(get_mut = "pub", get = "pub")]
   mods: &'hir mut [Option<Module<'hir>>],
   #[getset(get = "pub")]
   strintern: IndexSet<&'hir str>,
 }
 
-impl<'ast, 'hir> Package<'ast, 'hir> {
-  pub fn new(tree_arena: &'hir Arena, hir_arena: &'hir Arena, trees: usize) -> Self {
-    let trees = tree_arena.alloc_slice_with(trees, |_| None);
+impl<'hir> Package<'hir> {
+  pub fn new<'ast>(hir_arena: &'hir Arena, trees: &[Ast<'ast>]) -> Self {
     let mods = hir_arena.alloc_slice_with(trees.len(), |_| None);
     Package {
-      trees,
       mods,
       hir_arena,
       strintern: IndexSet::new(),
     }
-  }
-
-  pub fn obtain(&mut self, arena: &'ast Arena, idx: usize) -> Option<&mut Ast<'ast>> {
-    if idx >= self.trees.len() {
-      return None;
-    }
-    let slot = &mut self.trees[idx];
-    if slot.is_none() {
-      *slot = Some(Ast::new(arena));
-    }
-    slot.as_mut()
   }
 
   pub fn resolve(&mut self, input: &str) -> Symbol {

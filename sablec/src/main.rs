@@ -2,6 +2,7 @@ use std::io;
 
 use clap::Parser as ClapParser;
 use sable_arena::arena::Arena;
+use sable_ast::ast::Ast;
 use sable_common::file::manager::Manager;
 use sable_errors::{
   cache::ErrorCache,
@@ -26,10 +27,7 @@ struct Args {
 
 fn main() {
   let file_arena = Arena::new();
-  let middle_arena = Arena::new();
   let hir_arena = Arena::new();
-
-  let mut module = Package::new(&middle_arena, &hir_arena, 1);
 
   let args = Args::parse();
   let mut manager = Manager::new(&file_arena);
@@ -51,24 +49,27 @@ fn main() {
   let mut stdout = io::stdout();
   let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
-  let lexer = Lexer::new(source.clone());
+  let package = {
+    let lexer = Lexer::new(source.clone());
 
-  let main_ast_arena = Arena::new();
-  let mut main_ast = module.obtain(&main_ast_arena, 0).unwrap();
+    let main_ast_arena = Arena::new();
+    let mut main_ast = Ast::new(&main_ast_arena);
 
-  let mut parser = Parser::new(lexer, &mut main_ast, &mut writer);
-  match parser.parse() {
-    Ok(_) => {
-      println!(
-        "Successfully parsed {} function(s).",
-        main_ast.funcs().len()
-      );
-    }
-    Err(_) => {
-      eprintln!("Parsing failed. See errors above.");
-      std::process::exit(1);
-    }
+    let mut parser = Parser::new(lexer, &mut main_ast, &mut writer);
+    match parser.parse() {
+      Ok(_) => {
+        println!(
+          "Successfully parsed {} function(s).",
+          main_ast.funcs().len()
+        );
+      }
+      Err(_) => {
+        eprintln!("Parsing failed. See errors above.");
+        std::process::exit(1);
+      }
+    };
+    Package::new(&hir_arena, &[main_ast])
   };
 
-  println!("{:#?}", module);
+  println!("{:#?}", package);
 }
