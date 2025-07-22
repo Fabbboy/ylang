@@ -6,7 +6,7 @@ use sable_hir::package::Package;
 
 pub trait Analyzer<'ast, 'sema>
 where
-  Self: VisitStatement<'sema> + VisitExpression<'sema>,
+  Self: VisitStatement<'ast> + VisitExpression<'ast>,
 {
   fn new(package: &mut Package<'ast, 'sema>) -> Self;
 }
