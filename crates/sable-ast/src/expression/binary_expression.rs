@@ -10,9 +10,9 @@ macro_rules! binary_expr_factory {
         #[cfg_attr(feature = "serde", derive(serde::Serialize))]
         pub struct [<$name Expression>]<'ctx> {
           #[getset(get = "pub")]
-          left: Box<Expression<'ctx>>,
+          left: &'ctx Expression<'ctx>,
           #[getset(get = "pub")]
-          right: Box<Expression<'ctx>>,
+          right: &'ctx Expression<'ctx>,
         }
       )*
 

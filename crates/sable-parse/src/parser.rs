@@ -304,11 +304,14 @@ where
       let op_token = self.expect(expected.clone())?;
       let rhs = self.parse_factor()?;
 
+      let lhs_heaped = self.ast.arena().alloc(lhs);
+      let rhs_heaped = self.ast.arena().alloc(rhs);
+
       match op_token.kind() {
         TokenKind::Star => {
           let expr = MultiplyExpression::builder()
-            .left(Box::new(lhs))
-            .right(Box::new(rhs))
+            .left(lhs_heaped)
+            .right(rhs_heaped)
             .build();
           lhs = Expression::builder()
             .value(ExpressionKind::Binary(BinaryExpression::Multiply(expr)))
@@ -316,8 +319,8 @@ where
         }
         TokenKind::Slash => {
           let expr = DivideExpression::builder()
-            .left(Box::new(lhs))
-            .right(Box::new(rhs))
+            .left(lhs_heaped)
+            .right(rhs_heaped)
             .build();
 
           lhs = Expression::builder()
@@ -339,11 +342,14 @@ where
       let op_token = self.expect(expected)?;
       let rhs = self.parse_term()?;
 
+      let lhs_heaped = self.ast.arena().alloc(lhs);
+      let rhs_heaped = self.ast.arena().alloc(rhs);
+
       match op_token.kind() {
         TokenKind::Plus => {
           let expr = AddExpression::builder()
-            .left(Box::new(lhs))
-            .right(Box::new(rhs))
+            .left(lhs_heaped)
+            .right(rhs_heaped)
             .build();
 
           lhs = Expression::builder()
@@ -353,8 +359,8 @@ where
         TokenKind::Minus => {
           let expr = BinaryExpression::Subtract(
             SubtractExpression::builder()
-              .left(Box::new(lhs))
-              .right(Box::new(rhs))
+              .left(lhs_heaped)
+              .right(rhs_heaped)
               .build(),
           );
 
