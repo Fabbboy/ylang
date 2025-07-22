@@ -7,26 +7,30 @@ pub mod literal_expression;
 pub use assign_expression::AssignExpression;
 pub use binary_expression::BinaryExpression;
 pub use block_expression::BlockExpression;
-use getset::Getters;
 pub use identifier_expression::IdentifierExpression;
 pub use literal_expression::LiteralExpression;
-use typed_builder::TypedBuilder;
-
-#[derive(Debug, Getters, TypedBuilder)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct Expression<'ctx> {
-  #[getset(get = "pub")]
-  value: ExpressionKind<'ctx>,
-}
+use sable_common::location::Location;
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub enum ExpressionKind<'ctx> {
+pub enum Expression<'ctx> {
   Block(BlockExpression<'ctx>),
   Literal(LiteralExpression<'ctx>),
   Assign(AssignExpression<'ctx>),
   Binary(BinaryExpression<'ctx>),
   Identifier(IdentifierExpression<'ctx>),
+}
+
+impl<'ctx> Expression<'ctx> {
+  pub fn location(&self) -> &Location<'ctx> {
+    match self {
+      Expression::Block(block) => block.location(),
+      Expression::Literal(literal) => literal.location(),
+      Expression::Assign(assign) => assign.location(),
+      Expression::Binary(binary) => binary.location(),
+      Expression::Identifier(identifier) => identifier.location(),
+    }
+  }
 }
 
 pub trait VisitExpression<'ctx> {
@@ -39,12 +43,12 @@ pub trait VisitExpression<'ctx> {
   fn visit_identifier(&mut self, identifier: &IdentifierExpression<'ctx>) -> Self::Result;
 
   fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Result {
-    match expression.value() {
-      ExpressionKind::Block(block) => self.visit_block(block),
-      ExpressionKind::Literal(literal) => self.visit_literal(literal),
-      ExpressionKind::Assign(assign) => self.visit_assign(assign),
-      ExpressionKind::Binary(binary) => self.visit_binary(binary),
-      ExpressionKind::Identifier(identifier) => self.visit_identifier(identifier),
+    match expression {
+      Expression::Block(block) => self.visit_block(block),
+      Expression::Literal(literal) => self.visit_literal(literal),
+      Expression::Assign(assign) => self.visit_assign(assign),
+      Expression::Binary(binary) => self.visit_binary(binary),
+      Expression::Identifier(identifier) => self.visit_identifier(identifier),
     }
   }
 }

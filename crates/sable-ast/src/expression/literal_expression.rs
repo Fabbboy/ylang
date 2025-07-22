@@ -1,7 +1,7 @@
 use getset::Getters;
 use typed_builder::TypedBuilder;
 
-use crate::located::Located;
+use sable_common::location::Location;
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -10,13 +10,22 @@ pub enum LiteralExpression<'ctx> {
   Float(FloatExpression<'ctx>),
 }
 
+impl<'ctx> LiteralExpression<'ctx> {
+  pub fn location(&self) -> &Location<'ctx> {
+    match self {
+      LiteralExpression::Integer(expr) => expr.location(),
+      LiteralExpression::Float(expr) => expr.location(),
+    }
+  }
+}
+
 #[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct IntegerExpression<'ctx> {
   #[getset(get = "pub")]
   value: i64,
   #[getset(get = "pub")]
-  location: Located<'ctx, ()>,
+  location: Location<'ctx>,
 }
 
 #[derive(Debug, Getters, TypedBuilder)]
@@ -25,5 +34,5 @@ pub struct FloatExpression<'ctx> {
   #[getset(get = "pub")]
   value: f64,
   #[getset(get = "pub")]
-  location: Located<'ctx, ()>,
+  location: Location<'ctx>,
 }
