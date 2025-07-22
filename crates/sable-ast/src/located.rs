@@ -4,7 +4,7 @@ use typed_builder::TypedBuilder;
 
 use crate::token::Token;
 
-#[derive(Debug, Clone, Getters, TypedBuilder)]
+#[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Located<'loc, T> {
   #[getset(get = "pub")]
