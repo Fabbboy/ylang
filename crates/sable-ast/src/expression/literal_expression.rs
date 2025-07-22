@@ -10,15 +10,6 @@ pub enum LiteralExpression<'ctx> {
   Float(FloatExpression<'ctx>),
 }
 
-impl<'ctx> LiteralExpression<'ctx> {
-  pub fn location(&self) -> &Location<'ctx> {
-    match self {
-      LiteralExpression::Integer(expr) => expr.location(),
-      LiteralExpression::Float(expr) => expr.location(),
-    }
-  }
-}
-
 #[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct IntegerExpression<'ctx> {

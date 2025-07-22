@@ -2,11 +2,13 @@ use getset::Getters;
 use sable_common::location::Location;
 use typed_builder::TypedBuilder;
 
+use crate::located::Located;
+
 #[derive(Clone, Debug, PartialEq, Eq, Default, TypedBuilder, Getters, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Path<'ctx> {
   #[getset(get = "pub")]
-  segments: Vec<&'ctx str>,
+  segments: Vec<Located<'ctx, &'ctx str>>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Default, Hash)]

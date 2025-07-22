@@ -8,6 +8,7 @@ use sable_ast::{
     BinaryExpression,
     BlockExpression,
     Expression,
+    ExpressionKind,
     IdentifierExpression,
     LiteralExpression,
     binary_expression::{
@@ -21,6 +22,7 @@ use sable_ast::{
       IntegerExpression,
     },
   },
+  located::Located,
   objects::function::{
     Function,
     FunctionParam,
@@ -160,7 +162,12 @@ where
   fn parse_type(&mut self) -> Result<(Type<'ctx>, Location<'ctx>), ParseError<'ctx>> {
     let token = self.expect(smallvec![TokenKind::Identifier])?;
 
-    let mut ty = Type::Path(Path::builder().segments(vec![token.lexeme()]).build());
+    let segment_located = Located::builder()
+      .value(*token.lexeme())
+      .location(token.location().clone())
+      .build();
+
+    let mut ty = Type::Path(Path::builder().segments(vec![segment_located]).build());
 
     while self.peek(smallvec![TokenKind::Star]).is_some() {
       let _ptr_tok = self.expect(smallvec![TokenKind::Star])?;
@@ -191,11 +198,20 @@ where
     let maybe_next = match self.peek(smallvec![TokenKind::Assign]) {
       Some(got) => got,
       _ => {
-        let id_expr = IdentifierExpression::builder()
-          .name(identifier.lexeme())
+        let name_located = Located::builder()
+          .value(*identifier.lexeme())
           .location(identifier.location().clone())
           .build();
-        return Ok(Expression::Identifier(id_expr));
+        let id_expr = IdentifierExpression::builder()
+          .name(name_located)
+          .location(identifier.location().clone())
+          .build();
+        return Ok(
+          Expression::builder()
+            .value(ExpressionKind::Identifier(id_expr))
+            .location(identifier.location().clone())
+            .build(),
+        );
       }
     };
 
@@ -205,13 +221,22 @@ where
         let value = self.parse_expression()?;
         let value_heaped = self.ast.arena().alloc(value);
 
+        let identifier_located = Located::builder()
+          .value(*identifier.lexeme())
+          .location(identifier.location().clone())
+          .build();
         let assign_expr = AssignExpression::builder()
-          .identifier(identifier.lexeme())
+          .identifier(identifier_located)
           .value(value_heaped)
           .location(identifier.location().clone())
           .build();
 
-        Ok(Expression::Assign(assign_expr))
+        Ok(
+          Expression::builder()
+            .value(ExpressionKind::Assign(assign_expr))
+            .location(identifier.location().clone())
+            .build(),
+        )
       }
       _ => unreachable!("Expected assignment operator but got: {:?}", maybe_next),
     }
@@ -241,7 +266,14 @@ where
           .location(value_expr.location().clone())
           .build();
 
-        Ok(Expression::Literal(LiteralExpression::Integer(int_expr)))
+        Ok(
+          Expression::builder()
+            .value(ExpressionKind::Literal(LiteralExpression::Integer(
+              int_expr,
+            )))
+            .location(value_expr.location().clone())
+            .build(),
+        )
       }
       TokenKind::Float => {
         let value_expr = self.expect(smallvec![TokenKind::Float])?;
@@ -255,7 +287,15 @@ where
           .value(*value)
           .location(value_expr.location().clone())
           .build();
-        Ok(Expression::Literal(LiteralExpression::Float(float_expr)))
+
+        Ok(
+          Expression::builder()
+            .value(ExpressionKind::Literal(LiteralExpression::Float(
+              float_expr,
+            )))
+            .location(value_expr.location().clone())
+            .build(),
+        )
       }
       TokenKind::Identifier => Ok(self.parse_identifier()?),
       _ => unreachable!("Unhandled token kind: {:?}", expr_type),
@@ -284,7 +324,10 @@ where
             .right(rhs_heaped)
             .location(combined.clone())
             .build();
-          lhs = Expression::Binary(BinaryExpression::Multiply(expr));
+          lhs = Expression::builder()
+            .value(ExpressionKind::Binary(BinaryExpression::Multiply(expr)))
+            .location(combined.clone())
+            .build();
         }
         TokenKind::Slash => {
           let expr = DivideExpression::builder()
@@ -293,7 +336,10 @@ where
             .location(combined.clone())
             .build();
 
-          lhs = Expression::Binary(BinaryExpression::Divide(expr));
+          lhs = Expression::builder()
+            .value(ExpressionKind::Binary(BinaryExpression::Divide(expr)))
+            .location(combined.clone())
+            .build();
         }
         _ => unreachable!("Unhandled token kind: {:?}", op_token.kind()),
       };
@@ -325,7 +371,10 @@ where
             .location(combined.clone())
             .build();
 
-          lhs = Expression::Binary(BinaryExpression::Add(expr));
+          lhs = Expression::builder()
+            .value(ExpressionKind::Binary(BinaryExpression::Add(expr)))
+            .location(combined.clone())
+            .build();
         }
         TokenKind::Minus => {
           let expr = BinaryExpression::Subtract(
@@ -336,7 +385,10 @@ where
               .build(),
           );
 
-          lhs = Expression::Binary(expr);
+          lhs = Expression::builder()
+            .value(ExpressionKind::Binary(expr))
+            .location(combined.clone())
+            .build();
         }
 
         _ => unreachable!("Unhandled token kind: {:?}", op_token.kind()),
@@ -361,16 +413,20 @@ where
     self.expect(smallvec![TokenKind::Assign])?;
 
     let initializer = self.parse_expression()?;
-    let var_stop = self.expect(smallvec![TokenKind::Semicolon])?;
+    self.expect(smallvec![TokenKind::Semicolon])?;
 
-    let location = var_start.location().merge(var_stop.location()).unwrap();
+    let name_located = Located::builder()
+      .value(*var_name_tok.lexeme())
+      .location(var_name_tok.location().clone())
+      .build();
+
+    let type_located = Located::builder().value(type_.0).location(type_.1).build();
 
     Ok(
       VariableStatement::builder()
-        .name(var_name_tok.lexeme())
+        .name(name_located)
         .initializer(initializer)
-        .type_(type_.0)
-        .location(location)
+        .type_(type_located)
         .build(),
     )
   }
@@ -398,7 +454,12 @@ where
     match stmt_start {
       TokenKind::Var => {
         let var_stmt = self.parse_variable_stmt()?;
-        return Ok(Statement::Variable(var_stmt));
+        let stmt_location = var_stmt.name().location().clone();
+        let var_stmt_located = Located::builder()
+          .value(var_stmt)
+          .location(stmt_location)
+          .build();
+        return Ok(Statement::Variable(var_stmt_located));
       }
       _ => unreachable!("Unhandled token kind: {:?}", stmt_start),
     }
@@ -465,7 +526,12 @@ where
     let mut pre_params = SmallVec::<[FunctionParam<'ctx>; MAX_INLINE_PARAMS]>::new();
     while self.peek(smallvec![TokenKind::Identifier]).is_some() {
       let param = self.parse_tn_pair()?;
-      pre_params.push(param.into());
+      let param_location = param.location().clone();
+      let param_located = Located::builder()
+        .value(param)
+        .location(param_location)
+        .build();
+      pre_params.push(param_located.into());
       if self.peek(smallvec![TokenKind::Comma]).is_some() {
         self.expect(smallvec![TokenKind::Comma])?;
       }
@@ -492,15 +558,22 @@ where
       self.expect(smallvec![TokenKind::Semicolon])?;
     }
 
-    let location = name_token.location().merge(&ret_loc).unwrap();
+    let name_located = Located::builder()
+      .value(*name_token.lexeme())
+      .location(name_token.location().clone())
+      .build();
+
+    let return_type_located = Located::builder()
+      .value(return_type)
+      .location(ret_loc)
+      .build();
 
     Ok(
       Function::builder()
-        .name(name_token.lexeme())
+        .name(name_located)
         .params(final_params)
         .block(block)
-        .return_type(return_type)
-        .location(location)
+        .return_type(return_type_located)
         .build(),
     )
   }
