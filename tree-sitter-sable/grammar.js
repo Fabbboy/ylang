@@ -11,114 +11,78 @@
 module.exports = grammar({
   name: "sable",
 
-  extras: $ => [
-    /\s/,
-    $.comment,
-  ],
+  extras: ($) => [/\s/, $.comment],
 
   rules: {
-    source_file: $ => repeat($.function_declaration),
+    source_file: ($) => repeat($.function_declaration),
 
-    function_declaration: $ => seq(
-      'func',
-      $.identifier,
-      '(',
-      optional($.parameter_list),
-      ')',
-      ':',
-      $.type,
-      $.block_or_semi
-    ),
+    function_declaration: ($) =>
+      seq(
+        "func",
+        $.identifier,
+        "(",
+        optional($.parameter_list),
+        ")",
+        ":",
+        $.type,
+        $.block_or_semi
+      ),
 
-    parameter_list: $ => seq(
-      $.parameter,
-      repeat(seq(',', $.parameter))
-    ),
+    parameter_list: ($) => seq($.parameter, repeat(seq(",", $.parameter))),
 
-    parameter: $ => seq(
-      $.identifier,
-      ':',
-      $.type
-    ),
+    parameter: ($) => seq($.identifier, ":", $.type),
 
-    type: $ => seq(
-      $.identifier,
-      optional($.pointer_suffix)
-    ),
+    type: ($) => seq($.identifier, optional($.pointer_suffix)),
 
-    pointer_suffix: $ => repeat1('*'),
+    pointer_suffix: ($) => repeat1("*"),
 
-    block_or_semi: $ => choice(
-      $.block,
-      ';'
-    ),
+    block_or_semi: ($) => choice($.block, ";"),
 
-    block: $ => seq(
-      '{',
-      repeat($.statement),
-      '}'
-    ),
+    block: ($) => seq("{", repeat($.statement), "}"),
 
-    statement: $ => choice(
-      $.variable_declaration,
-      $.expression_statement,
-    ),
+    statement: ($) => choice($.variable_declaration, $.expression_statement),
 
-    variable_declaration: $ => seq(
-      'var',
-      $.identifier,
-      optional(seq(':', $.type)),
-      '=',
-      $.expression,
-      ';'
-    ),
+    variable_declaration: ($) =>
+      seq(
+        "var",
+        $.identifier,
+        optional(seq(":", $.type)),
+        "=",
+        $.expression,
+        ";"
+      ),
 
-    expression_statement: $ => seq(
-      $.expression,
-      ';'
-    ),
+    expression_statement: ($) => seq($.expression, ";"),
 
-    expression: $ => $.assignment,
+    expression: ($) => $.assignment,
 
-    assignment: $ => choice(
-      seq($.identifier, '=', $.expression),
-      $.additive
-    ),
+    assignment: ($) => choice(seq($.identifier, "=", $.expression), $.additive),
 
-    additive: $ => prec.left(1, seq(
-      $.multiplicative,
-      repeat(seq(
-        choice('+', '-'),
-        $.multiplicative
-      ))
-    )),
+    additive: ($) =>
+      prec.left(
+        1,
+        seq($.multiplicative, repeat(seq(choice("+", "-"), $.multiplicative)))
+      ),
 
-    multiplicative: $ => prec.left(2, seq(
-      $.primary,
-      repeat(seq(
-        choice('*', '/'),
-        $.primary
-      ))
-    )),
+    multiplicative: ($) =>
+      prec.left(2, seq($.primary, repeat(seq(choice("*", "/"), $.primary)))),
 
-    primary: $ => choice(
-      $.literal,
-      $.identifier,
-      seq('(', $.expression, ')')
-    ),
+    primary: ($) =>
+      choice($.literal, $.identifier, seq("(", $.expression, ")")),
 
-    literal: $ => choice(
-      $.integer_literal,
-      $.float_literal
-    ),
+    literal: ($) => choice($.integer_literal, $.float_literal),
 
-    integer_literal: $ => /[0-9]+/,
+    integer_literal: ($) => /[0-9]+/,
 
-    float_literal: $ => /[0-9]+\.[0-9]+/,
+    float_literal: ($) => /[0-9]+\.[0-9]+/,
 
-    identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
-
-    comment: $ => /\/\/[^\r\n]*/
-  }
+    identifier: ($) => /[a-zA-Z_][a-zA-Z0-9_]*/,
+    comment: ($) =>
+      token(
+        choice(
+          seq("//", /[^\r\n]*/),
+          seq("/*", /[^*]*\*+([^/*][^*]*\*+)*/, "/")
+        )
+      ),
+  },
 });
-

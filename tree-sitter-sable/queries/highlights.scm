@@ -6,13 +6,8 @@
 (function_declaration
   (identifier) @function)
 
-; Types - built-in types (more specific patterns first)
-(type 
-  (identifier) @type.builtin
-  (#match? @type.builtin "^(i32|i64|i8|i16|u32|u64|u8|u16|f32|f64|bool|void|char|str)$"))
-
-; Types - all other types (user-defined, custom types)
-(type 
+; Types
+(type
   (identifier) @type)
 
 ; Pointer suffixes
