@@ -7,6 +7,7 @@ use smallvec::SmallVec;
 
 use crate::{
   lex_error::{
+    comment_error::CommentError,
     numeric_error::NumericError,
     unknown_char::UnknownCharError,
   },
@@ -19,6 +20,7 @@ pub enum ParseError<'ctx> {
   UnexpectedToken(UnexpectedTokenError<'ctx>),
   UnknownChar(UnknownCharError<'ctx>),
   NumericError(NumericError<'ctx>),
+  CommentError(CommentError<'ctx>),
 }
 
 impl<'ctx> Reportable<'ctx> for ParseError<'ctx> {
@@ -27,6 +29,7 @@ impl<'ctx> Reportable<'ctx> for ParseError<'ctx> {
       ParseError::UnexpectedToken(unexpected_token) => unexpected_token.report(),
       ParseError::UnknownChar(unknown_char) => unknown_char.report(),
       ParseError::NumericError(numeric_error) => numeric_error.report(),
+      ParseError::CommentError(comment_error) => comment_error.report(),
     }
   }
 }
