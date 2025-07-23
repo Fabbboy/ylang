@@ -62,7 +62,6 @@ module.exports = grammar({
     statement: $ => choice(
       $.variable_declaration,
       $.expression_statement,
-      $.return_statement
     ),
 
     variable_declaration: $ => seq(

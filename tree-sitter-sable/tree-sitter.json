@@ -7,7 +7,8 @@
       "title": "Sable",
       "scope": "source.sable",
       "file-types": [
-        "sable"
+        "sable",
+        "sbl"
       ],
       "injection-regex": "^sable$",
       "class-name": "TreeSitterSable",
