@@ -47,6 +47,7 @@ use sable_ast::{
 use sable_common::location::Location;
 use sable_errors::{
   lex_error::{
+    comment_error::CommentError,
     numeric_error::NumericError,
     unknown_char::UnknownCharError,
   },
@@ -115,6 +116,9 @@ where
       )),
       TokenError::InvalidInteger | TokenError::InvalidFloat => {
         ParseError::NumericError(NumericError::new(token.lexeme(), token.location().clone()))
+      }
+      TokenError::UnterminatedComment => {
+        ParseError::CommentError(CommentError::new(token.lexeme(), token.location().clone()))
       }
     }
   }

@@ -9,6 +9,7 @@ pub enum TokenError {
   UnknownCharacter,
   InvalidInteger,
   InvalidFloat,
+  UnterminatedComment,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
