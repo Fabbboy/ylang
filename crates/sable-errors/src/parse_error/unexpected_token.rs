@@ -44,12 +44,6 @@ impl<'ctx> Reportable<'ctx> for UnexpectedTokenError<'ctx> {
         .join(", ")
     );
 
-    println!("Expected: {}", expected);
-    println!("Found: {:?}", self.found.kind());
-    println!("Span: {:?}", span);
-    println!("Location: {:?}", self.found.location());
-    println!("File: {:?}", self.found.location().filename());
-
     Report::build(ReportKind::Error, span.clone())
       .with_message(format!("Unexpected token: `{:?}`", self.found.kind()))
       .with_label(Label::new(span).with_message(expected))
