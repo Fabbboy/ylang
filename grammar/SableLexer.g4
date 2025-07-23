@@ -35,3 +35,7 @@ COMMENT
   : '//' ~[\r\n]* -> skip
   ;
 
+MULTILINE_COMMENT
+  : '/*' .*? '*/' -> skip
+  ;
+

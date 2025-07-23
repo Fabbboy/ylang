@@ -86,6 +86,20 @@ impl<'ctx> Lexer<'ctx> {
             }
           }
         }
+        //TODO: Emit error token when EOF is reached without closing the comment
+        Some('/') if self.check(1, |c| c == '*') => {
+          self.advance(); // skip '/'
+          self.advance(); // skip '*'
+          while let Some(c) = self.get_char(0) {
+            if c == '*' && self.check(1, |c| c == '/') {
+              self.advance(); // skip '*'
+              self.advance(); // skip '/'
+              break;
+            } else {
+              self.advance();
+            }
+          }
+        }
         _ => break,
       }
     }

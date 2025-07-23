@@ -1,0 +1,29 @@
+{
+  "tree-sitter-vscode.languageConfigs": [
+    {
+      "lang": "sable",
+      "parser": "/home/fabrice/RustProjects/sable/tree-sitter-sable/tree-sitter-sable.wasm",
+      "highlights": "/home/fabrice/RustProjects/sable/tree-sitter-sable/queries/highlights.scm",
+      "injections": "/home/fabrice/RustProjects/sable/tree-sitter-sable/queries/injections.scm",
+      "semanticTokenTypeMappings": {
+        "constant": {
+          "targetTokenType": "variable",
+          "targetTokenModifiers": [
+            "declaration",
+            "readonly"
+          ]
+        },
+        "function": {
+          "targetTokenType": "function"
+        },
+        "type": {
+          "targetTokenType": "type"
+        },
+        "variable.parameter": {
+          "targetTokenType": "parameter"
+        }
+      }
+    }
+  ],
+  "tree-sitter-vscode.debug": true
+}
