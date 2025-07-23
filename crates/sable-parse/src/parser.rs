@@ -88,7 +88,12 @@ enum ParseStatus {
 }
 
 fn expected_expression() -> SmallVec<[TokenKind; MAX_INLINE_KINDS]> {
-  smallvec![TokenKind::Integer, TokenKind::Float, TokenKind::Identifier]
+  smallvec![
+    TokenKind::Integer,
+    TokenKind::Float,
+    TokenKind::Identifier,
+    TokenKind::Paren(true)
+  ]
 }
 
 pub struct Parser<'parser, 'ctx, D>
@@ -311,7 +316,14 @@ where
             .build(),
         )
       },
-      TokenKind::Identifier => Ok(self.parse_identifier()?)
+      TokenKind::Identifier => Ok(self.parse_identifier()?),
+      TokenKind::Paren(true) => {
+        self.expect(smallvec![TokenKind::Paren(true)])?;
+        let expr = self.parse_expression()?;
+        self.expect(smallvec![TokenKind::Paren(false)])?;
+
+        Ok(expr)
+      },
     })
   }
 
