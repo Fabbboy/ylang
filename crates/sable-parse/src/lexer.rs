@@ -73,7 +73,7 @@ impl<'ctx> Lexer<'ctx> {
     false
   }
 
-  fn skip_trivial(&mut self) {
+  fn skip_trivial(&mut self) -> Option<Token<'ctx>> {
     loop {
       match self.get_char(0) {
         Some(' ' | '\t' | '\r' | '\n') => self.advance(),
@@ -86,23 +86,33 @@ impl<'ctx> Lexer<'ctx> {
             }
           }
         }
-        //TODO: Emit error token when EOF is reached without closing the comment
         Some('/') if self.check(1, |c| c == '*') => {
+          let comment_start = self.pos;
           self.advance(); // skip '/'
           self.advance(); // skip '*'
+          let mut terminated = false;
           while let Some(c) = self.get_char(0) {
             if c == '*' && self.check(1, |c| c == '/') {
               self.advance(); // skip '*'
               self.advance(); // skip '/'
+              terminated = true;
               break;
             } else {
               self.advance();
             }
           }
+          if !terminated {
+            self.start = comment_start;
+            return Some(self.make_token(
+              TokenKind::Error,
+              Some(TokenData::Error(TokenError::UnterminatedComment)),
+            ));
+          }
         }
         _ => break,
       }
     }
+    None
   }
 
   fn lex_identifier(&mut self) -> Token<'ctx> {
@@ -160,7 +170,9 @@ impl<'ctx> Lexer<'ctx> {
   }
 
   fn lex(&mut self) -> Token<'ctx> {
-    self.skip_trivial();
+    if let Some(token) = self.skip_trivial() {
+      return token;
+    }
 
     self.start = self.pos;
     match self.get_char(0) {
