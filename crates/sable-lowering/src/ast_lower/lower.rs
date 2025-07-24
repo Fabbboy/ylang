@@ -16,7 +16,6 @@ use sable_ast::{
     VisitStatement,
   },
 };
-use sable_common::location::Location;
 use sable_hir::{
   hir::item::Item,
   package::Package,
@@ -93,24 +92,15 @@ impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hi
     todo!()
   }
 
-  fn visit_literal(
-    &mut self,
-    literal: &Located<'ast, LiteralExpression<'ast>>,
-  ) -> Self::Ret {
+  fn visit_literal(&mut self, literal: &Located<'ast, LiteralExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_assign(
-    &mut self,
-    assign: &Located<'ast, AssignExpression<'ast>>,
-  ) -> Self::Ret {
+  fn visit_assign(&mut self, assign: &Located<'ast, AssignExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_binary(
-    &mut self,
-    binary: &Located<'ast, BinaryExpression<'ast>>,
-  ) -> Self::Ret {
+  fn visit_binary(&mut self, binary: &Located<'ast, BinaryExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 

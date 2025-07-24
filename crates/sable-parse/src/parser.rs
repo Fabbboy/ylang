@@ -227,12 +227,11 @@ where
           .name(name_located)
           .location(identifier.location().clone())
           .build();
-        return Ok(
-          Expression::builder()
-            .value(Expression::Identifier(id_expr))
-            .location(identifier.location().clone())
-            .build(),
-        );
+        let located = Located::builder()
+          .value(id_expr)
+          .location(identifier.location().clone())
+          .build();
+        return Ok(Expression::Identifier(located));
       }
     };
 
@@ -252,12 +251,11 @@ where
           .location(identifier.location().clone())
           .build();
 
-        Ok(
-          Expression::builder()
-            .value(Expression::Assign(assign_expr))
-            .location(identifier.location().clone())
-            .build(),
-        )
+        let located = Located::builder()
+          .value(assign_expr)
+          .location(identifier.location().clone())
+          .build();
+        Ok(Expression::Assign(located))
       }
     })
   }
@@ -286,14 +284,11 @@ where
           .location(value_expr.location().clone())
           .build();
 
-        Ok(
-          Expression::builder()
-            .value(Expression::Literal(LiteralExpression::Integer(
-              int_expr,
-            )))
-            .location(value_expr.location().clone())
-            .build(),
-        )
+        let located = Located::builder()
+          .value(LiteralExpression::Integer(int_expr))
+          .location(value_expr.location().clone())
+          .build();
+        Ok(Expression::Literal(located))
       },
       TokenKind::Float => {
         let value_expr = self.expect(smallvec![TokenKind::Float])?;
@@ -308,14 +303,11 @@ where
           .location(value_expr.location().clone())
           .build();
 
-        Ok(
-          Expression::builder()
-            .value(Expression::Literal(LiteralExpression::Float(
-              float_expr,
-            )))
-            .location(value_expr.location().clone())
-            .build(),
-        )
+        let located = Located::builder()
+          .value(LiteralExpression::Float(float_expr))
+          .location(value_expr.location().clone())
+          .build();
+        Ok(Expression::Literal(located))
       },
       TokenKind::Identifier => Ok(self.parse_identifier()?),
       TokenKind::Paren(true) => {
@@ -350,10 +342,11 @@ where
             .right(rhs_heaped)
             .location(combined.clone())
             .build();
-          lhs = Expression::builder()
-            .value(Expression::Binary(BinaryExpression::Multiply(expr)))
+          let located = Located::builder()
+            .value(BinaryExpression::Multiply(expr))
             .location(combined.clone())
             .build();
+          lhs = Expression::Binary(located);
         },
         TokenKind::Slash => {
           let expr = DivideExpression::builder()
@@ -361,10 +354,11 @@ where
             .right(rhs_heaped)
             .location(combined.clone())
             .build();
-          lhs = Expression::builder()
-            .value(Expression::Binary(BinaryExpression::Divide(expr)))
+          let located = Located::builder()
+            .value(BinaryExpression::Divide(expr))
             .location(combined.clone())
             .build();
+          lhs = Expression::Binary(located);
         }
       });
     }
@@ -395,10 +389,11 @@ where
             .location(combined.clone())
             .build();
 
-          lhs = Expression::builder()
-            .value(Expression::Binary(BinaryExpression::Add(expr)))
+          let located = Located::builder()
+            .value(BinaryExpression::Add(expr))
             .location(combined.clone())
             .build();
+          lhs = Expression::Binary(located);
         },
         TokenKind::Minus => {
           let expr = BinaryExpression::Subtract(
@@ -409,10 +404,11 @@ where
               .build(),
           );
 
-          lhs = Expression::builder()
-            .value(Expression::Binary(expr))
+          let located = Located::builder()
+            .value(expr)
             .location(combined.clone())
             .build();
+          lhs = Expression::Binary(located);
         }
       });
     }

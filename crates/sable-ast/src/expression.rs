@@ -11,6 +11,7 @@ pub use identifier_expression::IdentifierExpression;
 pub use literal_expression::LiteralExpression;
 
 use crate::located::Located;
+use sable_common::location::Location;
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -41,6 +42,18 @@ pub trait VisitExpression<'ctx> {
       Expression::Assign(assign) => self.visit_assign(assign),
       Expression::Binary(binary) => self.visit_binary(binary),
       Expression::Identifier(identifier) => self.visit_identifier(identifier),
+    }
+  }
+}
+
+impl<'ctx> Expression<'ctx> {
+  pub fn location(&self) -> &Location<'ctx> {
+    match self {
+      Expression::Block(expr) => expr.location(),
+      Expression::Literal(expr) => expr.location(),
+      Expression::Assign(expr) => expr.location(),
+      Expression::Binary(expr) => expr.location(),
+      Expression::Identifier(expr) => expr.location(),
     }
   }
 }
