@@ -89,34 +89,34 @@ impl<'ast, 'lower, 'hir> AstLowering<'ast, 'lower, 'hir> {
 impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hir> {
   type Ret = Result<Item<'hir>, AstLoweringErrorMMO>;
 
-  fn visit_block(&mut self, block: &BlockExpression<'ast>, location: &Location<'ast>) -> Self::Ret {
+  fn visit_block(&mut self, block: &Located<'ast, BlockExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_literal(&mut self, literal: &LiteralExpression, location: &Location<'ast>) -> Self::Ret {
+  fn visit_literal(
+    &mut self,
+    literal: &Located<'ast, LiteralExpression<'ast>>,
+  ) -> Self::Ret {
     todo!()
   }
 
   fn visit_assign(
     &mut self,
-    assign: &AssignExpression<'ast>,
-    location: &Location<'ast>,
+    assign: &Located<'ast, AssignExpression<'ast>>,
   ) -> Self::Ret {
     todo!()
   }
 
   fn visit_binary(
     &mut self,
-    binary: &BinaryExpression<'ast>,
-    location: &Location<'ast>,
+    binary: &Located<'ast, BinaryExpression<'ast>>,
   ) -> Self::Ret {
     todo!()
   }
 
   fn visit_identifier(
     &mut self,
-    identifier: &IdentifierExpression<'ast>,
-    location: &Location<'ast>,
+    identifier: &Located<'ast, IdentifierExpression<'ast>>,
   ) -> Self::Ret {
     todo!()
   }
