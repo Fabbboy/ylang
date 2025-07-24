@@ -17,7 +17,7 @@ use sable_ast::{
   },
 };
 use sable_common::location::Location;
-use sable_hir::package::Package;
+use sable_hir::{hir::item::Item, package::Package};
 
 use crate::ast_lower_error::AstLoweringErrorMMO;
 
@@ -25,8 +25,6 @@ enum LoweringStatus {
   Success,
   OhNo,
 }
-
-pub enum VisitorReturn {}
 
 pub struct AstLowering<'ast, 'lower, 'hir> {
   asts: &'lower [Ast<'ast>],
@@ -86,7 +84,7 @@ impl<'ast, 'lower, 'hir> AstLowering<'ast, 'lower, 'hir> {
 }
 
 impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hir> {
-  type Ret = Result<VisitorReturn, AstLoweringErrorMMO>;
+  type Ret = Result<Item<'hir>, AstLoweringErrorMMO>;
 
   fn visit_block(&mut self, block: &BlockExpression<'ast>, location: &Location<'ast>) -> Self::Ret {
     todo!()
@@ -122,7 +120,7 @@ impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hi
 }
 
 impl<'ast, 'lower, 'hir> VisitStatement<'ast> for AstLowering<'ast, 'lower, 'hir> {
-  type Ret = Result<VisitorReturn, AstLoweringErrorMMO>;
+  type Ret = Result<Item<'hir>, AstLoweringErrorMMO>;
 
   fn visit_expression(&mut self, expression: &Expression<'ast>) -> Self::Ret {
     todo!()
