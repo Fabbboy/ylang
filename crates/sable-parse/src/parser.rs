@@ -1,5 +1,20 @@
 use std::mem::MaybeUninit;
 
+use crate::{
+  lex_error::{
+    comment_error::CommentError,
+    numeric_error::NumericError,
+    unknown_char::UnknownCharError,
+  },
+  parse_error::{
+    ParseError,
+    ParseErrorMOO,
+    unexpected_token::{
+      MAX_INLINE_KINDS,
+      UnexpectedTokenError,
+    },
+  },
+};
 use either::Either;
 use sable_ast::{
   ast::Ast,
@@ -8,7 +23,6 @@ use sable_ast::{
     BinaryExpression,
     BlockExpression,
     Expression,
-    ExpressionKind,
     IdentifierExpression,
     LiteralExpression,
     binary_expression::{
@@ -44,25 +58,12 @@ use sable_ast::{
     TypeNamePair,
   },
 };
-use sable_common::location::Location;
-use crate::{
-  lex_error::{
-    comment_error::CommentError,
-    numeric_error::NumericError,
-    unknown_char::UnknownCharError,
+use sable_common::{
+  location::Location,
+  writer::{
+    Reportable,
+    Sink,
   },
-  parse_error::{
-    ParseError,
-    ParseErrorMOO,
-    unexpected_token::{
-      MAX_INLINE_KINDS,
-      UnexpectedTokenError,
-    },
-  },
-};
-use sable_common::writer::{
-  Reportable,
-  Sink,
 };
 use smallvec::{
   SmallVec,
@@ -228,7 +229,7 @@ where
           .build();
         return Ok(
           Expression::builder()
-            .value(ExpressionKind::Identifier(id_expr))
+            .value(Expression::Identifier(id_expr))
             .location(identifier.location().clone())
             .build(),
         );
@@ -253,7 +254,7 @@ where
 
         Ok(
           Expression::builder()
-            .value(ExpressionKind::Assign(assign_expr))
+            .value(Expression::Assign(assign_expr))
             .location(identifier.location().clone())
             .build(),
         )
@@ -287,7 +288,7 @@ where
 
         Ok(
           Expression::builder()
-            .value(ExpressionKind::Literal(LiteralExpression::Integer(
+            .value(Expression::Literal(LiteralExpression::Integer(
               int_expr,
             )))
             .location(value_expr.location().clone())
@@ -309,7 +310,7 @@ where
 
         Ok(
           Expression::builder()
-            .value(ExpressionKind::Literal(LiteralExpression::Float(
+            .value(Expression::Literal(LiteralExpression::Float(
               float_expr,
             )))
             .location(value_expr.location().clone())
@@ -350,7 +351,7 @@ where
             .location(combined.clone())
             .build();
           lhs = Expression::builder()
-            .value(ExpressionKind::Binary(BinaryExpression::Multiply(expr)))
+            .value(Expression::Binary(BinaryExpression::Multiply(expr)))
             .location(combined.clone())
             .build();
         },
@@ -361,7 +362,7 @@ where
             .location(combined.clone())
             .build();
           lhs = Expression::builder()
-            .value(ExpressionKind::Binary(BinaryExpression::Divide(expr)))
+            .value(Expression::Binary(BinaryExpression::Divide(expr)))
             .location(combined.clone())
             .build();
         }
@@ -395,7 +396,7 @@ where
             .build();
 
           lhs = Expression::builder()
-            .value(ExpressionKind::Binary(BinaryExpression::Add(expr)))
+            .value(Expression::Binary(BinaryExpression::Add(expr)))
             .location(combined.clone())
             .build();
         },
@@ -409,7 +410,7 @@ where
           );
 
           lhs = Expression::builder()
-            .value(ExpressionKind::Binary(expr))
+            .value(Expression::Binary(expr))
             .location(combined.clone())
             .build();
         }

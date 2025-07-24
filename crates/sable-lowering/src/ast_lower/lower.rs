@@ -17,7 +17,10 @@ use sable_ast::{
   },
 };
 use sable_common::location::Location;
-use sable_hir::{hir::item::Item, package::Package};
+use sable_hir::{
+  hir::item::Item,
+  package::Package,
+};
 
 use crate::ast_lower_error::AstLoweringErrorMMO;
 
