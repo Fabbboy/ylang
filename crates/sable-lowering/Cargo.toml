@@ -6,6 +6,5 @@ edition = "2024"
 [dependencies]
 sable-common = { workspace = true }
 sable-ast = { workspace = true }
-sable-errors = { workspace = true }
 sable-hir = { workspace = true }
 sable-arena = { workspace = true }

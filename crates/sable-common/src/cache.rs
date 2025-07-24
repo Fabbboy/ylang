@@ -2,7 +2,7 @@ use ariadne::{
   Cache,
   Source as AriadneSource,
 };
-use sable_common::file::{
+use crate::file::{
   FileId,
   source::Source,
 };
