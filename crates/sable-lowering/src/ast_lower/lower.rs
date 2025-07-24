@@ -16,6 +16,7 @@ use sable_ast::{
     VisitStatement,
   },
 };
+use sable_common::writer::Sink;
 use sable_hir::{
   hir::item::Item,
   package::Package,
@@ -28,14 +29,25 @@ enum LoweringStatus {
   OhNo,
 }
 
-pub struct AstLowering<'ast, 'lower, 'hir> {
+pub struct AstLowering<'ast, 'hir, 'lower, D>
+where
+  D: Sink<'hir> + ?Sized,
+{
   asts: &'lower [Ast<'ast>],
   package: &'lower Package<'hir>,
+  sink: &'lower D,
 }
 
-impl<'ast, 'lower, 'hir> AstLowering<'ast, 'lower, 'hir> {
-  pub fn new(asts: &'lower [Ast<'ast>], package: &'lower Package<'hir>) -> Self {
-    Self { asts, package }
+impl<'ast, 'hir, 'lower, D> AstLowering<'ast, 'hir, 'lower, D>
+where
+  D: Sink<'hir> + ?Sized,
+{
+  pub fn new(asts: &'lower [Ast<'ast>], package: &'lower Package<'hir>, sink: &'lower D) -> Self {
+    Self {
+      asts,
+      package,
+      sink,
+    }
   }
 
   fn lower_func(&mut self, func: &Function<'ast>) -> Result<(), ()> {
@@ -85,7 +97,10 @@ impl<'ast, 'lower, 'hir> AstLowering<'ast, 'lower, 'hir> {
   }
 }
 
-impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hir> {
+impl<'ast, 'hir, 'lower, D> VisitExpression<'ast> for AstLowering<'ast, 'hir, 'lower, D>
+where
+  D: Sink<'hir> + ?Sized,
+{
   type Ret = Result<Item<'hir>, AstLoweringErrorMMO>;
 
   fn visit_block(&mut self, block: &Located<'ast, BlockExpression<'ast>>) -> Self::Ret {
@@ -112,7 +127,10 @@ impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hi
   }
 }
 
-impl<'ast, 'lower, 'hir> VisitStatement<'ast> for AstLowering<'ast, 'lower, 'hir> {
+impl<'ast, 'lower, 'hir, D> VisitStatement<'ast> for AstLowering<'ast, 'hir, 'lower, D>
+where
+  D: Sink<'hir> + ?Sized,
+{
   type Ret = Result<Item<'hir>, AstLoweringErrorMMO>;
 
   fn visit_expression(&mut self, expression: &Expression<'ast>) -> Self::Ret {
