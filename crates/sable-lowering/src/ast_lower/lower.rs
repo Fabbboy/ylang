@@ -19,10 +19,7 @@ use sable_ast::{
 use sable_common::location::Location;
 use sable_hir::package::Package;
 
-use crate::ast_lower_error::{
-  AstLoweringError,
-  AstLoweringErrorMMO,
-};
+use crate::ast_lower_error::AstLoweringErrorMMO;
 
 enum LoweringStatus {
   Success,
