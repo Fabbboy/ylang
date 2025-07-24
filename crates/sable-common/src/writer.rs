@@ -1,5 +1,5 @@
 use ariadne::Report;
-use sable_common::file::Span;
+use crate::file::Span;
 use std::io;
 
 use crate::cache::ErrorCache;

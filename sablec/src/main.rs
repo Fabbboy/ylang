@@ -4,7 +4,7 @@ use clap::Parser as ClapParser;
 use sable_arena::arena::Arena;
 use sable_ast::ast::Ast;
 use sable_common::file::manager::Manager;
-use sable_errors::{
+use sable_common::{
   cache::ErrorCache,
   writer::ReportWriter,
 };

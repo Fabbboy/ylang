@@ -11,7 +11,7 @@ use sable_ast::token::{
 use sable_common::file::Span;
 use smallvec::SmallVec;
 
-use crate::writer::Reportable;
+use sable_common::writer::Reportable;
 
 pub const MAX_INLINE_KINDS: usize = 8;
 

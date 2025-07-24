@@ -12,8 +12,8 @@ use crate::{
     unknown_char::UnknownCharError,
   },
   parse_error::unexpected_token::UnexpectedTokenError,
-  writer::Reportable,
 };
+use sable_common::writer::Reportable;
 
 #[derive(Debug)]
 pub enum ParseError<'ctx> {

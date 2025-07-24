@@ -45,7 +45,7 @@ use sable_ast::{
   },
 };
 use sable_common::location::Location;
-use sable_errors::{
+use crate::{
   lex_error::{
     comment_error::CommentError,
     numeric_error::NumericError,
@@ -59,10 +59,10 @@ use sable_errors::{
       UnexpectedTokenError,
     },
   },
-  writer::{
-    Reportable,
-    Sink,
-  },
+};
+use sable_common::writer::{
+  Reportable,
+  Sink,
 };
 use smallvec::{
   SmallVec,

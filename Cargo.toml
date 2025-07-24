@@ -3,7 +3,6 @@ members = [
   "crates/sable-arena",
   "crates/sable-ast",
   "crates/sable-common",
-  "crates/sable-errors",
   "crates/sable-hir",
   "crates/sable-lowering",
   "crates/sable-parse",
@@ -29,7 +28,6 @@ cxx = "1.0.160" # features: c++11, c++17, c++20
 sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }
 sable-parse = { path = "crates/sable-parse" }
-sable-errors = { path = "crates/sable-errors" }
 sable-arena = { path = "crates/sable-arena" }
 sable-hir = { path = "crates/sable-hir" }
 sable-lowering = { path = "crates/sable-lowering" }
