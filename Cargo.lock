@@ -326,6 +326,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sable-lowering"
+version = "0.1.0"
+dependencies = [
+ "sable-arena",
+ "sable-ast",
+ "sable-common",
+ "sable-errors",
+ "sable-hir",
+]
+
+[[package]]
 name = "sable-parse"
 version = "0.1.0"
 dependencies = [
@@ -340,14 +351,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sable-sema"
-version = "0.1.0"
-dependencies = [
- "sable-ast",
- "sable-hir",
-]
-
-[[package]]
 name = "sablec"
 version = "0.1.0"
 dependencies = [
@@ -358,8 +361,8 @@ dependencies = [
  "sable-common",
  "sable-errors",
  "sable-hir",
+ "sable-lowering",
  "sable-parse",
- "sable-sema",
 ]
 
 [[package]]
