@@ -152,7 +152,7 @@ impl Drop for Chunk {
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Arena {
-  default_chunk_size: usize,
+  chunk_size: usize,
   head: RefCell<Option<NonNull<Chunk>>>,
 }
 
@@ -165,7 +165,7 @@ impl Arena {
 
   pub fn with_chunk_size(chunk_size: usize) -> Self {
     Self {
-      default_chunk_size: chunk_size,
+      chunk_size,
       head: RefCell::new(None),
     }
   }
@@ -272,7 +272,7 @@ impl Arena {
       }
     }
 
-    let needed_size = layout.size().max(self.default_chunk_size);
+    let needed_size = layout.size().max(self.chunk_size);
     let alloc_size = needed_size
       .checked_next_power_of_two()
       .unwrap_or(needed_size)
@@ -392,7 +392,7 @@ impl Arena {
       total_size,
       total_used,
       empty_chunks,
-      default_chunk_size: self.default_chunk_size,
+      default_chunk_size: self.chunk_size,
     }
   }
 
