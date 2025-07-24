@@ -22,20 +22,24 @@ module.exports = grammar({
     lbrace: ($) => "{",
     rbrace: ($) => "}",
     colon: ($) => ":",
+    comma: ($) => ",",
+
+    var_kw: ($) => "var",
+    func_kw: ($) => "func",
 
     function_declaration: ($) =>
       seq(
-        "func",
+        $.func_kw,
         $.identifier,
-        "(",
+        $.lparent,
         optional($.parameter_list),
-        ")",
-        ":",
+        $.rparent,
+        $.colon,
         $.type,
         $.block_or_semi
       ),
 
-    parameter_list: ($) => seq($.parameter, repeat(seq(",", $.parameter))),
+    parameter_list: ($) => seq($.parameter, repeat(seq($.comma, $.parameter))),
 
     parameter: ($) => seq($.identifier, $.colon, $.type),
 
@@ -51,7 +55,7 @@ module.exports = grammar({
 
     variable_declaration: ($) =>
       seq(
-        "var",
+        $.var_kw,
         $.identifier,
         optional(seq($.colon, $.type)),
         "=",

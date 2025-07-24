@@ -33,20 +33,32 @@
       "type": "STRING",
       "value": ":"
     },
+    "comma": {
+      "type": "STRING",
+      "value": ","
+    },
+    "var_kw": {
+      "type": "STRING",
+      "value": "var"
+    },
+    "func_kw": {
+      "type": "STRING",
+      "value": "func"
+    },
     "function_declaration": {
       "type": "SEQ",
       "members": [
         {
-          "type": "STRING",
-          "value": "func"
+          "type": "SYMBOL",
+          "name": "func_kw"
         },
         {
           "type": "SYMBOL",
           "name": "identifier"
         },
         {
-          "type": "STRING",
-          "value": "("
+          "type": "SYMBOL",
+          "name": "lparent"
         },
         {
           "type": "CHOICE",
@@ -61,12 +73,12 @@
           ]
         },
         {
-          "type": "STRING",
-          "value": ")"
+          "type": "SYMBOL",
+          "name": "rparent"
         },
         {
-          "type": "STRING",
-          "value": ":"
+          "type": "SYMBOL",
+          "name": "colon"
         },
         {
           "type": "SYMBOL",
@@ -91,8 +103,8 @@
             "type": "SEQ",
             "members": [
               {
-                "type": "STRING",
-                "value": ","
+                "type": "SYMBOL",
+                "name": "comma"
               },
               {
                 "type": "SYMBOL",
@@ -198,8 +210,8 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "STRING",
-          "value": "var"
+          "type": "SYMBOL",
+          "name": "var_kw"
         },
         {
           "type": "SYMBOL",

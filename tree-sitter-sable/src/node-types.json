@@ -80,11 +80,6 @@
     }
   },
   {
-    "type": "colon",
-    "named": true,
-    "fields": {}
-  },
-  {
     "type": "expression",
     "named": true,
     "fields": {},
@@ -131,11 +126,27 @@
           "named": true
         },
         {
+          "type": "colon",
+          "named": true
+        },
+        {
+          "type": "func_kw",
+          "named": true
+        },
+        {
           "type": "identifier",
           "named": true
         },
         {
+          "type": "lparent",
+          "named": true
+        },
+        {
           "type": "parameter_list",
+          "named": true
+        },
+        {
+          "type": "rparent",
           "named": true
         },
         {
@@ -163,11 +174,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "lparent",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "multiplicative",
@@ -216,6 +222,10 @@
       "required": true,
       "types": [
         {
+          "type": "comma",
+          "named": true
+        },
+        {
           "type": "parameter",
           "named": true
         }
@@ -257,11 +267,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "rparent",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "source_file",
@@ -344,17 +349,13 @@
         {
           "type": "type",
           "named": true
+        },
+        {
+          "type": "var_kw",
+          "named": true
         }
       ]
     }
-  },
-  {
-    "type": "(",
-    "named": false
-  },
-  {
-    "type": ")",
-    "named": false
   },
   {
     "type": "*",
@@ -362,10 +363,6 @@
   },
   {
     "type": "+",
-    "named": false
-  },
-  {
-    "type": ",",
     "named": false
   },
   {
@@ -377,12 +374,16 @@
     "named": false
   },
   {
-    "type": ":",
+    "type": "=",
     "named": false
   },
   {
-    "type": "=",
-    "named": false
+    "type": "colon",
+    "named": true
+  },
+  {
+    "type": "comma",
+    "named": true
   },
   {
     "type": "comment",
@@ -394,8 +395,8 @@
     "named": true
   },
   {
-    "type": "func",
-    "named": false
+    "type": "func_kw",
+    "named": true
   },
   {
     "type": "identifier",
@@ -410,7 +411,15 @@
     "named": true
   },
   {
+    "type": "lparent",
+    "named": true
+  },
+  {
     "type": "rbrace",
+    "named": true
+  },
+  {
+    "type": "rparent",
     "named": true
   },
   {
@@ -418,7 +427,7 @@
     "named": true
   },
   {
-    "type": "var",
-    "named": false
+    "type": "var_kw",
+    "named": true
   }
 ]
