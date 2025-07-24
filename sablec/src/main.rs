@@ -3,13 +3,13 @@ use std::io;
 use clap::Parser as ClapParser;
 use sable_arena::arena::Arena;
 use sable_ast::ast::Ast;
-use sable_common::file::manager::Manager;
 use sable_common::{
   cache::ErrorCache,
+  file::manager::Manager,
   writer::ReportWriter,
 };
 use sable_hir::package::Package;
-use sable_lowering::ast::AstLowering;
+use sable_lowering::ast_lower::lower::AstLowering;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,

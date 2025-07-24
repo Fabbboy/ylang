@@ -19,10 +19,17 @@ use sable_ast::{
 use sable_common::location::Location;
 use sable_hir::package::Package;
 
+use crate::ast_lower_error::{
+  AstLoweringError,
+  AstLoweringErrorMMO,
+};
+
 enum LoweringStatus {
   Success,
   OhNo,
 }
+
+pub enum VisitorReturn {}
 
 pub struct AstLowering<'ast, 'lower, 'hir> {
   asts: &'lower [Ast<'ast>],
@@ -36,15 +43,6 @@ impl<'ast, 'lower, 'hir> AstLowering<'ast, 'lower, 'hir> {
 
   fn lower_func(&mut self, func: &Function<'ast>) -> Result<(), ()> {
     let mut status = LoweringStatus::Success;
-
-    if let Some(blk) = func.block() {
-      match self.visit_block(blk, &blk.location()) {
-        Ok(_) => {}
-        Err(_) => {
-          status = LoweringStatus::OhNo;
-        }
-      }
-    }
 
     match status {
       LoweringStatus::Success => Ok(()),
@@ -91,21 +89,13 @@ impl<'ast, 'lower, 'hir> AstLowering<'ast, 'lower, 'hir> {
 }
 
 impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hir> {
-  type Result = Result<(), ()>;
+  type Ret = Result<VisitorReturn, AstLoweringErrorMMO>;
 
-  fn visit_block(
-    &mut self,
-    block: &BlockExpression<'ast>,
-    location: &Location<'ast>,
-  ) -> Self::Result {
+  fn visit_block(&mut self, block: &BlockExpression<'ast>, location: &Location<'ast>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_literal(
-    &mut self,
-    literal: &LiteralExpression,
-    location: &Location<'ast>,
-  ) -> Self::Result {
+  fn visit_literal(&mut self, literal: &LiteralExpression, location: &Location<'ast>) -> Self::Ret {
     todo!()
   }
 
@@ -113,7 +103,7 @@ impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hi
     &mut self,
     assign: &AssignExpression<'ast>,
     location: &Location<'ast>,
-  ) -> Self::Result {
+  ) -> Self::Ret {
     todo!()
   }
 
@@ -121,7 +111,7 @@ impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hi
     &mut self,
     binary: &BinaryExpression<'ast>,
     location: &Location<'ast>,
-  ) -> Self::Result {
+  ) -> Self::Ret {
     todo!()
   }
 
@@ -129,22 +119,22 @@ impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hi
     &mut self,
     identifier: &IdentifierExpression<'ast>,
     location: &Location<'ast>,
-  ) -> Self::Result {
+  ) -> Self::Ret {
     todo!()
   }
 }
 
 impl<'ast, 'lower, 'hir> VisitStatement<'ast> for AstLowering<'ast, 'lower, 'hir> {
-  type Result = Result<(), ()>;
+  type Ret = Result<VisitorReturn, AstLoweringErrorMMO>;
 
-  fn visit_expression(&mut self, expression: &Expression<'ast>) -> Self::Result {
+  fn visit_expression(&mut self, expression: &Expression<'ast>) -> Self::Ret {
     todo!()
   }
 
   fn visit_variable_statement(
     &mut self,
     variable_statement: &Located<'ast, VariableStatement<'ast>>,
-  ) -> Self::Result {
+  ) -> Self::Ret {
     todo!()
   }
 }

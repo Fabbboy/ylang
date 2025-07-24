@@ -33,35 +33,27 @@ pub enum ExpressionKind<'ctx> {
 }
 
 pub trait VisitExpression<'ctx> {
-  type Result;
+  type Ret;
 
-  fn visit_block(
-    &mut self,
-    block: &BlockExpression<'ctx>,
-    location: &Location<'ctx>,
-  ) -> Self::Result;
-  fn visit_literal(
-    &mut self,
-    literal: &LiteralExpression,
-    location: &Location<'ctx>,
-  ) -> Self::Result;
+  fn visit_block(&mut self, block: &BlockExpression<'ctx>, location: &Location<'ctx>) -> Self::Ret;
+  fn visit_literal(&mut self, literal: &LiteralExpression, location: &Location<'ctx>) -> Self::Ret;
   fn visit_assign(
     &mut self,
     assign: &AssignExpression<'ctx>,
     location: &Location<'ctx>,
-  ) -> Self::Result;
+  ) -> Self::Ret;
   fn visit_binary(
     &mut self,
     binary: &BinaryExpression<'ctx>,
     location: &Location<'ctx>,
-  ) -> Self::Result;
+  ) -> Self::Ret;
   fn visit_identifier(
     &mut self,
     identifier: &IdentifierExpression<'ctx>,
     location: &Location<'ctx>,
-  ) -> Self::Result;
+  ) -> Self::Ret;
 
-  fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Result {
+  fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Ret {
     match expression.value() {
       ExpressionKind::Block(block) => self.visit_block(block, expression.location()),
       ExpressionKind::Literal(literal) => self.visit_literal(literal, expression.location()),

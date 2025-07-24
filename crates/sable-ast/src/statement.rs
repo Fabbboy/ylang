@@ -15,15 +15,15 @@ pub enum Statement<'ctx> {
 }
 
 pub trait VisitStatement<'ctx> {
-  type Result;
+  type Ret;
 
-  fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Result;
+  fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Ret;
   fn visit_variable_statement(
     &mut self,
     variable_statement: &Located<'ctx, VariableStatement<'ctx>>,
-  ) -> Self::Result;
+  ) -> Self::Ret;
 
-  fn visit_statement(&mut self, statement: &Statement<'ctx>) -> Self::Result {
+  fn visit_statement(&mut self, statement: &Statement<'ctx>) -> Self::Ret {
     match statement {
       Statement::Expression(expression) => self.visit_expression(expression),
       Statement::Variable(variable_statement) => self.visit_variable_statement(variable_statement),

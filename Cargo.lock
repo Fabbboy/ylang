@@ -318,10 +318,12 @@ dependencies = [
 name = "sable-lowering"
 version = "0.1.0"
 dependencies = [
+ "either",
  "sable-arena",
  "sable-ast",
  "sable-common",
  "sable-hir",
+ "smallvec",
 ]
 
 [[package]]

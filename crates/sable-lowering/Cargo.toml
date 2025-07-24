@@ -8,3 +8,6 @@ sable-common = { workspace = true }
 sable-ast = { workspace = true }
 sable-hir = { workspace = true }
 sable-arena = { workspace = true }
+
+either = { workspace = true }
+smallvec = { workspace = true }
