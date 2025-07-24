@@ -9,6 +9,7 @@ use sable_errors::{
   writer::ReportWriter,
 };
 use sable_hir::package::Package;
+use sable_lowering::ast::AstLowering;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -49,26 +50,52 @@ fn main() {
   let mut stdout = io::stdout();
   let mut writer = ReportWriter::new(&mut cache, &mut stdout);
 
-  let package = {
-    let lexer = Lexer::new(source.clone());
-
+  // THE NESTING HERE IS INTENTIONAL IN ORDER TO "SIMULATE" HOW THE PARSER
+  // WILL WORK WITH MULTIPLE AST's IN THE FUTURE.
+  let package: Package = {
     let main_ast_arena = Arena::new();
-    let mut main_ast = Ast::new(&main_ast_arena);
+    let mut asts = Vec::new();
+    {
+      let main_ast = Ast::new(&main_ast_arena);
+      asts.push(main_ast);
+    }
 
-    let mut parser = Parser::new(lexer, &mut main_ast, &mut writer);
-    match parser.parse() {
-      Ok(_) => {
-        println!(
-          "Successfully parsed {} function(s).",
-          main_ast.funcs().len()
-        );
+    let mut main_ast = &mut asts[0];
+
+    let package: Package = {
+      let lexer = Lexer::new(source.clone());
+
+      let mut parser = Parser::new(lexer, &mut main_ast, &mut writer);
+      match parser.parse() {
+        Ok(_) => {
+          println!(
+            "Successfully parsed {} function(s).",
+            main_ast.funcs().len()
+          );
+        }
+        Err(_) => {
+          eprintln!("Parsing failed. See errors above.");
+          std::process::exit(1);
+        }
+      };
+
+      let pkg = Package::new(&hir_arena, &asts);
+      let lowerer = AstLowering::new(&asts, &pkg);
+
+      match lowerer.lower() {
+        Ok(_) => {
+          println!("Successfully lowered AST to HIR.");
+        }
+        Err(_) => {
+          eprintln!("Lowering failed.");
+          std::process::exit(1);
+        }
       }
-      Err(_) => {
-        eprintln!("Parsing failed. See errors above.");
-        std::process::exit(1);
-      }
+
+      pkg
     };
-    Package::new(&hir_arena, &[main_ast])
+
+    package
   };
 
   println!("{:#?}", package);
