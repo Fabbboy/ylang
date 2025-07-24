@@ -80,7 +80,7 @@ fn main() {
       };
 
       let pkg = Package::new(&hir_arena, &asts);
-      let lowerer = AstLowering::new(&asts, &pkg);
+      let mut lowerer = AstLowering::new(&asts, &pkg);
 
       match lowerer.lower() {
         Ok(_) => {

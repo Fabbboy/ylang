@@ -10,6 +10,7 @@ use sable_ast::{
     VisitExpression,
   },
   located::Located,
+  objects::function::Function,
   statement::{
     VariableStatement,
     VisitStatement,
@@ -17,6 +18,11 @@ use sable_ast::{
 };
 use sable_common::location::Location;
 use sable_hir::package::Package;
+
+enum LoweringStatus {
+  Success,
+  OhNo,
+}
 
 pub struct AstLowering<'ast, 'lower, 'hir> {
   asts: &'lower [Ast<'ast>],
@@ -28,13 +34,64 @@ impl<'ast, 'lower, 'hir> AstLowering<'ast, 'lower, 'hir> {
     Self { asts, package }
   }
 
-  pub fn lower(&self) -> Result<(), ()> {
-    Ok(())
+  fn lower_func(&mut self, func: &Function<'ast>) -> Result<(), ()> {
+    let mut status = LoweringStatus::Success;
+
+    if let Some(blk) = func.block() {
+      match self.visit_block(blk, &blk.location()) {
+        Ok(_) => {}
+        Err(_) => {
+          status = LoweringStatus::OhNo;
+        }
+      }
+    }
+
+    match status {
+      LoweringStatus::Success => Ok(()),
+      LoweringStatus::OhNo => Err(()),
+    }
+  }
+
+  fn lower_ast(&mut self, ast: &Ast<'ast>) -> Result<(), ()> {
+    let mut status = LoweringStatus::Success;
+
+    for func in ast.funcs() {
+      match self.lower_func(func) {
+        Ok(()) => {}
+        Err(_) => {
+          status = LoweringStatus::OhNo;
+        }
+      }
+    }
+
+    match status {
+      LoweringStatus::Success => Ok(()),
+      LoweringStatus::OhNo => Err(()),
+    }
+  }
+
+  pub fn lower(&mut self) -> Result<(), ()> {
+    let mut status = LoweringStatus::Success;
+
+    for ast in self.asts {
+      match self.lower_ast(ast) {
+        Ok(()) => {}
+        Err(_) => {
+          status = LoweringStatus::OhNo;
+          break;
+        }
+      }
+    }
+
+    match status {
+      LoweringStatus::Success => Ok(()),
+      LoweringStatus::OhNo => Err(()),
+    }
   }
 }
 
 impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hir> {
-  type Result = ();
+  type Result = Result<(), ()>;
 
   fn visit_block(
     &mut self,
@@ -78,7 +135,7 @@ impl<'ast, 'lower, 'hir> VisitExpression<'ast> for AstLowering<'ast, 'lower, 'hi
 }
 
 impl<'ast, 'lower, 'hir> VisitStatement<'ast> for AstLowering<'ast, 'lower, 'hir> {
-  type Result = ();
+  type Result = Result<(), ()>;
 
   fn visit_expression(&mut self, expression: &Expression<'ast>) -> Self::Result {
     todo!()
