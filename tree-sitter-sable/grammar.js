@@ -17,6 +17,11 @@ module.exports = grammar({
     source_file: ($) => repeat($.function_declaration),
 
     semi: ($) => ";",
+    lparent: ($) => "(",
+    rparent: ($) => ")",
+    lbrace: ($) => "{",
+    rbrace: ($) => "}",
+    colon: ($) => ":",
 
     function_declaration: ($) =>
       seq(
@@ -32,7 +37,7 @@ module.exports = grammar({
 
     parameter_list: ($) => seq($.parameter, repeat(seq(",", $.parameter))),
 
-    parameter: ($) => seq($.identifier, ":", $.type),
+    parameter: ($) => seq($.identifier, $.colon, $.type),
 
     type: ($) => seq($.identifier, optional($.pointer_suffix)),
 
@@ -40,7 +45,7 @@ module.exports = grammar({
 
     block_or_semi: ($) => choice($.block, $.semi),
 
-    block: ($) => seq("{", repeat($.statement), "}"),
+    block: ($) => seq($.lbrace, repeat($.statement), $.rbrace),
 
     statement: ($) => choice($.variable_declaration, $.expression_statement),
 
@@ -48,7 +53,7 @@ module.exports = grammar({
       seq(
         "var",
         $.identifier,
-        optional(seq(":", $.type)),
+        optional(seq($.colon, $.type)),
         "=",
         $.expression,
         $.semi
@@ -70,7 +75,7 @@ module.exports = grammar({
       prec.left(2, seq($.primary, repeat(seq(choice("*", "/"), $.primary)))),
 
     primary: ($) =>
-      choice($.literal, $.identifier, seq("(", $.expression, ")")),
+      choice($.literal, $.identifier, seq($.lparent, $.expression, $.rparent)),
 
     literal: ($) => choice($.integer_literal, $.float_literal),
 

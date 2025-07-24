@@ -43,8 +43,16 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": false,
+      "required": true,
       "types": [
+        {
+          "type": "lbrace",
+          "named": true
+        },
+        {
+          "type": "rbrace",
+          "named": true
+        },
         {
           "type": "statement",
           "named": true
@@ -70,6 +78,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "colon",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "expression",
@@ -152,6 +165,11 @@
     }
   },
   {
+    "type": "lparent",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "multiplicative",
     "named": true,
     "fields": {},
@@ -174,6 +192,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "colon",
+          "named": true
+        },
         {
           "type": "identifier",
           "named": true
@@ -210,7 +232,7 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
@@ -224,9 +246,22 @@
         {
           "type": "literal",
           "named": true
+        },
+        {
+          "type": "lparent",
+          "named": true
+        },
+        {
+          "type": "rparent",
+          "named": true
         }
       ]
     }
+  },
+  {
+    "type": "rparent",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "source_file",
@@ -290,6 +325,10 @@
       "multiple": true,
       "required": true,
       "types": [
+        {
+          "type": "colon",
+          "named": true
+        },
         {
           "type": "expression",
           "named": true
@@ -367,19 +406,19 @@
     "named": true
   },
   {
+    "type": "lbrace",
+    "named": true
+  },
+  {
+    "type": "rbrace",
+    "named": true
+  },
+  {
     "type": "semi",
     "named": true
   },
   {
     "type": "var",
-    "named": false
-  },
-  {
-    "type": "{",
-    "named": false
-  },
-  {
-    "type": "}",
     "named": false
   }
 ]

@@ -32,12 +32,12 @@
 "/" @operator
 
 ; Punctuation
-"(" @punctuation.bracket
-")" @punctuation.bracket
-"{" @punctuation.bracket
-"}" @punctuation.bracket 
+(lparent) @punctuation.bracket
+(rparent) @punctuation.bracket
+(lbrace) @punctuation.bracket
+(rbrace) @punctuation.bracket
 "," @punctuation.delimiter
-":" @punctuation.delimiter
+(colon) @punctuation.delimiter
 
 ; Comments
 (comment) @comment
