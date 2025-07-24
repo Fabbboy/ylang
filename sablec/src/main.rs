@@ -53,12 +53,11 @@ fn main() {
   // THE NESTING HERE IS INTENTIONAL IN ORDER TO "SIMULATE" HOW THE PARSER
   // WILL WORK WITH MULTIPLE AST's IN THE FUTURE.
   let package: Package = {
-    let main_ast_arena = Arena::new();
     let mut asts = Vec::new();
-    {
-      let main_ast = Ast::new(&main_ast_arena);
-      asts.push(main_ast);
-    }
+
+    let main_ast_arena = Arena::new();
+    let main_ast = Ast::new(&main_ast_arena);
+    asts.push(main_ast);
 
     let mut main_ast = &mut asts[0];
 

@@ -199,6 +199,15 @@ impl Arena {
     }
   }
 
+  pub fn alloc_slice_default<T>(&self, len: usize) -> &mut [T]
+  where
+    T: Default,
+  {
+    self
+      .try_alloc_slice_default(len)
+      .expect("Arena allocation failed")
+  }
+
   pub fn alloc_slice_with<T>(&self, len: usize, f: impl FnMut(usize) -> T) -> &mut [T] {
     self
       .try_alloc_slice_with(len, f)
@@ -219,6 +228,24 @@ impl Arena {
       let dst = ptr.as_ptr() as *mut T;
       for i in 0..len {
         dst.add(i).write(f(i));
+      }
+      Some(slice::from_raw_parts_mut(dst, len))
+    }
+  }
+
+  pub fn try_alloc_slice_default<T>(&self, len: usize) -> Option<&mut [T]>
+  where
+    T: Default,
+  {
+    if len == 0 {
+      return Some(&mut []);
+    }
+    let layout = Layout::array::<T>(len).ok()?;
+    let ptr = self.try_alloc_raw(layout)?;
+    unsafe {
+      let dst = ptr.as_ptr() as *mut T;
+      for i in 0..len {
+        dst.add(i).write(Default::default());
       }
       Some(slice::from_raw_parts_mut(dst, len))
     }

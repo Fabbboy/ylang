@@ -23,7 +23,7 @@ pub struct Package<'hir> {
 
 impl<'hir> Package<'hir> {
   pub fn new<'ast>(hir_arena: &'hir Arena, trees: &[Ast<'ast>]) -> Self {
-    let mods = hir_arena.alloc_slice_with(trees.len(), |_| None);
+    let mods = hir_arena.alloc_slice_default(trees.len());
     Package {
       mods,
       hir_arena,
