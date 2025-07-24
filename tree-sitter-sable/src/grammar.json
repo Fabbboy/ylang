@@ -9,6 +9,10 @@
         "name": "function_declaration"
       }
     },
+    "semi": {
+      "type": "STRING",
+      "value": ";"
+    },
     "function_declaration": {
       "type": "SEQ",
       "members": [
@@ -132,8 +136,8 @@
           "name": "block"
         },
         {
-          "type": "STRING",
-          "value": ";"
+          "type": "SYMBOL",
+          "name": "semi"
         }
       ]
     },
@@ -211,8 +215,8 @@
           "name": "expression"
         },
         {
-          "type": "STRING",
-          "value": ";"
+          "type": "SYMBOL",
+          "name": "semi"
         }
       ]
     },
@@ -224,8 +228,8 @@
           "name": "expression"
         },
         {
-          "type": "STRING",
-          "value": ";"
+          "type": "SYMBOL",
+          "name": "semi"
         }
       ]
     },

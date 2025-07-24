@@ -58,10 +58,14 @@
     "fields": {},
     "children": {
       "multiple": false,
-      "required": false,
+      "required": true,
       "types": [
         {
           "type": "block",
+          "named": true
+        },
+        {
+          "type": "semi",
           "named": true
         }
       ]
@@ -87,11 +91,15 @@
     "named": true,
     "fields": {},
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": true,
       "types": [
         {
           "type": "expression",
+          "named": true
+        },
+        {
+          "type": "semi",
           "named": true
         }
       ]
@@ -291,6 +299,10 @@
           "named": true
         },
         {
+          "type": "semi",
+          "named": true
+        },
+        {
           "type": "type",
           "named": true
         }
@@ -330,10 +342,6 @@
     "named": false
   },
   {
-    "type": ";",
-    "named": false
-  },
-  {
     "type": "=",
     "named": false
   },
@@ -356,6 +364,10 @@
   },
   {
     "type": "integer_literal",
+    "named": true
+  },
+  {
+    "type": "semi",
     "named": true
   },
   {

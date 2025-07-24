@@ -16,6 +16,8 @@ module.exports = grammar({
   rules: {
     source_file: ($) => repeat($.function_declaration),
 
+    semi: ($) => ";",
+
     function_declaration: ($) =>
       seq(
         "func",
@@ -36,7 +38,7 @@ module.exports = grammar({
 
     pointer_suffix: ($) => repeat1("*"),
 
-    block_or_semi: ($) => choice($.block, ";"),
+    block_or_semi: ($) => choice($.block, $.semi),
 
     block: ($) => seq("{", repeat($.statement), "}"),
 
@@ -49,10 +51,10 @@ module.exports = grammar({
         optional(seq(":", $.type)),
         "=",
         $.expression,
-        ";"
+        $.semi
       ),
 
-    expression_statement: ($) => seq($.expression, ";"),
+    expression_statement: ($) => seq($.expression, $.semi),
 
     expression: ($) => $.assignment,
 

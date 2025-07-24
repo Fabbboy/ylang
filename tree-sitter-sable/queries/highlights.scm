@@ -24,7 +24,7 @@
 (integer_literal) @number
 (float_literal) @number.float
 
-; Operators
+(semi) @operators
 "=" @operator
 "+" @operator
 "-" @operator
@@ -35,8 +35,7 @@
 "(" @punctuation.bracket
 ")" @punctuation.bracket
 "{" @punctuation.bracket
-"}" @punctuation.bracket
-";" @punctuation.delimiter
+"}" @punctuation.bracket 
 "," @punctuation.delimiter
 ":" @punctuation.delimiter
 

@@ -1,9 +1,7 @@
 ; Fold blocks
 (block) @fold
 
-; Fold function declarations
-(function_declaration
-  body: (block) @fold)
+(block) @fold
 
 ; Fold parameter lists (if they span multiple lines)
 (parameter_list) @fold
