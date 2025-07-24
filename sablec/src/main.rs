@@ -62,7 +62,7 @@ fn main() {
 
     let mut main_ast = &mut asts[0];
 
-    let package: Package = {
+    {
       let lexer = Lexer::new(source.clone());
 
       let mut parser = Parser::new(lexer, &mut main_ast, &mut writer);
@@ -93,9 +93,7 @@ fn main() {
       }
 
       pkg
-    };
-
-    package
+    }
   };
 
   println!("{:#?}", package);
