@@ -1,4 +1,8 @@
-use getset::Getters;
+use getset::{
+  Getters,
+  MutGetters,
+  Setters,
+};
 use typed_builder::TypedBuilder;
 
 use crate::{
@@ -12,10 +16,10 @@ use crate::{
 
 pub const MAX_INLINE_PARAMS: usize = 6;
 
-#[derive(Getters, TypedBuilder, Debug)]
+#[derive(Getters, Setters, TypedBuilder, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FunctionParam<'ctx> {
-  #[getset(get = "pub")]
+  #[getset(get = "pub", set = "pub")]
   name: Located<'ctx, &'ctx str>,
   #[getset(get = "pub")]
   type_: Located<'ctx, Type<'ctx>>,
@@ -36,12 +40,12 @@ impl<'ctx> From<Located<'ctx, TypeNamePair<'ctx>>> for FunctionParam<'ctx> {
   }
 }
 
-#[derive(Getters, TypedBuilder, Debug)]
+#[derive(Getters, MutGetters, TypedBuilder, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Function<'ctx> {
   #[getset(get = "pub")]
   name: Located<'ctx, &'ctx str>,
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut = "pub")]
   params: &'ctx [FunctionParam<'ctx>],
   #[getset(get = "pub")]
   return_type: Located<'ctx, Type<'ctx>>,

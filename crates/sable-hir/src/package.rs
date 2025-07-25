@@ -8,9 +8,6 @@ use sable_ast::ast::Ast;
 
 use crate::hir::module::Module;
 
-#[derive(Debug)]
-pub struct Symbol(pub usize);
-
 #[derive(Debug, Getters, MutGetters)]
 pub struct Package<'hir> {
   #[getset(get = "pub")]
@@ -28,6 +25,16 @@ impl<'hir> Package<'hir> {
       hir_arena,
       mods,
       strintern: IndexSet::new(),
+    }
+  }
+
+  pub fn intern(&mut self, string: &str) -> &str {
+    if self.strintern.contains(string) {
+      self.strintern.get(string).unwrap()
+    } else {
+      let copy: &'hir mut str = self.hir_arena.alloc_str(string);
+      let (idx, _) = self.strintern.insert_full(copy);
+      self.strintern.get_index(idx).unwrap()
     }
   }
 }

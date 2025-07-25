@@ -30,3 +30,12 @@ impl<'loc, T> From<Located<'loc, T>> for Located<'loc, Box<T>> {
     }
   }
 }
+
+impl<'loc, T> Located<'loc, T> {
+  pub fn replace(&self, value: T) -> Self {
+    Self {
+      value,
+      location: self.location.clone(),
+    }
+  }
+}
