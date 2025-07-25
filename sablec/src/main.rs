@@ -8,7 +8,6 @@ use sable_common::{
   writer::ReportWriter,
 };
 use sable_hir::package::Package;
-use sable_lowering::ast_lower::lower::AstLowering;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -73,17 +72,6 @@ fn main() {
       };
 
       let pkg = Package::new(&hir_arena, &asts);
-      let mut lowerer = AstLowering::new(&asts, &pkg, &mut writer);
-
-      match lowerer.lower() {
-        Ok(_) => {
-          println!("Successfully lowered AST to HIR.");
-        }
-        Err(_) => {
-          eprintln!("Lowering failed.");
-          std::process::exit(1);
-        }
-      }
 
       pkg
     }
