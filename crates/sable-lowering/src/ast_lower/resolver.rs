@@ -19,7 +19,7 @@ where
 {
   asts: &'lower mut [Ast<'ast>],
   package: &'lower mut Package<'hir>,
-  reporter: &'lower D,
+  reporter: &'lower mut D,
   _marker: PhantomData<&'src ()>,
 }
 
@@ -28,9 +28,9 @@ where
   D: Sink<'src>,
 {
   pub fn new(
-    asts: &'lower mut [Ast<'ast>],
-    package: &'lower mut Package<'hir>,
-    reporter: &'lower D,
+    asts: &'lower mut [Ast<'ast>], // the slice it self is not mutated only the items. Need mutable to do string interning 
+    package: &'lower mut Package<'hir>, // only needed mutable for interning 
+    reporter: &'lower mut D,
   ) -> Self {
     Self {
       asts,
