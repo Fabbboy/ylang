@@ -9,7 +9,7 @@ use crate::objects::function::Function;
 #[derive(Getters, MutGetters, Debug)]
 pub struct Ast<'ctx> {
   #[getset(get_mut = "pub", get = "pub")]
-  funcs: Vec<Function<'ctx>, &'ctx Arena>,
+  funcs: Vec<Function<'ctx>>,
   #[getset(get = "pub")]
   arena: &'ctx Arena,
 }
@@ -17,7 +17,7 @@ pub struct Ast<'ctx> {
 impl<'ctx> Ast<'ctx> {
   pub fn new(arena: &'ctx Arena) -> Self {
     Ast {
-      funcs: Vec::new_in(arena),
+      funcs: Vec::new(),
       arena,
     }
   }
