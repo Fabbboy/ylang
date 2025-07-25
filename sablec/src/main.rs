@@ -8,6 +8,7 @@ use sable_common::{
   writer::ReportWriter,
 };
 use sable_hir::package::Package;
+use sable_lowering::ast_lower::resolver::Resolver;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -72,6 +73,15 @@ fn main() {
       };
 
       let pkg = Package::new(&hir_arena, &asts);
+
+      let mut resolver = Resolver::new(&asts, &pkg, &mut writer);
+      match resolver.resolve() {
+        Ok(_) => println!("Resolution successful."),
+        Err(_) => {
+          eprintln!("Resolution failed. See errors above.");
+          std::process::exit(1);
+        }
+      };
 
       pkg
     }
