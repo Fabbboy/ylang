@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use sable_ast::ast::Ast;
 use sable_common::writer::Sink;
 use sable_hir::package::Package;
@@ -7,18 +9,19 @@ enum ResolverStatus {
   OhNo,
 }
 
-pub struct Resolver<'ast, 'lower, 'hir, D>
+pub struct Resolver<'src, 'hir, 'ast, 'lower, D>
 where
-  D: Sink<'ast>,
+  D: Sink<'src>,
 {
   ast: &'lower [Ast<'ast>],
   package: &'lower Package<'hir>,
   reporter: &'lower D,
+  _marker: PhantomData<(&'src ())>,
 }
 
-impl<'ast, 'lower, 'hir, D> Resolver<'ast, 'lower, 'hir, D>
+impl<'src, 'hir, 'ast, 'lower, D> Resolver<'src, 'hir, 'ast, 'lower, D>
 where
-  D: Sink<'ast>,
+  D: Sink<'src>,
 {
   pub fn new(
     ast: &'lower [Ast<'ast>],
@@ -29,6 +32,7 @@ where
       ast,
       package,
       reporter,
+      _marker: PhantomData,
     }
   }
 
