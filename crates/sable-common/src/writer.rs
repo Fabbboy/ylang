@@ -1,5 +1,5 @@
-use ariadne::Report;
 use crate::file::Span;
+use ariadne::Report;
 use std::io;
 
 use crate::cache::ErrorCache;

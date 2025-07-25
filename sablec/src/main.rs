@@ -32,7 +32,6 @@ fn main() {
 
   let args = Args::parse();
   let mut manager = Manager::new(&file_arena);
-  let mut cache = ErrorCache::new();
 
   let (source_code, filename) = {
     match std::fs::read_to_string(&args.input) {
@@ -45,20 +44,18 @@ fn main() {
   };
 
   let source = manager.add_source(&source_code, &filename);
-  cache.add_file(&source);
 
   let mut stdout = io::stdout();
-  let mut writer = ReportWriter::new(&mut cache, &mut stdout);
+  let mut writer = ReportWriter::new(manager.error_cache_mut(), &mut stdout);
 
   // THE NESTING HERE IS INTENTIONAL IN ORDER TO "SIMULATE" HOW THE PARSER
   // WILL WORK WITH MULTIPLE AST's IN THE FUTURE.
   let package: Package = {
-    let mut asts = Vec::new();
-
     let main_ast_arena = Arena::new();
     let main_ast = Ast::new(&main_ast_arena);
-    asts.push(main_ast);
 
+    let mut asts = Vec::new();
+    asts.push(main_ast);
     let mut main_ast = &mut asts[0];
 
     {
@@ -78,7 +75,7 @@ fn main() {
         }
       };
 
-      let pkg = Package::new(&hir_arena, &asts);
+      let pkg = Package::new(&hir_arena, asts.len());
       let mut lowerer = AstLowering::new(&asts, &pkg, &mut writer);
 
       match lowerer.lower() {
