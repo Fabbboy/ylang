@@ -7,24 +7,18 @@ use crate::{
     unknown_char::UnknownCharError,
   },
   parse_error::{
+    unexpected_token::{
+      UnexpectedTokenError,
+      MAX_INLINE_KINDS,
+    },
     ParseError,
     ParseErrorMOO,
-    unexpected_token::{
-      MAX_INLINE_KINDS,
-      UnexpectedTokenError,
-    },
   },
 };
 use either::Either;
 use sable_ast::{
   ast::Ast,
   expression::{
-    AssignExpression,
-    BinaryExpression,
-    BlockExpression,
-    Expression,
-    IdentifierExpression,
-    LiteralExpression,
     binary_expression::{
       AddExpression,
       DivideExpression,
@@ -35,6 +29,12 @@ use sable_ast::{
       FloatExpression,
       IntegerExpression,
     },
+    AssignExpression,
+    BinaryExpression,
+    BlockExpression,
+    Expression,
+    IdentifierExpression,
+    LiteralExpression,
   },
   located::Located,
   objects::function::{
@@ -66,8 +66,8 @@ use sable_common::{
   },
 };
 use smallvec::{
-  SmallVec,
   smallvec,
+  SmallVec,
 };
 
 use crate::lexer::Lexer;
@@ -97,24 +97,26 @@ fn expected_expression() -> SmallVec<[TokenKind; MAX_INLINE_KINDS]> {
   ]
 }
 
-pub struct Parser<'parser, 'ctx, D>
+pub struct Parser<'parser, 'src, 'ast, D>
 where
-  D: Sink<'ctx> + ?Sized,
+  D: Sink<'src> + ?Sized,
 {
-  lexer: Lexer<'ctx>,
-  ast: &'parser mut Ast<'ctx>,
+  lexer: Lexer<'src>,
+  ast: &'parser mut Ast<'ast>,
   sink: &'parser mut D,
 }
 
-impl<'parser, 'ctx, D> Parser<'parser, 'ctx, D>
+impl<'parser, 'src, 'ast, D> Parser<'parser, 'src, 'ast, D>
 where
-  D: Sink<'ctx> + ?Sized,
+  D: Sink<'src> + ?Sized,
+  'src: 'parser,
+  'src: 'ast,
 {
-  pub fn new(lexer: Lexer<'ctx>, ast: &'parser mut Ast<'ctx>, sink: &'parser mut D) -> Self {
+  pub fn new(lexer: Lexer<'src>, ast: &'parser mut Ast<'ast>, sink: &'parser mut D) -> Self {
     Self { lexer, ast, sink }
   }
 
-  fn handle_token_error(&self, token: &Token<'ctx>, error: &TokenError) -> ParseError<'ctx> {
+  fn handle_token_error(&self, token: &Token<'src>, error: &TokenError) -> ParseError<'src> {
     match error {
       TokenError::UnknownCharacter => ParseError::UnknownChar(UnknownCharError::new(
         token.lexeme(),
@@ -129,7 +131,7 @@ where
     }
   }
 
-  fn handle_parse_error(&mut self, error: ParseErrorMOO<'ctx>) {
+  fn handle_parse_error(&mut self, error: ParseErrorMOO<'src>) {
     match error.0 {
       Either::Left(parse_error) => self.sink.report(parse_error.report()).unwrap(),
       Either::Right(errors) => {
@@ -143,7 +145,7 @@ where
   fn expect(
     &mut self,
     expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>,
-  ) -> Result<Token<'ctx>, ParseError<'ctx>> {
+  ) -> Result<Token<'src>, ParseError<'src>> {
     let found_peek = self.lexer.peek();
 
     if let Some(TokenData::Error(token_error)) = found_peek.data() {
@@ -180,7 +182,7 @@ where
     }
   }
 
-  fn parse_type(&mut self) -> Result<(Type<'ctx>, Location<'ctx>), ParseError<'ctx>> {
+  fn parse_type(&mut self) -> Result<(Type<'ast>, Location<'src>), ParseError<'src>> {
     let token = self.expect(smallvec![TokenKind::Identifier])?;
 
     let segment_located = Located::builder()
@@ -198,7 +200,7 @@ where
     Ok((ty, token.location().clone()))
   }
 
-  fn parse_tn_pair(&mut self) -> Result<TypeNamePair<'ctx>, ParseError<'ctx>> {
+  fn parse_tn_pair(&mut self) -> Result<TypeNamePair<'ast>, ParseError<'src>> {
     let name_token = self.expect(smallvec![TokenKind::Identifier])?;
     self.expect(smallvec![TokenKind::Colon])?;
     let (ty, location) = self.parse_type()?;
@@ -213,7 +215,7 @@ where
     )
   }
 
-  fn parse_identifier(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
+  fn parse_identifier(&mut self) -> Result<Expression<'ast>, ParseErrorMOO<'src>> {
     let identifier = self.expect(smallvec![TokenKind::Identifier])?;
 
     let maybe_next = match self.peek(smallvec![TokenKind::Assign]) {
@@ -260,7 +262,7 @@ where
     })
   }
 
-  fn parse_factor(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
+  fn parse_factor(&mut self) -> Result<Expression<'ast>, ParseErrorMOO<'src>> {
     let expected = expected_expression();
     let expr_type = match self.peek(expected.clone()) {
       Some(kind) => kind,
@@ -320,7 +322,7 @@ where
     })
   }
 
-  fn parse_term(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
+  fn parse_term(&mut self) -> Result<Expression<'ast>, ParseErrorMOO<'src>> {
     let mut lhs = self.parse_factor()?;
 
     let expected = smallvec![TokenKind::Star, TokenKind::Slash,];
@@ -366,7 +368,7 @@ where
     Ok(lhs)
   }
 
-  fn parse_expression(&mut self) -> Result<Expression<'ctx>, ParseErrorMOO<'ctx>> {
+  fn parse_expression(&mut self) -> Result<Expression<'ast>, ParseErrorMOO<'src>> {
     let mut lhs = self.parse_term()?;
 
     let expected = smallvec![TokenKind::Plus, TokenKind::Minus,];
@@ -416,7 +418,7 @@ where
     Ok(lhs)
   }
 
-  fn parse_variable_stmt(&mut self) -> Result<VariableStatement<'ctx>, ParseErrorMOO<'ctx>> {
+  fn parse_variable_stmt(&mut self) -> Result<VariableStatement<'ast>, ParseErrorMOO<'src>> {
     let var_start = self.expect(smallvec![TokenKind::Var])?;
     let var_name_tok = self.expect(smallvec![TokenKind::Identifier])?;
 
@@ -449,7 +451,7 @@ where
     )
   }
 
-  fn parse_statement(&mut self) -> Result<Statement<'ctx>, ParseErrorMOO<'ctx>> {
+  fn parse_statement(&mut self) -> Result<Statement<'ast>, ParseErrorMOO<'src>> {
     if self.peek(expected_expression()).is_some() {
       let expr = self.parse_expression()?;
       self.expect(smallvec![TokenKind::Semicolon])?;
@@ -482,7 +484,7 @@ where
     })
   }
 
-  fn parse_block(&mut self) -> Result<BlockExpression<'ctx>, ParseErrorMOO<'ctx>> {
+  fn parse_block(&mut self) -> Result<BlockExpression<'ast>, ParseErrorMOO<'src>> {
     let mut status = ParseStatus::Success;
     let mut statements = Vec::new();
     let mut errors = SmallVec::new();
@@ -534,13 +536,13 @@ where
     }
   }
 
-  fn parse_function(&mut self) -> Result<Function<'ctx>, ParseErrorMOO<'ctx>> {
+  fn parse_function(&mut self) -> Result<Function<'ast>, ParseErrorMOO<'src>> {
     self.expect(smallvec![TokenKind::Func])?;
 
     let name_token = self.expect(smallvec![TokenKind::Identifier])?;
 
     self.expect(smallvec![TokenKind::Paren(true)])?;
-    let mut pre_params = SmallVec::<[FunctionParam<'ctx>; MAX_INLINE_PARAMS]>::new();
+    let mut pre_params = SmallVec::<[FunctionParam<'ast>; MAX_INLINE_PARAMS]>::new();
     while self.peek(smallvec![TokenKind::Identifier]).is_some() {
       let param = self.parse_tn_pair()?;
       let param_location = param.location().clone();
@@ -561,7 +563,7 @@ where
     for (i, param) in pre_params.into_iter().enumerate() {
       raw_params[i] = MaybeUninit::new(param);
     }
-    let final_params: &'ctx [FunctionParam<'ctx>] = unsafe { std::mem::transmute(raw_params) };
+    let final_params: &'ast [FunctionParam<'ast>] = unsafe { std::mem::transmute(raw_params) };
 
     self.expect(smallvec![TokenKind::Paren(false)])?;
     self.expect(smallvec![TokenKind::Colon])?;

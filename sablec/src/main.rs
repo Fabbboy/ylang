@@ -4,7 +4,6 @@ use clap::Parser as ClapParser;
 use sable_arena::arena::Arena;
 use sable_ast::ast::Ast;
 use sable_common::{
-  cache::ErrorCache,
   file::manager::Manager,
   writer::ReportWriter,
 };
@@ -48,8 +47,6 @@ fn main() {
   let mut stdout = io::stdout();
   let mut writer = ReportWriter::new(manager.error_cache_mut(), &mut stdout);
 
-  // THE NESTING HERE IS INTENTIONAL IN ORDER TO "SIMULATE" HOW THE PARSER
-  // WILL WORK WITH MULTIPLE AST's IN THE FUTURE.
   let package: Package = {
     let main_ast_arena = Arena::new();
     let main_ast = Ast::new(&main_ast_arena);
@@ -75,7 +72,7 @@ fn main() {
         }
       };
 
-      let pkg = Package::new(&hir_arena, asts.len());
+      let pkg = Package::new(&hir_arena, &asts);
       let mut lowerer = AstLowering::new(&asts, &pkg, &mut writer);
 
       match lowerer.lower() {

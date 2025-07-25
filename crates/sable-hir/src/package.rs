@@ -4,6 +4,7 @@ use getset::{
 };
 use indexmap::IndexSet;
 use sable_arena::arena::Arena;
+use sable_ast::ast::Ast;
 
 use crate::hir::module::Module;
 
@@ -21,8 +22,8 @@ pub struct Package<'hir> {
 }
 
 impl<'hir> Package<'hir> {
-  pub fn new<'ast>(hir_arena: &'hir Arena, trees: usize) -> Self {
-    let mods = hir_arena.alloc_slice_with(trees, |_| None);
+  pub fn new<'ast>(hir_arena: &'hir Arena, trees: &[Ast<'ast>]) -> Self {
+    let mods = hir_arena.alloc_slice_with(trees.len(), |_| None);
     Self {
       hir_arena,
       mods,
