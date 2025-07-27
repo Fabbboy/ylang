@@ -43,3 +43,9 @@ impl<'ctx> Cache<FileId<'ctx>> for ErrorCache<'ctx> {
     Some(id)
   }
 }
+
+impl<'ctx> Default for ErrorCache<'ctx> {
+  fn default() -> Self {
+    Self::new()
+  }
+}
