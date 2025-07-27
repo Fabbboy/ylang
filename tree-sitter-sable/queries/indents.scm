@@ -9,5 +9,5 @@
 
 ; Dedent
 [
-  "}"
+ (lbrace)
 ] @indent.dedent

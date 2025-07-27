@@ -23,13 +23,15 @@
 ; Literals
 (integer_literal) @number
 (float_literal) @number.float
-
-(semi) @operators
-equal: ($) => "=",
-plus: ($) => "+",
-minus: ($) => "-",
-star: ($) => "*",
-slash: ($) => "/",
+ 
+[
+  (semi)
+  (equal)
+  (plus)
+  (minus)
+  (multiply)
+  (divide)
+] @operator
 
 ; Punctuation
 (lparent) @punctuation.bracket
