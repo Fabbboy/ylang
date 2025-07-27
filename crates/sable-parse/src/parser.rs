@@ -7,18 +7,24 @@ use crate::{
     unknown_char::UnknownCharError,
   },
   parse_error::{
-    unexpected_token::{
-      UnexpectedTokenError,
-      MAX_INLINE_KINDS,
-    },
     ParseError,
     ParseErrorMOO,
+    unexpected_token::{
+      MAX_INLINE_KINDS,
+      UnexpectedTokenError,
+    },
   },
 };
 use either::Either;
 use sable_ast::{
   ast::Ast,
   expression::{
+    AssignExpression,
+    BinaryExpression,
+    BlockExpression,
+    Expression,
+    IdentifierExpression,
+    LiteralExpression,
     binary_expression::{
       AddExpression,
       DivideExpression,
@@ -29,12 +35,6 @@ use sable_ast::{
       FloatExpression,
       IntegerExpression,
     },
-    AssignExpression,
-    BinaryExpression,
-    BlockExpression,
-    Expression,
-    IdentifierExpression,
-    LiteralExpression,
   },
   located::Located,
   objects::function::{
@@ -66,8 +66,8 @@ use sable_common::{
   },
 };
 use smallvec::{
-  smallvec,
   SmallVec,
+  smallvec,
 };
 
 use crate::lexer::Lexer;
@@ -241,7 +241,7 @@ where
       TokenKind::Assign => {
         self.expect(smallvec![TokenKind::Assign])?;
         let value = self.parse_expression()?;
-        let value_heaped = self.ast.arena().alloc(value);
+        let value_heaped = self.ast.expr_arena().alloc(value);
 
         let identifier_located = Located::builder()
           .value(*identifier.lexeme())
@@ -334,8 +334,8 @@ where
       let rhs_loc = rhs.location().clone();
       let combined = lhs_loc.merge(&rhs_loc).unwrap();
 
-      let lhs_heaped = self.ast.arena().alloc(lhs);
-      let rhs_heaped = self.ast.arena().alloc(rhs);
+      let lhs_heaped = self.ast.expr_arena().alloc(lhs);
+      let rhs_heaped = self.ast.expr_arena().alloc(rhs);
 
       switch!(op_token.kind() => {
         TokenKind::Star => {
@@ -380,8 +380,8 @@ where
       let rhs_loc = rhs.location().clone();
       let combined = lhs_loc.merge(&rhs_loc).unwrap();
 
-      let lhs_heaped = self.ast.arena().alloc(lhs);
-      let rhs_heaped = self.ast.arena().alloc(rhs);
+      let lhs_heaped = self.ast.expr_arena().alloc(lhs);
+      let rhs_heaped = self.ast.expr_arena().alloc(rhs);
 
       switch!(op_token.kind() => {
         TokenKind::Plus => {
@@ -558,7 +558,8 @@ where
 
     let raw_params = self
       .ast
-      .arena()
+      .param_arena()
+      .as_untyped()
       .alloc_slice_with(pre_params.len(), |_| MaybeUninit::uninit());
     for (i, param) in pre_params.into_iter().enumerate() {
       raw_params[i] = MaybeUninit::new(param);

@@ -3,15 +3,20 @@ use getset::{
   MutGetters,
 };
 use indexmap::IndexSet;
-use sable_arena::arena::Arena;
+use sable_arena::TypedArena;
 use sable_ast::ast::Ast;
 
-use crate::hir::module::Module;
+use crate::hir::{
+  item::Item,
+  module::Module,
+};
 
 #[derive(Debug, Getters, MutGetters)]
 pub struct Package<'hir> {
   #[getset(get = "pub")]
-  hir_arena: &'hir Arena,
+  module_arena: &'hir TypedArena<Module<'hir>>,
+  #[getset(get = "pub")]
+  item_arena: &'hir TypedArena<Item<'hir>>,
   #[getset(get_mut = "pub", get = "pub")]
   mods: &'hir mut [Option<Module<'hir>>],
   #[getset(get = "pub")]
@@ -19,10 +24,17 @@ pub struct Package<'hir> {
 }
 
 impl<'hir> Package<'hir> {
-  pub fn new<'ast>(hir_arena: &'hir Arena, trees: &[Ast<'ast>]) -> Self {
-    let mods = hir_arena.alloc_slice_with(trees.len(), |_| None);
+  pub fn new<'ast>(
+    module_arena: &'hir TypedArena<Module<'hir>>,
+    item_arena: &'hir TypedArena<Item<'hir>>,
+    trees: &[Ast<'ast>],
+  ) -> Self {
+    let mods = module_arena
+      .as_untyped()
+      .alloc_slice_with(trees.len(), |_| None);
     Self {
-      hir_arena,
+      module_arena,
+      item_arena,
       mods,
       strintern: IndexSet::new(),
     }
@@ -32,7 +44,7 @@ impl<'hir> Package<'hir> {
     if self.strintern.contains(string) {
       self.strintern.get(string).unwrap()
     } else {
-      let copy: &'hir mut str = self.hir_arena.alloc_str(string);
+      let copy: &'hir mut str = self.module_arena.alloc_str(string);
       let (idx, _) = self.strintern.insert_full(copy);
       self.strintern.get_index(idx).unwrap()
     }
