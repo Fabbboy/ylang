@@ -1,6 +1,6 @@
 ; Keywords
-"func" @keyword.function
-"var" @keyword
+(func_kw) @keyword.function
+(var_kw) @keyword
 
 ; Function definitions
 (function_declaration
@@ -25,11 +25,11 @@
 (float_literal) @number.float
 
 (semi) @operators
-"=" @operator
-"+" @operator
-"-" @operator
-"*" @operator
-"/" @operator
+equal: ($) => "=",
+plus: ($) => "+",
+minus: ($) => "-",
+star: ($) => "*",
+slash: ($) => "/",
 
 ; Punctuation
 (lparent) @punctuation.bracket

@@ -24,6 +24,12 @@ module.exports = grammar({
     colon: ($) => ":",
     comma: ($) => ",",
 
+    plus: ($) => "+",
+    minus: ($) => "-",
+    star: ($) => "*",
+    slash: ($) => "/",
+    equal: ($) => "=",
+
     var_kw: ($) => "var",
     func_kw: ($) => "func",
 
@@ -45,7 +51,7 @@ module.exports = grammar({
 
     type: ($) => seq($.identifier, optional($.pointer_suffix)),
 
-    pointer_suffix: ($) => repeat1("*"),
+    pointer_suffix: ($) => repeat1($.star),
 
     block_or_semi: ($) => choice($.block, $.semi),
 
@@ -67,16 +73,16 @@ module.exports = grammar({
 
     expression: ($) => $.assignment,
 
-    assignment: ($) => choice(seq($.identifier, "=", $.expression), $.additive),
+    assignment: ($) => choice(seq($.identifier, $.equal, $.expression), $.additive),
 
     additive: ($) =>
       prec.left(
         1,
-        seq($.multiplicative, repeat(seq(choice("+", "-"), $.multiplicative)))
+        seq($.multiplicative, repeat(seq(choice($.plus, $.minus), $.multiplicative)))
       ),
 
     multiplicative: ($) =>
-      prec.left(2, seq($.primary, repeat(seq(choice("*", "/"), $.primary)))),
+      prec.left(2, seq($.primary, repeat(seq(choice($.star, $.slash), $.primary)))),
 
     primary: ($) =>
       choice($.literal, $.identifier, seq($.lparent, $.expression, $.rparent)),

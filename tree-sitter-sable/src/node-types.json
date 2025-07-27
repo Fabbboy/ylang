@@ -8,7 +8,15 @@
       "required": true,
       "types": [
         {
+          "type": "minus",
+          "named": true
+        },
+        {
           "type": "multiplicative",
+          "named": true
+        },
+        {
+          "type": "plus",
           "named": true
         }
       ]
@@ -24,6 +32,10 @@
       "types": [
         {
           "type": "additive",
+          "named": true
+        },
+        {
+          "type": "equal",
           "named": true
         },
         {
@@ -78,6 +90,11 @@
         }
       ]
     }
+  },
+  {
+    "type": "equal",
+    "named": true,
+    "fields": {}
   },
   {
     "type": "expression",
@@ -186,6 +203,14 @@
         {
           "type": "primary",
           "named": true
+        },
+        {
+          "type": "slash",
+          "named": true
+        },
+        {
+          "type": "star",
+          "named": true
         }
       ]
     }
@@ -235,7 +260,17 @@
   {
     "type": "pointer_suffix",
     "named": true,
-    "fields": {}
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "star",
+          "named": true
+        }
+      ]
+    }
   },
   {
     "type": "primary",
@@ -358,22 +393,6 @@
     }
   },
   {
-    "type": "*",
-    "named": false
-  },
-  {
-    "type": "+",
-    "named": false
-  },
-  {
-    "type": "-",
-    "named": false
-  },
-  {
-    "type": "/",
-    "named": false
-  },
-  {
     "type": "=",
     "named": false
   },
@@ -415,6 +434,14 @@
     "named": true
   },
   {
+    "type": "minus",
+    "named": true
+  },
+  {
+    "type": "plus",
+    "named": true
+  },
+  {
     "type": "rbrace",
     "named": true
   },
@@ -424,6 +451,14 @@
   },
   {
     "type": "semi",
+    "named": true
+  },
+  {
+    "type": "slash",
+    "named": true
+  },
+  {
+    "type": "star",
     "named": true
   },
   {
