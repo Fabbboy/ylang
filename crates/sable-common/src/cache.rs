@@ -1,10 +1,10 @@
-use ariadne::{
-  Cache,
-  Source as AriadneSource,
-};
 use crate::file::{
   FileId,
   source::Source,
+};
+use ariadne::{
+  Cache,
+  Source as AriadneSource,
 };
 use std::collections::HashMap;
 

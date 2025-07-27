@@ -1,3 +1,1 @@
-pub enum Type {
-
-}
+pub enum Type {}

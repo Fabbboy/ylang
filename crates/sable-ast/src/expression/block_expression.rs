@@ -1,7 +1,7 @@
 use crate::statement::Statement;
 use getset::Getters;
-use typed_builder::TypedBuilder;
 use sable_common::location::Location;
+use typed_builder::TypedBuilder;
 
 #[derive(Getters, TypedBuilder, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]

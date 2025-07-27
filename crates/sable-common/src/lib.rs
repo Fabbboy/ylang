@@ -1,7 +1,7 @@
 #![feature(allocator_api)]
 
-pub mod file;
-pub mod location;
 pub mod cache;
-pub mod writer;
+pub mod file;
 pub mod interner;
+pub mod location;
+pub mod writer;

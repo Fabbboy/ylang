@@ -1,2 +1,2 @@
-pub mod module;
 pub mod item;
+pub mod module;
