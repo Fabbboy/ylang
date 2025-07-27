@@ -23,6 +23,7 @@
 ; Literals
 (integer_literal) @number
 (float_literal) @number.float
+<<<<<<< ours
  
 [
   (semi)
@@ -32,6 +33,19 @@
   (multiply)
   (divide)
 ] @operator
+=======
+
+; Operators
+[
+  (plus)
+  (minus)
+  (star)
+  (slash)
+  (equal)
+] @operator
+
+(semi) @punctuation.delimiter
+>>>>>>> theirs
 
 ; Punctuation
 (lparent) @punctuation.bracket

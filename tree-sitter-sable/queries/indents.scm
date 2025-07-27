@@ -9,5 +9,9 @@
 
 ; Dedent
 [
+<<<<<<< ours
  (lbrace)
+=======
+  (rbrace)
+>>>>>>> theirs
 ] @indent.dedent

@@ -5,6 +5,11 @@ Sable is a programming language written in rust that is aiming to be fast and lo
 Sable is not frozen just a intelectual break. We got parsing of variable declarations, assignments and function declarations done. Next step would be to start implementing the semantic analyzer or try another shot on the highlevel-IR although the last one failed. If I had to start today I would go for a Swift approach because the codebase is easier to read and understand than rust's but do as you please.
 
 Also don't try to split the input codebase into crates or packages just go for a swift/zig approach where the project does not have a fixed architecture it's way easier and makes the compiler implementation way more flexible just go for a `sablec a.sable b.sable c.sable` and then create a module that holds all these ast's and then just build up a lookup table
+### Tree-sitter CLI
+Install the Tree-sitter command line interface using either Node.js or Rust:
+
+- `npm install -g tree-sitter-cli`
+- `cargo install tree-sitter-cli`
 
 ## a Sable codebase (heavily WIP)
 ```
