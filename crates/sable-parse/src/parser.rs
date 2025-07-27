@@ -1,3 +1,6 @@
+#![allow(clippy::result_large_err)]
+#![allow(clippy::result_unit_err)]
+
 use std::mem::MaybeUninit;
 
 use crate::{
@@ -178,7 +181,7 @@ where
   fn sync(&mut self, expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>) {
     loop {
       let next = self.lexer.peek();
-      if expected.contains(&next.kind()) || next.kind().clone() == TokenKind::Eof {
+      if expected.contains(next.kind()) || *next.kind() == TokenKind::Eof {
         return;
       }
       self.lexer.next();
@@ -338,7 +341,7 @@ where
     let mut lhs = self.parse_factor()?;
 
     let expected = smallvec![TokenKind::Star, TokenKind::Slash,];
-    while let Some(_) = self.peek(expected.clone()) {
+    while self.peek(expected.clone()).is_some() {
       let op_token = self.expect(expected.clone())?;
       let rhs = self.parse_factor()?;
 
@@ -491,7 +494,7 @@ where
           .value(var_stmt)
           .location(stmt_location)
           .build();
-        return Ok(Statement::Variable(var_stmt_located));
+        Ok(Statement::Variable(var_stmt_located))
       }
     })
   }
@@ -505,9 +508,9 @@ where
 
     let sync_points = smallvec![TokenKind::Semicolon, TokenKind::Brace(false),];
 
-    while !self
+    while self
       .peek(smallvec![TokenKind::Brace(false), TokenKind::Eof])
-      .is_some()
+      .is_none()
     {
       match self.parse_statement() {
         Ok(statement) => {

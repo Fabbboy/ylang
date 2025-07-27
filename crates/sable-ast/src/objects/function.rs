@@ -29,7 +29,7 @@ impl<'ctx> From<Located<'ctx, TypeNamePair<'ctx>>> for FunctionParam<'ctx> {
   fn from(pair: Located<'ctx, TypeNamePair<'ctx>>) -> Self {
     Self {
       name: Located::builder()
-        .value(pair.value().name().clone())
+        .value(*pair.value().name())
         .location(pair.location().clone())
         .build(),
       type_: Located::builder()

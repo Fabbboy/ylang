@@ -1,3 +1,5 @@
+#![allow(clippy::result_unit_err)]
+
 use std::marker::PhantomData;
 
 use sable_ast::{
@@ -33,8 +35,8 @@ where
   D: Sink<'src>,
 {
   asts: &'lower [Ast<'ast>],
-  package: &'lower mut Package<'hir>,
-  reporter: &'lower mut D,
+  _package: &'lower mut Package<'hir>,
+  _reporter: &'lower mut D,
   _marker: PhantomData<&'src ()>,
 }
 
@@ -49,13 +51,13 @@ where
   ) -> Self {
     Self {
       asts,
-      package,
-      reporter,
+      _package: package,
+      _reporter: reporter,
       _marker: PhantomData,
     }
   }
 
-  fn visit_func(&mut self, func: &Function<'ast>) -> Result<(), ()> {
+  fn visit_func(&mut self, _func: &Function<'ast>) -> Result<(), ()> {
     let status = ResolverStatus::Success;
 
     match status {
@@ -75,7 +77,7 @@ where
     let mut status = ResolverStatus::Success;
 
     for ast in self.asts.iter() {
-      if let Err(_) = self.visit_ast(ast) {
+      if self.visit_ast(ast).is_err() {
         status = ResolverStatus::OhNo;
       }
     }
@@ -93,26 +95,26 @@ where
 {
   type Ret = Result<(), AstLoweringError>;
 
-  fn visit_block(&mut self, block: &Located<'ast, BlockExpression<'ast>>) -> Self::Ret {
+  fn visit_block(&mut self, _block: &Located<'ast, BlockExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_literal(&mut self, literal: &Located<'ast, LiteralExpression<'ast>>) -> Self::Ret {
+  fn visit_literal(&mut self, _literal: &Located<'ast, LiteralExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_assign(&mut self, assign: &Located<'ast, AssignExpression<'ast>>) -> Self::Ret {
+  fn visit_assign(&mut self, _assign: &Located<'ast, AssignExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_binary(&mut self, binary: &Located<'ast, BinaryExpression<'ast>>) -> Self::Ret {
+  fn visit_binary(&mut self, _binary: &Located<'ast, BinaryExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_identifier(
-    &mut self,
-    identifier: &Located<'ast, IdentifierExpression<'ast>>,
-  ) -> Self::Ret {
+    fn visit_identifier(
+      &mut self,
+      _identifier: &Located<'ast, IdentifierExpression<'ast>>,
+    ) -> Self::Ret {
     todo!()
   }
 
@@ -133,13 +135,13 @@ where
 {
   type Ret = Result<(), AstLoweringError>;
 
-  fn visit_expression(&mut self, expression: &Expression<'ast>) -> Self::Ret {
+  fn visit_expression(&mut self, _expression: &Expression<'ast>) -> Self::Ret {
     todo!()
   }
 
   fn visit_variable_statement(
     &mut self,
-    variable_statement: &Located<'ast, VariableStatement<'ast>>,
+    _variable_statement: &Located<'ast, VariableStatement<'ast>>,
   ) -> Self::Ret {
     todo!()
   } // modifys ast and package does not have to return
