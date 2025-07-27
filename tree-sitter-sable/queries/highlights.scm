@@ -1,6 +1,6 @@
 ; Keywords
-(func_kw) @keyword.function
-(var_kw) @keyword
+"func" @keyword.function
+"var" @keyword
 
 ; Function definitions
 (function_declaration
@@ -23,37 +23,21 @@
 ; Literals
 (integer_literal) @number
 (float_literal) @number.float
-<<<<<<< ours
- 
-[
-  (semi)
-  (equal)
-  (plus)
-  (minus)
-  (multiply)
-  (divide)
-] @operator
-=======
 
-; Operators
-[
-  (plus)
-  (minus)
-  (star)
-  (slash)
-  (equal)
-] @operator
-
-(semi) @punctuation.delimiter
->>>>>>> theirs
+(semi) @operators
+"=" @operator
+"+" @operator
+"-" @operator
+"*" @operator
+"/" @operator
 
 ; Punctuation
-(lparent) @punctuation.bracket
-(rparent) @punctuation.bracket
-(lbrace) @punctuation.bracket
-(rbrace) @punctuation.bracket
-(comma) @punctuation.delimiter
-(colon) @punctuation.delimiter
+"(" @punctuation.bracket
+")" @punctuation.bracket
+"{" @punctuation.bracket
+"}" @punctuation.bracket 
+"," @punctuation.delimiter
+":" @punctuation.delimiter
 
 ; Comments
 (comment) @comment

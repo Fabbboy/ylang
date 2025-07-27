@@ -8,15 +8,7 @@
       "required": true,
       "types": [
         {
-          "type": "minus",
-          "named": true
-        },
-        {
           "type": "multiplicative",
-          "named": true
-        },
-        {
-          "type": "plus",
           "named": true
         }
       ]
@@ -32,10 +24,6 @@
       "types": [
         {
           "type": "additive",
-          "named": true
-        },
-        {
-          "type": "equal",
           "named": true
         },
         {
@@ -55,16 +43,8 @@
     "fields": {},
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
-        {
-          "type": "lbrace",
-          "named": true
-        },
-        {
-          "type": "rbrace",
-          "named": true
-        },
         {
           "type": "statement",
           "named": true
@@ -90,11 +70,6 @@
         }
       ]
     }
-  },
-  {
-    "type": "equal",
-    "named": true,
-    "fields": {}
   },
   {
     "type": "expression",
@@ -143,27 +118,11 @@
           "named": true
         },
         {
-          "type": "colon",
-          "named": true
-        },
-        {
-          "type": "func_kw",
-          "named": true
-        },
-        {
           "type": "identifier",
           "named": true
         },
         {
-          "type": "lparent",
-          "named": true
-        },
-        {
           "type": "parameter_list",
-          "named": true
-        },
-        {
-          "type": "rparent",
           "named": true
         },
         {
@@ -203,14 +162,6 @@
         {
           "type": "primary",
           "named": true
-        },
-        {
-          "type": "slash",
-          "named": true
-        },
-        {
-          "type": "star",
-          "named": true
         }
       ]
     }
@@ -223,10 +174,6 @@
       "multiple": true,
       "required": true,
       "types": [
-        {
-          "type": "colon",
-          "named": true
-        },
         {
           "type": "identifier",
           "named": true
@@ -247,10 +194,6 @@
       "required": true,
       "types": [
         {
-          "type": "comma",
-          "named": true
-        },
-        {
           "type": "parameter",
           "named": true
         }
@@ -260,24 +203,14 @@
   {
     "type": "pointer_suffix",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "star",
-          "named": true
-        }
-      ]
-    }
+    "fields": {}
   },
   {
     "type": "primary",
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
+      "multiple": false,
       "required": true,
       "types": [
         {
@@ -290,14 +223,6 @@
         },
         {
           "type": "literal",
-          "named": true
-        },
-        {
-          "type": "lparent",
-          "named": true
-        },
-        {
-          "type": "rparent",
           "named": true
         }
       ]
@@ -366,10 +291,6 @@
       "required": true,
       "types": [
         {
-          "type": "colon",
-          "named": true
-        },
-        {
           "type": "expression",
           "named": true
         },
@@ -384,25 +305,45 @@
         {
           "type": "type",
           "named": true
-        },
-        {
-          "type": "var_kw",
-          "named": true
         }
       ]
     }
   },
   {
-    "type": "=",
+    "type": "(",
     "named": false
   },
   {
-    "type": "colon",
-    "named": true
+    "type": ")",
+    "named": false
   },
   {
-    "type": "comma",
-    "named": true
+    "type": "*",
+    "named": false
+  },
+  {
+    "type": "+",
+    "named": false
+  },
+  {
+    "type": ",",
+    "named": false
+  },
+  {
+    "type": "-",
+    "named": false
+  },
+  {
+    "type": "/",
+    "named": false
+  },
+  {
+    "type": ":",
+    "named": false
+  },
+  {
+    "type": "=",
+    "named": false
   },
   {
     "type": "comment",
@@ -414,8 +355,8 @@
     "named": true
   },
   {
-    "type": "func_kw",
-    "named": true
+    "type": "func",
+    "named": false
   },
   {
     "type": "identifier",
@@ -426,43 +367,19 @@
     "named": true
   },
   {
-    "type": "lbrace",
-    "named": true
-  },
-  {
-    "type": "lparent",
-    "named": true
-  },
-  {
-    "type": "minus",
-    "named": true
-  },
-  {
-    "type": "plus",
-    "named": true
-  },
-  {
-    "type": "rbrace",
-    "named": true
-  },
-  {
-    "type": "rparent",
-    "named": true
-  },
-  {
     "type": "semi",
     "named": true
   },
   {
-    "type": "slash",
-    "named": true
+    "type": "var",
+    "named": false
   },
   {
-    "type": "star",
-    "named": true
+    "type": "{",
+    "named": false
   },
   {
-    "type": "var_kw",
-    "named": true
+    "type": "}",
+    "named": false
   }
 ]
