@@ -1,13 +1,26 @@
 use std::io;
 
 use clap::Parser as ClapParser;
-use sable_arena::arena::Arena;
-use sable_ast::ast::Ast;
+use sable_arena::TypedArena;
+use sable_ast::{
+  ast::Ast,
+  expression::Expression,
+  objects::function::FunctionParam,
+};
 use sable_common::{
-  file::manager::Manager,
+  file::{
+    manager::Manager,
+    source::Source,
+  },
   writer::ReportWriter,
 };
-use sable_hir::package::Package;
+use sable_hir::{
+  hir::{
+    item::Item,
+    module::Module,
+  },
+  package::Package,
+};
 use sable_lowering::ast_lower::resolver::Resolver;
 use sable_parse::{
   lexer::Lexer,
@@ -26,8 +39,9 @@ struct Args {
 }
 
 fn main() {
-  let file_arena = Arena::new();
-  let hir_arena = Arena::new();
+  let file_arena: TypedArena<Source<'_>> = TypedArena::new();
+  let module_arena: TypedArena<Module<'_>> = TypedArena::new();
+  let item_arena: TypedArena<Item<'_>> = TypedArena::new();
 
   let args = Args::parse();
   let mut manager = Manager::new(&file_arena);
@@ -48,8 +62,9 @@ fn main() {
   let mut writer = ReportWriter::new(manager.error_cache_mut(), &mut stdout);
 
   let package: Package = {
-    let main_ast_arena = Arena::new();
-    let main_ast = Ast::new(&main_ast_arena);
+    let expr_arena: TypedArena<Expression<'_>> = TypedArena::new();
+    let param_arena: TypedArena<FunctionParam<'_>> = TypedArena::new();
+    let main_ast = Ast::new(&expr_arena, &param_arena);
 
     let mut asts = Vec::new();
     asts.push(main_ast);
@@ -72,9 +87,9 @@ fn main() {
         }
       };
 
-      let pkg = Package::new(&hir_arena, &asts);
+      let mut pkg = Package::new(&module_arena, &item_arena, &asts);
 
-      let mut resolver = Resolver::new(&asts, &pkg, &mut writer);
+      let mut resolver = Resolver::new(&asts, &mut pkg, &mut writer);
       match resolver.resolve() {
         Ok(_) => println!("Resolution successful."),
         Err(_) => {

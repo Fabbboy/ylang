@@ -2,23 +2,35 @@ use getset::{
   Getters,
   MutGetters,
 };
-use sable_arena::arena::Arena;
+use sable_arena::TypedArena;
 
-use crate::objects::function::Function;
+use crate::{
+  expression::Expression,
+  objects::function::{
+    Function,
+    FunctionParam,
+  },
+};
 
 #[derive(Getters, MutGetters, Debug)]
 pub struct Ast<'ctx> {
   #[getset(get_mut = "pub", get = "pub")]
   funcs: Vec<Function<'ctx>>,
   #[getset(get = "pub")]
-  arena: &'ctx Arena,
+  expr_arena: &'ctx TypedArena<Expression<'ctx>>,
+  #[getset(get = "pub")]
+  param_arena: &'ctx TypedArena<FunctionParam<'ctx>>,
 }
 
 impl<'ctx> Ast<'ctx> {
-  pub fn new(arena: &'ctx Arena) -> Self {
+  pub fn new(
+    expr_arena: &'ctx TypedArena<Expression<'ctx>>,
+    param_arena: &'ctx TypedArena<FunctionParam<'ctx>>,
+  ) -> Self {
     Ast {
       funcs: Vec::new(),
-      arena,
+      expr_arena,
+      param_arena,
     }
   }
 }

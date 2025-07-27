@@ -1,5 +1,5 @@
 use getset::Getters;
-use sable_arena::arena::Arena;
+use sable_arena::TypedArena;
 
 use crate::file::FileId;
 
@@ -12,7 +12,7 @@ pub struct Source<'ctx> {
 }
 
 impl<'ctx> Source<'ctx> {
-  pub fn new(content: &str, filename: &str, arena: &'ctx Arena) -> Self {
+  pub fn new(content: &str, filename: &str, arena: &'ctx TypedArena<Source<'ctx>>) -> Self {
     Self {
       content: arena.alloc_str(content),
       filename: arena.alloc_str(filename),

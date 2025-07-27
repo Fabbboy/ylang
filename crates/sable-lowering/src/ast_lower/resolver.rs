@@ -21,7 +21,7 @@ pub struct Resolver<'src, 'hir, 'ast, 'lower, D>
 where
   D: Sink<'src>,
 {
-  asts: &'lower mut [Ast<'ast>],
+  asts: &'lower [Ast<'ast>],
   package: &'lower mut Package<'hir>,
   reporter: &'lower mut D,
   _marker: PhantomData<&'src ()>,
@@ -32,8 +32,8 @@ where
   D: Sink<'src>,
 {
   pub fn new(
-    asts: &'lower mut [Ast<'ast>], // the slice it self is not mutated only the items. Need mutable to do string interning
-    package: &'lower mut Package<'hir>, // only needed mutable for interning
+    asts: &'lower [Ast<'ast>],
+    package: &'lower mut Package<'hir>,
     reporter: &'lower mut D,
   ) -> Self {
     Self {
@@ -44,13 +44,8 @@ where
     }
   }
 
-  fn visit_func(&mut self, func: &mut Function<'ast>) -> Result<(), ()> {
+  fn visit_func(&mut self, func: &Function<'ast>) -> Result<(), ()> {
     let status = ResolverStatus::Success;
-
-    for param in *func.params_mut() {
-      let lexeme = self.package.intern(param.name().value());
-      param.set_name(param.name().replace(lexeme));
-    }
 
     match status {
       ResolverStatus::Success => Ok(()),
@@ -58,8 +53,8 @@ where
     }
   }
 
-  fn visit_ast(&mut self, ast: &mut Ast<'ast>) -> Result<(), ()> {
-    for func in ast.funcs_mut() {
+  fn visit_ast(&mut self, ast: &Ast<'ast>) -> Result<(), ()> {
+    for func in ast.funcs() {
       self.visit_func(func)?;
     }
     Ok(())
@@ -68,7 +63,7 @@ where
   pub fn resolve(&mut self) -> Result<(), ()> {
     let mut status = ResolverStatus::Success;
 
-    for ast in self.asts.iter_mut() {
+    for ast in self.asts.iter() {
       if let Err(_) = self.visit_ast(ast) {
         status = ResolverStatus::OhNo;
       }
@@ -85,7 +80,7 @@ impl<'src, 'hir, 'ast, 'lower, D> VisitExpression<'ast> for Resolver<'src, 'hir,
 where
   D: Sink<'src>,
 {
-  type Ret = Result<(), AstLoweringError>; // modifys ast and package does not have to return 
+  type Ret = Result<(), AstLoweringError>;
 
   fn visit_block(
     &mut self,
