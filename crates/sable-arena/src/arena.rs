@@ -199,6 +199,21 @@ impl Arena {
     }
   }
 
+  pub fn alloc_copy<T: ?Sized>(&self, value: &T) -> &mut T {
+    self.try_alloc_copy(value).expect("Arena allocation failed")
+  }
+
+  pub fn try_alloc_copy<T: ?Sized>(&self, value: &T) -> Option<&mut T> {
+    let layout = Layout::for_value(value);
+    let ptr = self.try_alloc_raw(layout)?;
+    unsafe {
+      ptr::copy_nonoverlapping(value as *const T as *const u8, ptr.as_ptr(), layout.size());
+      let meta = ptr::metadata(value);
+      let raw = ptr::from_raw_parts_mut(ptr.as_ptr() as *mut (), meta);
+      Some(&mut *raw)
+    }
+  }
+
   pub fn alloc_slice_default<T>(&self, len: usize) -> &mut [T]
   where
     T: Default,

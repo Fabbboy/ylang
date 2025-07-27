@@ -37,6 +37,10 @@ impl<T> TypedArena<T> {
     self.inner.alloc(value)
   }
 
+  pub fn alloc_copy(&self, value: &T) -> &mut T {
+    self.inner.alloc_copy(value)
+  }
+
   pub fn alloc_slice_with(&self, len: usize, f: impl FnMut(usize) -> T) -> &mut [T] {
     self.inner.alloc_slice_with(len, f)
   }
