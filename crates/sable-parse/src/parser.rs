@@ -59,6 +59,7 @@ use sable_ast::{
   },
 };
 use sable_common::{
+  interner::StrInterner,
   location::Location,
   writer::{
     Reportable,
@@ -104,6 +105,7 @@ where
   lexer: Lexer<'src>,
   ast: &'parser mut Ast<'ast>,
   sink: &'parser mut D,
+  strintern: &'parser StrInterner<'src>,
 }
 
 impl<'parser, 'src, 'ast, D> Parser<'parser, 'src, 'ast, D>
@@ -112,8 +114,18 @@ where
   'src: 'parser,
   'src: 'ast,
 {
-  pub fn new(lexer: Lexer<'src>, ast: &'parser mut Ast<'ast>, sink: &'parser mut D) -> Self {
-    Self { lexer, ast, sink }
+  pub fn new(
+    lexer: Lexer<'src>,
+    ast: &'parser mut Ast<'ast>,
+    sink: &'parser mut D,
+    strintern: &'parser StrInterner<'src>,
+  ) -> Self {
+    Self {
+      lexer,
+      ast,
+      sink,
+      strintern,
+    }
   }
 
   fn handle_token_error(&self, token: &Token<'src>, error: &TokenError) -> ParseError<'src> {
