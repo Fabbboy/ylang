@@ -5,12 +5,13 @@ use crate::{
 };
 use getset::Getters;
 use typed_builder::TypedBuilder;
+use sable_common::interner::Entry;
 
 #[derive(Debug, Getters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct VariableStatement<'ctx> {
   #[getset(get = "pub")]
-  name: Located<'ctx, &'ctx str>,
+  name: Located<'ctx, Entry>,
   #[getset(get = "pub")]
   initializer: Expression<'ctx>,
   #[getset(get = "pub")]

@@ -12,6 +12,7 @@ use crate::{
     TypeNamePair,
   },
 };
+use sable_common::interner::Entry;
 
 pub const MAX_INLINE_PARAMS: usize = 6;
 
@@ -19,7 +20,7 @@ pub const MAX_INLINE_PARAMS: usize = 6;
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct FunctionParam<'ctx> {
   #[getset(get = "pub", set = "pub")]
-  name: Located<'ctx, &'ctx str>,
+  name: Located<'ctx, Entry>,
   #[getset(get = "pub")]
   type_: Located<'ctx, Type<'ctx>>,
 }
@@ -28,7 +29,7 @@ impl<'ctx> From<Located<'ctx, TypeNamePair<'ctx>>> for FunctionParam<'ctx> {
   fn from(pair: Located<'ctx, TypeNamePair<'ctx>>) -> Self {
     Self {
       name: Located::builder()
-        .value(*pair.value().name())
+        .value(pair.value().name().clone())
         .location(pair.location().clone())
         .build(),
       type_: Located::builder()
@@ -43,7 +44,7 @@ impl<'ctx> From<Located<'ctx, TypeNamePair<'ctx>>> for FunctionParam<'ctx> {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Function<'ctx> {
   #[getset(get = "pub")]
-  name: Located<'ctx, &'ctx str>,
+  name: Located<'ctx, Entry>,
   #[getset(get = "pub")]
   params: &'ctx [FunctionParam<'ctx>],
   #[getset(get = "pub")]

@@ -3,12 +3,13 @@ use sable_common::location::Location;
 use typed_builder::TypedBuilder;
 
 use crate::located::Located;
+use sable_common::interner::Entry;
 
 #[derive(Clone, Debug, PartialEq, Eq, Default, TypedBuilder, Getters, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Path<'ctx> {
   #[getset(get = "pub")]
-  segments: Vec<Located<'ctx, &'ctx str>>,
+  segments: Vec<Located<'ctx, Entry>>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Default, Hash)]
@@ -24,7 +25,7 @@ pub enum Type<'ctx> {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct TypeNamePair<'ctx> {
   #[getset(get = "pub")]
-  name: &'ctx str,
+  name: Entry,
   #[getset(get = "pub")]
   type_: Type<'ctx>,
   #[getset(get = "pub")]

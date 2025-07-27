@@ -198,7 +198,7 @@ where
     let token = self.expect(smallvec![TokenKind::Identifier])?;
 
     let segment_located = Located::builder()
-      .value(*token.lexeme())
+      .value(self.strintern.intern(token.lexeme()))
       .location(token.location().clone())
       .build();
 
@@ -220,7 +220,7 @@ where
     let location = name_token.location().merge(&location).unwrap();
     Ok(
       TypeNamePair::builder()
-        .name(name_token.lexeme())
+        .name(self.strintern.intern(name_token.lexeme()))
         .type_(ty)
         .location(location)
         .build(),
@@ -234,7 +234,7 @@ where
       Some(got) => got,
       _ => {
         let name_located = Located::builder()
-          .value(*identifier.lexeme())
+          .value(self.strintern.intern(identifier.lexeme()))
           .location(identifier.location().clone())
           .build();
         let id_expr = IdentifierExpression::builder()
@@ -256,7 +256,7 @@ where
         let value_heaped = self.ast.expr_arena().alloc(value);
 
         let identifier_located = Located::builder()
-          .value(*identifier.lexeme())
+          .value(self.strintern.intern(identifier.lexeme()))
           .location(identifier.location().clone())
           .build();
         let assign_expr = AssignExpression::builder()
@@ -448,7 +448,7 @@ where
     self.expect(smallvec![TokenKind::Semicolon])?;
 
     let name_located = Located::builder()
-      .value(*var_name_tok.lexeme())
+      .value(self.strintern.intern(var_name_tok.lexeme()))
       .location(var_name_tok.location().clone())
       .build();
 
@@ -591,7 +591,7 @@ where
     }
 
     let name_located = Located::builder()
-      .value(*name_token.lexeme())
+      .value(self.strintern.intern(name_token.lexeme()))
       .location(name_token.location().clone())
       .build();
 

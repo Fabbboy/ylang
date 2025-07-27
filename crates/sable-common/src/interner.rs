@@ -10,6 +10,7 @@ use sable_arena::{
 };
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Entry(pub usize);
 
 #[derive(Debug)]
