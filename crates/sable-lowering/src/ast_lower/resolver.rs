@@ -2,10 +2,21 @@ use std::marker::PhantomData;
 
 use sable_ast::{
   ast::Ast,
-  expression::VisitExpression,
+  expression::{
+    AssignExpression,
+    BinaryExpression,
+    BlockExpression,
+    Expression,
+    IdentifierExpression,
+    LiteralExpression,
+    VisitExpression,
+  },
   located::Located,
   objects::function::Function,
-  statement::VisitStatement,
+  statement::{
+    VariableStatement,
+    VisitStatement,
+  },
 };
 use sable_common::writer::Sink;
 use sable_hir::package::Package;
@@ -82,53 +93,36 @@ where
 {
   type Ret = Result<(), AstLoweringError>;
 
-  fn visit_block(
-    &mut self,
-    block: &Located<'ast, sable_ast::expression::BlockExpression<'ast>>,
-  ) -> Self::Ret {
+  fn visit_block(&mut self, block: &Located<'ast, BlockExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_literal(
-    &mut self,
-    literal: &Located<'ast, sable_ast::expression::LiteralExpression<'ast>>,
-  ) -> Self::Ret {
+  fn visit_literal(&mut self, literal: &Located<'ast, LiteralExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_assign(
-    &mut self,
-    assign: &Located<'ast, sable_ast::expression::AssignExpression<'ast>>,
-  ) -> Self::Ret {
+  fn visit_assign(&mut self, assign: &Located<'ast, AssignExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
-  fn visit_binary(
-    &mut self,
-    binary: &Located<'ast, sable_ast::expression::BinaryExpression<'ast>>,
-  ) -> Self::Ret {
+  fn visit_binary(&mut self, binary: &Located<'ast, BinaryExpression<'ast>>) -> Self::Ret {
     todo!()
   }
 
   fn visit_identifier(
     &mut self,
-    identifier: &Located<'ast, sable_ast::expression::IdentifierExpression<'ast>>,
+    identifier: &Located<'ast, IdentifierExpression<'ast>>,
   ) -> Self::Ret {
     todo!()
   }
 
-  fn visit_expression(
-    &mut self,
-    expression: &sable_ast::expression::Expression<'ast>,
-  ) -> Self::Ret {
+  fn visit_expression(&mut self, expression: &Expression<'ast>) -> Self::Ret {
     match expression {
-      sable_ast::expression::Expression::Block(block) => self.visit_block(block),
-      sable_ast::expression::Expression::Literal(literal) => self.visit_literal(literal),
-      sable_ast::expression::Expression::Assign(assign) => self.visit_assign(assign),
-      sable_ast::expression::Expression::Binary(binary) => self.visit_binary(binary),
-      sable_ast::expression::Expression::Identifier(identifier) => {
-        self.visit_identifier(identifier)
-      }
+      Expression::Block(block) => self.visit_block(block),
+      Expression::Literal(literal) => self.visit_literal(literal),
+      Expression::Assign(assign) => self.visit_assign(assign),
+      Expression::Binary(binary) => self.visit_binary(binary),
+      Expression::Identifier(identifier) => self.visit_identifier(identifier),
     }
   }
 }
@@ -139,16 +133,13 @@ where
 {
   type Ret = Result<(), AstLoweringError>;
 
-  fn visit_expression(
-    &mut self,
-    expression: &sable_ast::expression::Expression<'ast>,
-  ) -> Self::Ret {
+  fn visit_expression(&mut self, expression: &Expression<'ast>) -> Self::Ret {
     todo!()
   }
 
   fn visit_variable_statement(
     &mut self,
-    variable_statement: &Located<'ast, sable_ast::statement::VariableStatement<'ast>>,
+    variable_statement: &Located<'ast, VariableStatement<'ast>>,
   ) -> Self::Ret {
     todo!()
   } // modifys ast and package does not have to return
