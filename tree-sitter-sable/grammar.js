@@ -17,53 +17,38 @@ module.exports = grammar({
     source_file: ($) => repeat($.function_declaration),
 
     semi: ($) => ";",
-    lparent: ($) => "(",
-    rparent: ($) => ")",
-    lbrace: ($) => "{",
-    rbrace: ($) => "}",
-    colon: ($) => ":",
-    comma: ($) => ",",
-
-    plus: ($) => "+",
-    minus: ($) => "-",
-    star: ($) => "*",
-    slash: ($) => "/",
-    equal: ($) => "=",
-
-    var_kw: ($) => "var",
-    func_kw: ($) => "func",
 
     function_declaration: ($) =>
       seq(
-        $.func_kw,
+        "func",
         $.identifier,
-        $.lparent,
+        "(",
         optional($.parameter_list),
-        $.rparent,
-        $.colon,
+        ")",
+        ":",
         $.type,
         $.block_or_semi
       ),
 
-    parameter_list: ($) => seq($.parameter, repeat(seq($.comma, $.parameter))),
+    parameter_list: ($) => seq($.parameter, repeat(seq(",", $.parameter))),
 
-    parameter: ($) => seq($.identifier, $.colon, $.type),
+    parameter: ($) => seq($.identifier, ":", $.type),
 
     type: ($) => seq($.identifier, optional($.pointer_suffix)),
 
-    pointer_suffix: ($) => repeat1($.star),
+    pointer_suffix: ($) => repeat1("*"),
 
     block_or_semi: ($) => choice($.block, $.semi),
 
-    block: ($) => seq($.lbrace, repeat($.statement), $.rbrace),
+    block: ($) => seq("{", repeat($.statement), "}"),
 
     statement: ($) => choice($.variable_declaration, $.expression_statement),
 
     variable_declaration: ($) =>
       seq(
-        $.var_kw,
+        "var",
         $.identifier,
-        optional(seq($.colon, $.type)),
+        optional(seq(":", $.type)),
         "=",
         $.expression,
         $.semi
@@ -73,19 +58,19 @@ module.exports = grammar({
 
     expression: ($) => $.assignment,
 
-    assignment: ($) => choice(seq($.identifier, $.equal, $.expression), $.additive),
+    assignment: ($) => choice(seq($.identifier, "=", $.expression), $.additive),
 
     additive: ($) =>
       prec.left(
         1,
-        seq($.multiplicative, repeat(seq(choice($.plus, $.minus), $.multiplicative)))
+        seq($.multiplicative, repeat(seq(choice("+", "-"), $.multiplicative)))
       ),
 
     multiplicative: ($) =>
-      prec.left(2, seq($.primary, repeat(seq(choice($.star, $.slash), $.primary)))),
+      prec.left(2, seq($.primary, repeat(seq(choice("*", "/"), $.primary)))),
 
     primary: ($) =>
-      choice($.literal, $.identifier, seq($.lparent, $.expression, $.rparent)),
+      choice($.literal, $.identifier, seq("(", $.expression, ")")),
 
     literal: ($) => choice($.integer_literal, $.float_literal),
 
