@@ -1,6 +1,5 @@
 use getset::{
   Getters,
-  MutGetters,
   Setters,
 };
 use typed_builder::TypedBuilder;
@@ -40,12 +39,12 @@ impl<'ctx> From<Located<'ctx, TypeNamePair<'ctx>>> for FunctionParam<'ctx> {
   }
 }
 
-#[derive(Getters, MutGetters, TypedBuilder, Debug)]
+#[derive(Getters, TypedBuilder, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Function<'ctx> {
   #[getset(get = "pub")]
   name: Located<'ctx, &'ctx str>,
-  #[getset(get = "pub", get_mut = "pub")]
+  #[getset(get = "pub")]
   params: &'ctx [FunctionParam<'ctx>],
   #[getset(get = "pub")]
   return_type: Located<'ctx, Type<'ctx>>,

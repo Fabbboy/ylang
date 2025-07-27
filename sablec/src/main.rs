@@ -72,9 +72,9 @@ fn main() {
         }
       };
 
-      let pkg = Package::new(&hir_arena, &asts);
+      let mut pkg = Package::new(&hir_arena, &asts);
 
-      let mut resolver = Resolver::new(&asts, &pkg, &mut writer);
+      let mut resolver = Resolver::new(&asts, &mut pkg, &mut writer);
       match resolver.resolve() {
         Ok(_) => println!("Resolution successful."),
         Err(_) => {
