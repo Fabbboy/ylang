@@ -1,3 +1,6 @@
+#![allow(clippy::mut_from_ref)]
+#![allow(clippy::items_after_test_module)]
+
 extern crate alloc;
 
 use alloc::boxed::Box;
@@ -153,6 +156,7 @@ impl Drop for Chunk {
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Arena {
   chunk_size: usize,
+  #[cfg_attr(feature = "serde", serde(skip))]
   head: RefCell<Option<NonNull<Chunk>>>,
 }
 
@@ -346,15 +350,15 @@ impl Arena {
         old_layout.size(),
         new_layout.size(),
         new_layout.align(),
-      ) {
-        if chunk.try_grow_in_place(
+      ) &&
+        chunk.try_grow_in_place(
           ptr,
           old_layout.size(),
           new_layout.size(),
           new_layout.align(),
-        ) {
-          return Some(ptr);
-        }
+        )
+      {
+        return Some(ptr);
       }
     }
 
@@ -406,7 +410,7 @@ impl Arena {
       return true;
     }
     let raw = NonNull::new(slice.as_mut_ptr() as *mut u8).unwrap();
-    let size = mem::size_of::<T>() * slice.len();
+    let size = mem::size_of_val(slice);
     self.dealloc_raw(
       raw,
       Layout::from_size_align(size, mem::align_of::<T>()).unwrap(),
@@ -643,12 +647,14 @@ mod tests {
   fn test_mixed_type_allocation() {
     let arena = Arena::with_chunk_size(1024);
 
+    use std::f64::consts::PI;
+
     let int_ref = arena.alloc(42i32);
-    let float_ref = arena.alloc(3.14f64);
+    let float_ref = arena.alloc(PI);
     let string_ref = arena.try_alloc_str("test").unwrap();
 
     assert_eq!(*int_ref, 42);
-    assert_eq!(*float_ref, 3.14);
+    assert_eq!(*float_ref, PI);
     assert_eq!(string_ref, "test");
 
     let int_slice = arena.alloc_slice_with(3, |i| (i as i32) * 10);

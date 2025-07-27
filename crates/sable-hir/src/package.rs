@@ -21,7 +21,7 @@ pub struct Package<'hir> {
 }
 
 impl<'hir> Package<'hir> {
-  pub fn new<'ast>(
+  pub fn new(
     item_arena: &'hir TypedArena<Item<'hir>>,
     strintern: &'hir StrInterner<'hir>,
   ) -> Self {

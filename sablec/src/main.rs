@@ -70,14 +70,13 @@ fn main() {
     let param_arena: TypedArena<FunctionParam> = TypedArena::new();
     let main_ast = Ast::new(&expr_arena, &param_arena);
 
-    let mut asts = Vec::new();
-    asts.push(main_ast);
-    let mut main_ast = &mut asts[0];
+    let mut asts = vec![main_ast];
+    let main_ast = &mut asts[0];
 
     {
       let lexer = Lexer::new(source.clone());
 
-      let mut parser = Parser::new(lexer, &mut main_ast, &mut writer, &str_intern);
+      let mut parser = Parser::new(lexer, main_ast, &mut writer, &str_intern);
       match parser.parse() {
         Ok(_) => {
           println!(

@@ -52,7 +52,7 @@ impl<'ctx> Lexer<'ctx> {
 
   #[inline]
   fn make_location(&self) -> Location<'ctx> {
-    Location::new(self.start..self.pos, *self.source.filename())
+    Location::new(self.start..self.pos, self.source.filename())
   }
 
   #[inline]
@@ -116,7 +116,7 @@ impl<'ctx> Lexer<'ctx> {
   }
 
   fn lex_identifier(&mut self) -> Token<'ctx> {
-    while let Some(_) = self.get_char(0) {
+    while self.get_char(0).is_some() {
       if self.check(0, |c| c.is_ascii_alphanumeric() || c == '_') {
         self.advance();
       } else {
@@ -228,6 +228,6 @@ impl<'ctx> Iterator for Lexer<'ctx> {
 
     let cache = self.next.clone();
     self.next = Some(self.lex());
-    return cache;
+    cache
   }
 }
