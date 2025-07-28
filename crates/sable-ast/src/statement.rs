@@ -18,7 +18,7 @@ pub trait VisitStatement<'ctx> {
   type Ret;
 
   fn visit_expression(&mut self, expression: &Expression<'ctx>) -> Self::Ret;
-  fn visit_variable_statement(
+  fn visit_variable(
     &mut self,
     variable_statement: &Located<'ctx, VariableStatement<'ctx>>,
   ) -> Self::Ret;
@@ -26,7 +26,7 @@ pub trait VisitStatement<'ctx> {
   fn visit_statement(&mut self, statement: &Statement<'ctx>) -> Self::Ret {
     match statement {
       Statement::Expression(expression) => self.visit_expression(expression),
-      Statement::Variable(variable_statement) => self.visit_variable_statement(variable_statement),
+      Statement::Variable(variable_statement) => self.visit_variable(variable_statement),
     }
   }
 }

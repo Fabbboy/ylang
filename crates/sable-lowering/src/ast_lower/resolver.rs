@@ -111,21 +111,11 @@ where
     todo!()
   }
 
-    fn visit_identifier(
-      &mut self,
-      _identifier: &Located<'ast, IdentifierExpression<'ast>>,
-    ) -> Self::Ret {
+  fn visit_identifier(
+    &mut self,
+    _identifier: &Located<'ast, IdentifierExpression<'ast>>,
+  ) -> Self::Ret {
     todo!()
-  }
-
-  fn visit_expression(&mut self, expression: &Expression<'ast>) -> Self::Ret {
-    match expression {
-      Expression::Block(block) => self.visit_block(block),
-      Expression::Literal(literal) => self.visit_literal(literal),
-      Expression::Assign(assign) => self.visit_assign(assign),
-      Expression::Binary(binary) => self.visit_binary(binary),
-      Expression::Identifier(identifier) => self.visit_identifier(identifier),
-    }
   }
 }
 
@@ -139,7 +129,7 @@ where
     todo!()
   }
 
-  fn visit_variable_statement(
+  fn visit_variable(
     &mut self,
     _variable_statement: &Located<'ast, VariableStatement<'ast>>,
   ) -> Self::Ret {
