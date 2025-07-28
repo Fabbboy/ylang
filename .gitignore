@@ -2,3 +2,7 @@
 test
 .vscode/
 tree-sitter-sable/*.so
+*.wasm
+*.so
+*.a
+*.html
