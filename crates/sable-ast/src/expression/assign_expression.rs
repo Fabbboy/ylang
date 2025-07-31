@@ -5,10 +5,7 @@ use crate::{
   expression::Expression,
   located::Located,
 };
-use sable_common::{
-  interner::Entry,
-  location::Location,
-};
+use sable_common::interner::Entry;
 
 #[derive(Debug, TypedBuilder, Getters)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -17,6 +14,4 @@ pub struct AssignExpression<'ctx> {
   identifier: Located<'ctx, Entry>,
   #[getset(get = "pub")]
   value: &'ctx Expression<'ctx>,
-  #[getset(get = "pub")]
-  location: Location<'ctx>,
 }

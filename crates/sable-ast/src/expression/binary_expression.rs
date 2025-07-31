@@ -1,6 +1,5 @@
 use crate::expression::Expression;
 use getset::Getters;
-use sable_common::location::Location;
 use typed_builder::TypedBuilder;
 
 macro_rules! binary_expr_factory {
@@ -14,8 +13,6 @@ macro_rules! binary_expr_factory {
           left: &'ctx Expression<'ctx>,
           #[getset(get = "pub")]
           right: &'ctx Expression<'ctx>,
-          #[getset(get = "pub")]
-          location: Location<'ctx>,
         }
       )*
 
@@ -25,16 +22,6 @@ macro_rules! binary_expr_factory {
         $(
           $name([<$name Expression>]<'ctx>),
         )*
-      }
-
-      impl<'ctx> BinaryExpression<'ctx> {
-        pub fn location(&self) -> &Location<'ctx> {
-          match self {
-            $(
-              BinaryExpression::$name(expr) => expr.location(),
-            )*
-          }
-        }
       }
     }
   };
