@@ -23,7 +23,7 @@ serde = "1.0.219"
 clap = "4.5.40"
 paste = "1.0.15"
 
-cxx = "1.0.160" # features: c++11, c++17, c++20
+partial = { git = "https://github.com/Fabbboy/partial.git", branch = "master" }
 
 sable-ast = { path = "crates/sable-ast" }
 sable-common = { path = "crates/sable-common" }
