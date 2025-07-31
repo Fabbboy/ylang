@@ -3,6 +3,7 @@
 use std::marker::PhantomData;
 
 use sable_ast::{
+  NodeId,
   ast::Ast,
   expression::{
     AssignExpression,
@@ -13,14 +14,17 @@ use sable_ast::{
     LiteralExpression,
     VisitExpression,
   },
-  located::Located,
   objects::function::Function,
   statement::{
     VariableStatement,
     VisitStatement,
   },
 };
-use sable_common::writer::Sink;
+use sable_common::{
+  location::Location,
+  once::Once,
+  writer::Sink,
+};
 use sable_hir::package::Package;
 
 use crate::ast_lower_error::AstLoweringError;
@@ -95,25 +99,47 @@ where
 {
   type Ret = Result<(), AstLoweringError>;
 
-  fn visit_block(&mut self, _block: &Located<'ast, BlockExpression<'ast>>) -> Self::Ret {
+  fn visit_block(
+    &mut self,
+    _id: &Once<NodeId>,
+    _block: &BlockExpression<'ast>,
+    _location: &Location<'ast>,
+  ) -> Self::Ret {
     todo!()
   }
 
-  fn visit_literal(&mut self, _literal: &Located<'ast, LiteralExpression<'ast>>) -> Self::Ret {
+  fn visit_literal(
+    &mut self,
+    _id: &Once<NodeId>,
+    _literal: &LiteralExpression,
+    _location: &Location<'ast>,
+  ) -> Self::Ret {
     todo!()
   }
 
-  fn visit_assign(&mut self, _assign: &Located<'ast, AssignExpression<'ast>>) -> Self::Ret {
+  fn visit_assign(
+    &mut self,
+    _id: &Once<NodeId>,
+    _assign: &AssignExpression<'ast>,
+    _location: &Location<'ast>,
+  ) -> Self::Ret {
     todo!()
   }
 
-  fn visit_binary(&mut self, _binary: &Located<'ast, BinaryExpression<'ast>>) -> Self::Ret {
+  fn visit_binary(
+    &mut self,
+    _id: &Once<NodeId>,
+    _binary: &BinaryExpression<'ast>,
+    _location: &Location<'ast>,
+  ) -> Self::Ret {
     todo!()
   }
 
   fn visit_identifier(
     &mut self,
-    _identifier: &Located<'ast, IdentifierExpression<'ast>>,
+    _id: &Once<NodeId>,
+    _identifier: &IdentifierExpression,
+    _location: &Location<'ast>,
   ) -> Self::Ret {
     todo!()
   }
@@ -125,13 +151,20 @@ where
 {
   type Ret = Result<(), AstLoweringError>;
 
-  fn visit_expression(&mut self, _expression: &Expression<'ast>) -> Self::Ret {
+  fn visit_expression(
+    &mut self,
+    _id: &Once<NodeId>,
+    _expression: &Expression<'ast>,
+    _location: &Location<'ast>,
+  ) -> Self::Ret {
     todo!()
   }
 
   fn visit_variable(
     &mut self,
-    _variable_statement: &Located<'ast, VariableStatement<'ast>>,
+    _id: &Once<NodeId>,
+    _variable_statement: &VariableStatement<'ast>,
+    _location: &Location<'ast>,
   ) -> Self::Ret {
     todo!()
   } // modifys ast and package does not have to return

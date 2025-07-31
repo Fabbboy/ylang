@@ -26,6 +26,7 @@ use sable_ast::{
     BinaryExpression,
     BlockExpression,
     Expression,
+    ExpressionKind,
     IdentifierExpression,
     LiteralExpression,
     binary_expression::{
@@ -47,6 +48,7 @@ use sable_ast::{
   },
   statement::{
     Statement,
+    StatementKind,
     VariableStatement,
   },
   token::{
@@ -236,19 +238,15 @@ where
     let maybe_next = match self.peek(smallvec![TokenKind::Assign]) {
       Some(got) => got,
       _ => {
-        let name_located = Located::builder()
-          .value(self.strintern.intern(identifier.lexeme()))
-          .location(identifier.location().clone())
-          .build();
         let id_expr = IdentifierExpression::builder()
-          .name(name_located)
-          .location(identifier.location().clone())
+          .name(self.strintern.intern(identifier.lexeme()))
           .build();
-        let located = Located::builder()
-          .value(id_expr)
-          .location(identifier.location().clone())
-          .build();
-        return Ok(Expression::Identifier(located));
+        return Ok(
+          Expression::builder()
+            .location(identifier.location().clone())
+            .kind(ExpressionKind::Identifier(id_expr))
+            .build(),
+        );
       }
     };
 
@@ -265,14 +263,14 @@ where
         let assign_expr = AssignExpression::builder()
           .identifier(identifier_located)
           .value(value_heaped)
-          .location(identifier.location().clone())
           .build();
 
-        let located = Located::builder()
-          .value(assign_expr)
-          .location(identifier.location().clone())
-          .build();
-        Ok(Expression::Assign(located))
+        Ok(
+          Expression::builder()
+            .location(identifier.location().clone())
+            .kind(ExpressionKind::Assign(assign_expr))
+            .build(),
+        )
       }
     })
   }
@@ -298,14 +296,14 @@ where
 
         let int_expr = IntegerExpression::builder()
           .value(*value)
-          .location(value_expr.location().clone())
           .build();
 
-        let located = Located::builder()
-          .value(LiteralExpression::Integer(int_expr))
-          .location(value_expr.location().clone())
-          .build();
-        Ok(Expression::Literal(located))
+        Ok(
+          Expression::builder()
+            .location(value_expr.location().clone())
+            .kind(ExpressionKind::Literal(LiteralExpression::Integer(int_expr)))
+            .build(),
+        )
       },
       TokenKind::Float => {
         let value_expr = self.expect(smallvec![TokenKind::Float])?;
@@ -317,14 +315,14 @@ where
 
         let float_expr = FloatExpression::builder()
           .value(*value)
-          .location(value_expr.location().clone())
           .build();
 
-        let located = Located::builder()
-          .value(LiteralExpression::Float(float_expr))
-          .location(value_expr.location().clone())
-          .build();
-        Ok(Expression::Literal(located))
+        Ok(
+          Expression::builder()
+            .location(value_expr.location().clone())
+            .kind(ExpressionKind::Literal(LiteralExpression::Float(float_expr)))
+            .build(),
+        )
       },
       TokenKind::Identifier => Ok(self.parse_identifier()?),
       TokenKind::Paren(true) => {
@@ -357,25 +355,21 @@ where
           let expr = MultiplyExpression::builder()
             .left(lhs_heaped)
             .right(rhs_heaped)
-            .location(combined.clone())
             .build();
-          let located = Located::builder()
-            .value(BinaryExpression::Multiply(expr))
+          lhs = Expression::builder()
             .location(combined.clone())
+            .kind(ExpressionKind::Binary(BinaryExpression::Multiply(expr)))
             .build();
-          lhs = Expression::Binary(located);
         },
         TokenKind::Slash => {
           let expr = DivideExpression::builder()
             .left(lhs_heaped)
             .right(rhs_heaped)
-            .location(combined.clone())
             .build();
-          let located = Located::builder()
-            .value(BinaryExpression::Divide(expr))
+          lhs = Expression::builder()
             .location(combined.clone())
+            .kind(ExpressionKind::Binary(BinaryExpression::Divide(expr)))
             .build();
-          lhs = Expression::Binary(located);
         }
       });
     }
@@ -403,29 +397,23 @@ where
           let expr = AddExpression::builder()
             .left(lhs_heaped)
             .right(rhs_heaped)
-            .location(combined.clone())
             .build();
 
-          let located = Located::builder()
-            .value(BinaryExpression::Add(expr))
+          lhs = Expression::builder()
             .location(combined.clone())
+            .kind(ExpressionKind::Binary(BinaryExpression::Add(expr)))
             .build();
-          lhs = Expression::Binary(located);
         },
         TokenKind::Minus => {
-          let expr = BinaryExpression::Subtract(
-            SubtractExpression::builder()
-              .left(lhs_heaped)
-              .right(rhs_heaped)
-              .location(combined.clone())
-              .build(),
-          );
-
-          let located = Located::builder()
-            .value(expr)
-            .location(combined.clone())
+          let expr = SubtractExpression::builder()
+            .left(lhs_heaped)
+            .right(rhs_heaped)
             .build();
-          lhs = Expression::Binary(located);
+
+          lhs = Expression::builder()
+            .location(combined.clone())
+            .kind(ExpressionKind::Binary(BinaryExpression::Subtract(expr)))
+            .build();
         }
       });
     }
@@ -471,7 +459,12 @@ where
       let expr = self.parse_expression()?;
       self.expect(smallvec![TokenKind::Semicolon])?;
 
-      return Ok(Statement::Expression(expr));
+      return Ok(
+        Statement::builder()
+          .location(expr.location().clone())
+          .kind(StatementKind::Expression(expr))
+          .build(),
+      );
     }
 
     let expected = smallvec![TokenKind::Var,];
@@ -490,11 +483,12 @@ where
       TokenKind::Var => {
         let var_stmt = self.parse_variable_stmt()?;
         let stmt_location = var_stmt.name().location().clone();
-        let var_stmt_located = Located::builder()
-          .value(var_stmt)
-          .location(stmt_location)
-          .build();
-        Ok(Statement::Variable(var_stmt_located))
+        Ok(
+          Statement::builder()
+            .location(stmt_location)
+            .kind(StatementKind::Variable(var_stmt))
+            .build(),
+        )
       }
     })
   }
@@ -538,16 +532,11 @@ where
     }
 
     let blk_end = self.expect(smallvec![TokenKind::Brace(false)])?;
-    let location = blk_start.location().merge(blk_end.location()).unwrap();
+    let _location = blk_start.location().merge(blk_end.location()).unwrap();
 
     match status {
       ParseStatus::Error => Err(ParseErrorMOO(Either::Right(errors))),
-      ParseStatus::Success => Ok(
-        BlockExpression::builder()
-          .body(statements)
-          .location(location)
-          .build(),
-      ),
+      ParseStatus::Success => Ok(BlockExpression::builder().body(statements).build()),
     }
   }
 
