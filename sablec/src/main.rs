@@ -2,10 +2,7 @@
 use std::{
   cell::OnceCell,
   io,
-  sync::{
-    Arc,
-    Once,
-  },
+  sync::Arc,
 };
 
 use clap::Parser as ClapParser;
@@ -21,7 +18,10 @@ use sable_ast::{
 use sable_common::{
   file::{
     manager::Manager,
-    source::Source,
+    source::{
+      self,
+      Source,
+    },
   },
   interner::StrInterner,
   writer::{
@@ -56,16 +56,15 @@ struct ParseCtx<'ast> {
   ast: OnceCell<Ast<'ast>>,
 }
 
-fn parse_file<'f, 'ast, 'src, D>(
-  source: Arc<Source, &'src TypedArena<Source>>,
-  asts_arena: &'f TypedArena<ParseCtx>,
-  str_intern: &'f StrInterner<'src>,
+fn parse_file<'src, 'ast, D>(
+  source: Arc<Source<'src>, &'src TypedArena<Source<'src>>>,
+  asts_arena: &'ast TypedArena<ParseCtx<'ast>>,
+  str_intern: &'ast StrInterner<'src>,
   writer: &mut D,
-) -> Result<&'ast mut ParseCtx<'ast>, ()>
+) -> Result<&'ast ParseCtx<'ast>, ()>
 where
   D: Sink<'src>,
   'src: 'ast,
-  'ast: 'f,
 {
   let ctx = asts_arena.alloc(ParseCtx {
     expr_arena: TypedArena::new(),
@@ -73,7 +72,7 @@ where
     ast: OnceCell::new(),
   });
 
-  ctx.ast.set(Ast::new(&ctx.expr_arena, &ctx.param_arena));
+  let _ = ctx.ast.set(Ast::new(&ctx.expr_arena, &ctx.param_arena));
 
   let lexer = Lexer::new(source.clone());
   let ast = ctx.ast.get_mut().unwrap();
@@ -81,7 +80,7 @@ where
   match parser.parse() {
     Ok(_) => {
       println!("Successfully parsed {} function(s).", ast.funcs().len());
-      Ok(ctx)
+      Ok(&*ctx)
     }
     Err(_) => {
       eprintln!("Parsing failed. See errors above.");
@@ -111,7 +110,7 @@ fn main() {
       }
     };
 
-    let src = manager.add_source(filename.as_str(), source_code.as_str());
+    let src = manager.add_source(&source_code, &filename);
     sources.push(src);
   }
 
@@ -128,17 +127,14 @@ fn main() {
       }
     }
   }
-
   /*
-       let mut resolver = Resolver::new(&asts, &mut package, &mut writer);
-     match resolver.resolve() {
-       Ok(_) => println!("Resolution successful."),
-       Err(_) => {
-         eprintln!("Resolution failed. See errors above.");
-         std::process::exit(1);
-       }
-     };
-  */
-
+  let mut resolver = Resolver::new(&ast_refs, &mut package, &mut writer);
+  match resolver.resolve() {
+    Ok(_) => println!("Resolution successful."),
+    Err(_) => {
+      eprintln!("Resolution failed. See errors above.");
+      std::process::exit(1);
+    }
+  }; */
   println!("{:#?}", package);
 }
