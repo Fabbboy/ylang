@@ -40,7 +40,7 @@ pub enum ExpressionKind<'ctx> {
   Literal(LiteralExpression),
   Assign(AssignExpression<'ctx>),
   Binary(BinaryExpression<'ctx>),
-  Identifier(IdentifierExpression<'ctx>),
+  Identifier(IdentifierExpression),
 }
 
 pub trait VisitExpression<'ctx> {
@@ -73,7 +73,7 @@ pub trait VisitExpression<'ctx> {
   fn visit_identifier(
     &mut self,
     id: &Once<NodeId>,
-    identifier: &IdentifierExpression<'ctx>,
+    identifier: &IdentifierExpression,
     location: &Location<'ctx>,
   ) -> Self::Ret;
 
