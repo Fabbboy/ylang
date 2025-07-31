@@ -1,6 +1,5 @@
 #![feature(allocator_api)]
 use std::{
-  cell::OnceCell,
   io,
   sync::Arc,
 };
@@ -18,10 +17,7 @@ use sable_ast::{
 use sable_common::{
   file::{
     manager::Manager,
-    source::{
-      self,
-      Source,
-    },
+    source::Source,
   },
   interner::StrInterner,
   writer::{
@@ -53,34 +49,27 @@ struct Args {
 struct ParseCtx<'ast> {
   expr_arena: TypedArena<Expression<'ast>>,
   param_arena: TypedArena<FunctionParam<'ast>>,
-  ast: OnceCell<Ast<'ast>>,
 }
 
 fn parse_file<'src, 'ast, D>(
   source: Arc<Source<'src>, &'src TypedArena<Source<'src>>>,
-  asts_arena: &'ast TypedArena<ParseCtx<'ast>>,
+  asts_arena: &'ast TypedArena<Ast<'ast>>,
+  ctx: &'ast ParseCtx<'ast>,
   str_intern: &'ast StrInterner<'src>,
   writer: &mut D,
-) -> Result<&'ast ParseCtx<'ast>, ()>
+) -> Result<&'ast mut Ast<'ast>, ()>
 where
   D: Sink<'src>,
   'src: 'ast,
 {
-  let ctx = asts_arena.alloc(ParseCtx {
-    expr_arena: TypedArena::new(),
-    param_arena: TypedArena::new(),
-    ast: OnceCell::new(),
-  });
-
-  let _ = ctx.ast.set(Ast::new(&ctx.expr_arena, &ctx.param_arena));
+  let ast = asts_arena.alloc(Ast::new(&ctx.expr_arena, &ctx.param_arena));
 
   let lexer = Lexer::new(source.clone());
-  let ast = ctx.ast.get_mut().unwrap();
   let mut parser = Parser::new(lexer, ast, writer, str_intern);
   match parser.parse() {
     Ok(_) => {
       println!("Successfully parsed {} function(s).", ast.funcs().len());
-      Ok(&*ctx)
+      Ok(ast)
     }
     Err(_) => {
       eprintln!("Parsing failed. See errors above.");
@@ -91,7 +80,7 @@ where
 
 fn main() {
   let file_arena: TypedArena<Source> = TypedArena::new();
-  let asts_arena: TypedArena<ParseCtx> = TypedArena::new();
+  let asts_arena: TypedArena<Ast> = TypedArena::new();
   let item_arena: TypedArena<Item> = TypedArena::new();
   let str_intern_arena = Arena::new();
   let str_intern = StrInterner::new(&str_intern_arena);
@@ -100,6 +89,7 @@ fn main() {
   let mut manager = Manager::new(&file_arena);
   let mut package = Package::new(&item_arena, &str_intern);
 
+  let mut ctxs = vec![];
   let mut sources = vec![];
   for filename in args.input {
     let source_code = match std::fs::read_to_string(&filename) {
@@ -112,29 +102,36 @@ fn main() {
 
     let src = manager.add_source(&source_code, &filename);
     sources.push(src);
+    let ctx = ParseCtx {
+      expr_arena: TypedArena::new(),
+      param_arena: TypedArena::new(),
+    };
+    ctxs.push(ctx);
   }
 
   let mut stdout = io::stdout();
   let mut writer = ReportWriter::new(manager.error_cache_mut(), &mut stdout);
 
-  let mut ctxs = vec![];
-  for source in sources {
-    match parse_file(source, &asts_arena, &str_intern, &mut writer) {
-      Ok(ctx) => ctxs.push(ctx),
+  let mut asts = vec![];
+  for (source, ctx) in sources.iter().zip(ctxs.iter_mut()) {
+    match parse_file(source.clone(), &asts_arena, ctx, &str_intern, &mut writer) {
+      Ok(ast) => {
+        asts.push(ast);
+      }
       Err(_) => {
-        eprintln!("Failed to parse source file.");
-        std::process::exit(1);
+        eprintln!("Failed to parse file '{}'.", source.filename());
       }
     }
   }
-  /*
-  let mut resolver = Resolver::new(&ast_refs, &mut package, &mut writer);
+
+  let mut resolver = Resolver::new(&asts, &mut package, &mut writer);
   match resolver.resolve() {
     Ok(_) => println!("Resolution successful."),
     Err(_) => {
       eprintln!("Resolution failed. See errors above.");
       std::process::exit(1);
     }
-  }; */
+  };
+
   println!("{:#?}", package);
 }

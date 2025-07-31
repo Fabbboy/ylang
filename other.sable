@@ -1,0 +1,3 @@
+func some_name(a: i32, b: i32): i32 {
+  var result = a + b;
+}
