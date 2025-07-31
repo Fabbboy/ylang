@@ -34,7 +34,7 @@ pub struct Resolver<'src, 'hir, 'ast, 'lower, D>
 where
   D: Sink<'src>,
 {
-  asts: &'lower [Ast<'ast>],
+  asts: &'lower [&'lower mut Ast<'ast>],
   _package: &'lower mut Package<'hir>,
   _reporter: &'lower mut D,
   _marker: PhantomData<&'src ()>,
@@ -45,7 +45,7 @@ where
   D: Sink<'src>,
 {
   pub fn new(
-    asts: &'lower [Ast<'ast>],
+    asts: &'lower [&'lower mut Ast<'ast>],
     package: &'lower mut Package<'hir>,
     reporter: &'lower mut D,
   ) -> Self {
