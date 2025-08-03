@@ -1,18 +1,9 @@
-use crate::{
-  NodeId,
-  expression::Expression,
-};
+use crate::{expression::Expression, NodeId};
 
 pub mod variable_statement;
 
-use getset::{
-  Getters,
-  MutGetters,
-};
-use sable_common::{
-  location::Location,
-  once::Once,
-};
+use getset::{Getters, MutGetters};
+use sable_common::{location::Location, once::Once};
 use typed_builder::TypedBuilder;
 pub use variable_statement::VariableStatement;
 
@@ -21,7 +12,7 @@ pub use variable_statement::VariableStatement;
 pub struct Statement<'ctx> {
   #[getset(get = "pub")]
   location: Location<'ctx>,
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut = "pub")]
   kind: StatementKind<'ctx>,
   #[getset(get = "pub", get_mut = "pub")]
   #[builder(default)]
@@ -58,6 +49,34 @@ pub trait VisitStatement<'ctx> {
       }
       StatementKind::Variable(variable_statement) => {
         self.visit_variable(statement.id(), variable_statement, statement.location())
+      }
+    }
+  }
+}
+
+pub trait VisitStatementMut<'ctx> {
+  type Ret;
+
+  fn visit_expression(
+    &mut self,
+    id: &mut Once<NodeId>,
+    expression: &mut Expression<'ctx>,
+    location: &Location<'ctx>,
+  ) -> Self::Ret;
+  fn visit_variable(
+    &mut self,
+    id: &mut Once<NodeId>,
+    variable_statement: &mut VariableStatement<'ctx>,
+    location: &Location<'ctx>,
+  ) -> Self::Ret;
+
+  fn visit_statement(&mut self, statement: &mut Statement<'ctx>) -> Self::Ret {
+    let location = &statement.location;
+    let id = &mut statement.id;
+    match &mut statement.kind {
+      StatementKind::Expression(expression) => self.visit_expression(id, expression, location),
+      StatementKind::Variable(variable_statement) => {
+        self.visit_variable(id, variable_statement, location)
       }
     }
   }

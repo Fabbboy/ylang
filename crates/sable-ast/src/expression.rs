@@ -7,26 +7,20 @@ pub mod literal_expression;
 pub use assign_expression::AssignExpression;
 pub use binary_expression::BinaryExpression;
 pub use block_expression::BlockExpression;
-use getset::{
-  Getters,
-  MutGetters,
-};
+use getset::{Getters, MutGetters};
 pub use identifier_expression::IdentifierExpression;
 pub use literal_expression::LiteralExpression;
 use typed_builder::TypedBuilder;
 
 use crate::NodeId;
-use sable_common::{
-  location::Location,
-  once::Once,
-};
+use sable_common::{location::Location, once::Once};
 
 #[derive(Debug, Getters, MutGetters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Expression<'ctx> {
   #[getset(get = "pub")]
   location: Location<'ctx>,
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut = "pub")]
   kind: ExpressionKind<'ctx>,
   #[getset(get = "pub", get_mut = "pub")]
   #[builder(default)]
@@ -94,6 +88,53 @@ pub trait VisitExpression<'ctx> {
       ExpressionKind::Identifier(identifier) => {
         self.visit_identifier(expression.id(), identifier, expression.location())
       }
+    }
+  }
+}
+
+pub trait VisitExpressionMut<'ctx> {
+  type Ret;
+
+  fn visit_block(
+    &mut self,
+    id: &mut Once<NodeId>,
+    block: &mut BlockExpression<'ctx>,
+    location: &Location<'ctx>,
+  ) -> Self::Ret;
+  fn visit_literal(
+    &mut self,
+    id: &mut Once<NodeId>,
+    literal: &mut LiteralExpression,
+    location: &Location<'ctx>,
+  ) -> Self::Ret;
+  fn visit_assign(
+    &mut self,
+    id: &mut Once<NodeId>,
+    assign: &mut AssignExpression<'ctx>,
+    location: &Location<'ctx>,
+  ) -> Self::Ret;
+  fn visit_binary(
+    &mut self,
+    id: &mut Once<NodeId>,
+    binary: &mut BinaryExpression<'ctx>,
+    location: &Location<'ctx>,
+  ) -> Self::Ret;
+  fn visit_identifier(
+    &mut self,
+    id: &mut Once<NodeId>,
+    identifier: &mut IdentifierExpression,
+    location: &Location<'ctx>,
+  ) -> Self::Ret;
+
+  fn visit_expression(&mut self, expression: &mut Expression<'ctx>) -> Self::Ret {
+    let location = &expression.location;
+    let id = &mut expression.id;
+    match &mut expression.kind {
+      ExpressionKind::Block(block) => self.visit_block(id, block, location),
+      ExpressionKind::Literal(literal) => self.visit_literal(id, literal, location),
+      ExpressionKind::Assign(assign) => self.visit_assign(id, assign, location),
+      ExpressionKind::Binary(binary) => self.visit_binary(id, binary, location),
+      ExpressionKind::Identifier(identifier) => self.visit_identifier(id, identifier, location),
     }
   }
 }
