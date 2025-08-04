@@ -111,12 +111,22 @@ pub trait ExpressionVisitorMut<'ast> {
     expr: &mut Expression<'ast>,
   ) -> Self::VisitReturn;
   fn visit_expr_mut(&mut self, expr: &mut Expression<'ast>) -> Self::VisitReturn {
-    match &mut expr.kind {
-      ExpressionKind::Block(block) => self.visit_block_mut(block, expr),
-      ExpressionKind::Literal(literal) => self.visit_literal_mut(literal, expr),
-      ExpressionKind::Assign(assign) => self.visit_assign_mut(assign, expr),
-      ExpressionKind::Binary(binary) => self.visit_binary_mut(binary, expr),
-      ExpressionKind::Identifier(identifier) => self.visit_identifier_mut(identifier, expr),
+    // SAFETY: We create a raw pointer so that we can obtain simultaneous
+    // mutable references to both the expression and its kind. This mirrors
+    // the intent of the visitor API while working around the borrow checker,
+    // and is safe because the pointer originates from `expr` and is not used
+    // after the match statement completes.
+    let expr_ptr: *mut Expression<'ast> = expr;
+    unsafe {
+      match &mut (*expr_ptr).kind {
+        ExpressionKind::Block(block) => self.visit_block_mut(block, &mut *expr_ptr),
+        ExpressionKind::Literal(literal) => self.visit_literal_mut(literal, &mut *expr_ptr),
+        ExpressionKind::Assign(assign) => self.visit_assign_mut(assign, &mut *expr_ptr),
+        ExpressionKind::Binary(binary) => self.visit_binary_mut(binary, &mut *expr_ptr),
+        ExpressionKind::Identifier(identifier) => {
+          self.visit_identifier_mut(identifier, &mut *expr_ptr)
+        }
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 use crate::{
-  NodeId,
   expression::Expression,
+  NodeId,
 };
 
 pub mod variable_statement;
@@ -74,9 +74,15 @@ pub trait StatementVisitorMut<'ctx> {
   ) -> Self::VisitReturn;
 
   fn visit_stmt_mut(&mut self, statement: &mut Statement<'ctx>) -> Self::VisitReturn {
-    match &mut statement.kind {
-      StatementKind::Expression(expr) => self.visit_expression_mut(expr, statement),
-      StatementKind::Variable(variable) => self.visit_variable_mut(variable, statement),
+    // SAFETY: see comment in `ExpressionVisitorMut::visit_expr_mut`. We need to
+    // borrow both the statement and its inner kind mutably at the same time, so
+    // we work with a raw pointer to avoid borrow checker conflicts.
+    let stmt_ptr: *mut Statement<'ctx> = statement;
+    unsafe {
+      match &mut (*stmt_ptr).kind {
+        StatementKind::Expression(expr) => self.visit_expression_mut(expr, &mut *stmt_ptr),
+        StatementKind::Variable(variable) => self.visit_variable_mut(variable, &mut *stmt_ptr),
+      }
     }
   }
 }
