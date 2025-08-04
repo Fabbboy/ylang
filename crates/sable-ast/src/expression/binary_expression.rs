@@ -33,6 +33,40 @@ macro_rules! binary_expr_factory {
         )*
       }
 
+      impl<'ctx> BinaryExpression<'ctx> {
+        pub fn lhs(&self) -> &Expression<'ctx> {
+          match self {
+            $(
+              BinaryExpression::$name(inner) => inner.left(),
+            )*
+          }
+        }
+
+        pub fn lhs_mut(&mut self) -> &mut Expression<'ctx> {
+          match self {
+            $(
+              BinaryExpression::$name(inner) => inner.left_mut(),
+            )*
+          }
+        }
+
+        pub fn rhs(&self) -> &Expression<'ctx> {
+          match self {
+            $(
+              BinaryExpression::$name(inner) => inner.right(),
+            )*
+          }
+        }
+
+        pub fn rhs_mut(&mut self) -> &mut Expression<'ctx> {
+          match self {
+            $(
+              BinaryExpression::$name(inner) => inner.right_mut(),
+            )*
+          }
+        }
+      }
+
       impl<'ast> VisitableExpr<'ast> for BinaryExpression<'ast> {
         fn accept<V>(&self, expr: &Expression<'ast>, visitor: &mut V) -> V::VisitReturn
         where
