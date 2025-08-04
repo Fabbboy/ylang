@@ -44,7 +44,8 @@ impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
     id
   }
 
-  fn visit_block_standalone(&mut self, block: &mut BlockExpression<'ast>) -> Result<(), ()> {
+  // Used for blocks that are not part of an expression and do not carry an ID nor a Expression object.
+  fn visit_block(&mut self, block: &mut BlockExpression<'ast>) -> Result<(), ()> {
     for stmt in block.body_mut() {
       self.visit_stmt_mut(stmt)?;
     }
@@ -53,7 +54,7 @@ impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
 
   fn resolve_func(&mut self, func: &mut Function<'ast>) -> Result<(), ()> {
     if let Some(block) = func.block_mut() {
-      self.visit_block_standalone(block)?;
+      self.visit_block(block)?;
     }
 
     Ok(())
