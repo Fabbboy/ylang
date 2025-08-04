@@ -6,25 +6,25 @@ use std::{
 
 use clap::Parser as ClapParser;
 use sable_arena::{
-  arena::Arena,
   TypedArena,
+  arena::Arena,
 };
 use sable_ast::{
   ast::Ast,
   expression::{
+    Expression,
+    ExpressionVisitorMut,
     assign_expression::AssignExpression,
     binary_expression::BinaryExpression,
     block_expression::BlockExpression,
     identifier_expression::IdentifierExpression,
     literal_expression::LiteralExpression,
-    Expression,
-    ExpressionVisitorMut,
   },
   objects::function::FunctionParam,
   statement::{
-    variable_statement::VariableStatement,
     Statement,
     StatementVisitorMut,
+    variable_statement::VariableStatement,
   },
 };
 use sable_common::{
@@ -90,103 +90,6 @@ where
   }
 }
 
-/// Visitor that counts the number of expressions in an AST.
-struct ExprCounter {
-  count: usize,
-}
-
-impl ExprCounter {
-  fn new() -> Self {
-    Self { count: 0 }
-  }
-}
-
-impl<'ast> ExpressionVisitorMut<'ast> for ExprCounter {
-  type VisitReturn = ();
-
-  fn visit_block_mut(
-    &mut self,
-    block: &mut BlockExpression<'ast>,
-    _expr: &mut Expression<'ast>,
-  ) -> Self::VisitReturn {
-    self.count += 1;
-    for stmt in block.body_mut() {
-      StatementVisitorMut::visit_stmt_mut(self, stmt);
-    }
-  }
-
-  fn visit_literal_mut(
-    &mut self,
-    _literal: &mut LiteralExpression,
-    _expr: &mut Expression<'ast>,
-  ) -> Self::VisitReturn {
-    self.count += 1;
-  }
-
-  fn visit_assign_mut(
-    &mut self,
-    assign: &mut AssignExpression<'ast>,
-    _expr: &mut Expression<'ast>,
-  ) -> Self::VisitReturn {
-    self.count += 1;
-    ExpressionVisitorMut::visit_expr_mut(self, assign.value_mut());
-  }
-
-  fn visit_binary_mut(
-    &mut self,
-    binary: &mut BinaryExpression<'ast>,
-    _expr: &mut Expression<'ast>,
-  ) -> Self::VisitReturn {
-    self.count += 1;
-    match binary {
-      BinaryExpression::Add(expr) => {
-        ExpressionVisitorMut::visit_expr_mut(self, expr.left_mut());
-        ExpressionVisitorMut::visit_expr_mut(self, expr.right_mut());
-      }
-      BinaryExpression::Subtract(expr) => {
-        ExpressionVisitorMut::visit_expr_mut(self, expr.left_mut());
-        ExpressionVisitorMut::visit_expr_mut(self, expr.right_mut());
-      }
-      BinaryExpression::Multiply(expr) => {
-        ExpressionVisitorMut::visit_expr_mut(self, expr.left_mut());
-        ExpressionVisitorMut::visit_expr_mut(self, expr.right_mut());
-      }
-      BinaryExpression::Divide(expr) => {
-        ExpressionVisitorMut::visit_expr_mut(self, expr.left_mut());
-        ExpressionVisitorMut::visit_expr_mut(self, expr.right_mut());
-      }
-    }
-  }
-
-  fn visit_identifier_mut(
-    &mut self,
-    _identifier: &mut IdentifierExpression,
-    _expr: &mut Expression<'ast>,
-  ) -> Self::VisitReturn {
-    self.count += 1;
-  }
-}
-
-impl<'ast> StatementVisitorMut<'ast> for ExprCounter {
-  type VisitReturn = ();
-
-  fn visit_expression_mut(
-    &mut self,
-    expr: &mut Expression<'ast>,
-    _statement: &mut Statement<'ast>,
-  ) -> Self::VisitReturn {
-    ExpressionVisitorMut::visit_expr_mut(self, expr);
-  }
-
-  fn visit_variable_mut(
-    &mut self,
-    variable: &mut VariableStatement<'ast>,
-    _statement: &mut Statement<'ast>,
-  ) -> Self::VisitReturn {
-    ExpressionVisitorMut::visit_expr_mut(self, variable.initializer_mut());
-  }
-}
-
 fn main() {
   let file_arena: TypedArena<Source> = TypedArena::new();
   let asts_arena: TypedArena<Ast> = TypedArena::new();
@@ -232,19 +135,6 @@ fn main() {
       }
     }
   }
-
-  // Count expressions across all parsed ASTs using the mutable visitor.
-  let mut counter = ExprCounter::new();
-  for ast in &mut asts {
-    for func in ast.funcs_mut() {
-      if let Some(block) = func.block_mut() {
-        for stmt in block.body_mut() {
-          StatementVisitorMut::visit_stmt_mut(&mut counter, stmt);
-        }
-      }
-    }
-  }
-  println!("Total expressions: {}", counter.count);
 
   /*let mut resolver = Resolver::new(&mut asts, &mut package, &mut writer);
   match resolver.resolve() {
