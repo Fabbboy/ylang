@@ -2,6 +2,7 @@ use crate::{
   NodeId,
   expression::{
     Expression,
+    VisitExpression,
     VisitExpressionMut,
   },
 };
@@ -38,29 +39,21 @@ pub enum StatementKind<'ctx> {
   Variable(VariableStatement<'ctx>),
 }
 
-pub trait VisitStatement<'ctx> {
-  type Ret;
-
-  fn visit_expression(
-    &mut self,
-    id: &Once<NodeId>,
-    expression: &Expression<'ctx>,
-    location: &Location<'ctx>,
-  ) -> Self::Ret;
+pub trait VisitStatement<'ctx>
+where
+  Self: VisitExpression<'ctx>,
+{
   fn visit_variable(
     &mut self,
-    id: &Once<NodeId>,
+    statement: &Statement<'ctx>,
     variable_statement: &VariableStatement<'ctx>,
-    location: &Location<'ctx>,
   ) -> Self::Ret;
 
   fn visit_statement(&mut self, statement: &Statement<'ctx>) -> Self::Ret {
     match statement.kind() {
-      StatementKind::Expression(expression) => {
-        self.visit_expression(statement.id(), expression, statement.location())
-      }
+      StatementKind::Expression(expression) => self.visit_expression(expression),
       StatementKind::Variable(variable_statement) => {
-        self.visit_variable(statement.id(), variable_statement, statement.location())
+        self.visit_variable(statement, variable_statement)
       }
     }
   }
@@ -72,18 +65,15 @@ where
 {
   fn visit_variable(
     &mut self,
-    id: &mut Once<NodeId>,
+    stmt: &mut Statement<'ast>,
     variable_statement: &mut VariableStatement<'ast>,
-    location: &Location<'ast>,
   ) -> Self::Ret;
 
   fn visit_statement(&mut self, statement: &mut Statement<'ast>) -> Self::Ret {
-    let location = &statement.location;
-    let id = &mut statement.id;
-    match &mut statement.kind {
+    match statement.kind_mut() {
       StatementKind::Expression(expression) => self.visit_expression(expression),
       StatementKind::Variable(variable_statement) => {
-        self.visit_variable(id, variable_statement, location)
+        self.visit_variable(statement, variable_statement)
       }
     }
   }
