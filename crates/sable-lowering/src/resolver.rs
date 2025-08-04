@@ -2,6 +2,15 @@ use std::cell::Cell;
 
 use sable_ast::{
   ast::Ast,
+  expression::{
+    AssignExpression,
+    BinaryExpression,
+    BlockExpression,
+    Expression,
+    ExpressionVisitorMut,
+    IdentifierExpression,
+    LiteralExpression,
+  },
   objects::function::Function,
 };
 
@@ -30,6 +39,8 @@ impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
   }
 
   fn resolve_func(&mut self, func: &mut Function<'ast>) -> Result<(), ()> {
+    if let Some(block) = func.block_mut() {}
+
     Ok(())
   }
 
@@ -67,5 +78,49 @@ impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
       Status::Ok => Ok(()),
       Status::Error => Err(()),
     }
+  }
+}
+
+impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
+  type VisitReturn = Result<(), ()>;
+
+  fn visit_block_mut(
+    &mut self,
+    block: &mut BlockExpression<'ast>,
+    expr: &mut Expression<'ast>,
+  ) -> Self::VisitReturn {
+    todo!()
+  }
+
+  fn visit_literal_mut(
+    &mut self,
+    literal: &mut LiteralExpression,
+    expr: &mut Expression<'ast>,
+  ) -> Self::VisitReturn {
+    todo!()
+  }
+
+  fn visit_assign_mut(
+    &mut self,
+    assign: &mut AssignExpression<'ast>,
+    expr: &mut Expression<'ast>,
+  ) -> Self::VisitReturn {
+    todo!()
+  }
+
+  fn visit_binary_mut(
+    &mut self,
+    binary: &mut BinaryExpression<'ast>,
+    expr: &mut Expression<'ast>,
+  ) -> Self::VisitReturn {
+    todo!()
+  }
+
+  fn visit_identifier_mut(
+    &mut self,
+    identifier: &mut IdentifierExpression,
+    expr: &mut Expression<'ast>,
+  ) -> Self::VisitReturn {
+    todo!()
   }
 }
