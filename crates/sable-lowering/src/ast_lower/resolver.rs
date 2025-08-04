@@ -1,6 +1,5 @@
 #![allow(clippy::result_unit_err)]
 
-use core::slice;
 use std::{
   marker::PhantomData,
   mem,
@@ -13,16 +12,13 @@ use sable_ast::{
     AssignExpression,
     BinaryExpression,
     BlockExpression,
-    Expression,
     IdentifierExpression,
     LiteralExpression,
-    VisitExpression,
     VisitExpressionMut,
   },
   objects::function::Function,
   statement::{
     VariableStatement,
-    VisitStatement,
     VisitStatementMut,
   },
 };
@@ -31,10 +27,7 @@ use sable_common::{
   once::Once,
   writer::Sink,
 };
-use sable_hir::{
-  hir::item::Item,
-  package::Package,
-};
+use sable_hir::package::Package;
 
 enum ResolverStatus {
   Success,
@@ -125,7 +118,7 @@ where
     &mut self,
     id: &mut Once<NodeId>,
     variable_statement: &mut VariableStatement<'ast>,
-    location: &Location<'ast>,
+    _location: &Location<'ast>,
   ) -> Self::Ret {
     _ = id.init(NodeId(self.get_inc()));
     self.visit_expression(variable_statement.initializer_mut());
@@ -142,7 +135,7 @@ where
     &mut self,
     id: &mut Once<NodeId>,
     block: &mut BlockExpression<'ast>,
-    location: &Location<'ast>,
+    _location: &Location<'ast>,
   ) -> Self::Ret {
     _ = id.init(NodeId(self.get_inc()));
     for stmt in block.body_mut().iter_mut() {
@@ -153,8 +146,8 @@ where
   fn visit_literal(
     &mut self,
     id: &mut Once<NodeId>,
-    literal: &mut LiteralExpression,
-    location: &Location<'ast>,
+    _literal: &mut LiteralExpression,
+    _location: &Location<'ast>,
   ) -> Self::Ret {
     _ = id.init(NodeId(self.get_inc()));
   }
@@ -163,7 +156,7 @@ where
     &mut self,
     id: &mut Once<NodeId>,
     assign: &mut AssignExpression<'ast>,
-    location: &Location<'ast>,
+    _location: &Location<'ast>,
   ) -> Self::Ret {
     _ = id.init(NodeId(self.get_inc()));
     self.visit_expression(assign.value_mut());
@@ -173,7 +166,7 @@ where
     &mut self,
     id: &mut Once<NodeId>,
     binary: &mut BinaryExpression<'ast>,
-    location: &Location<'ast>,
+    _location: &Location<'ast>,
   ) -> Self::Ret {
     _ = id.init(NodeId(self.get_inc()));
     match binary {
@@ -199,8 +192,8 @@ where
   fn visit_identifier(
     &mut self,
     id: &mut Once<NodeId>,
-    identifier: &mut IdentifierExpression,
-    location: &Location<'ast>,
+    _identifier: &mut IdentifierExpression,
+    _location: &Location<'ast>,
   ) -> Self::Ret {
     _ = id.init(NodeId(self.get_inc()));
   }
