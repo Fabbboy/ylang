@@ -1,6 +1,7 @@
 use std::cell::Cell;
 
 use sable_ast::{
+  NodeId,
   ast::Ast,
   expression::{
     AssignExpression,
@@ -12,6 +13,11 @@ use sable_ast::{
     LiteralExpression,
   },
   objects::function::Function,
+  statement::{
+    Statement,
+    StatementVisitorMut,
+    VariableStatement,
+  },
 };
 
 enum Status {
@@ -38,8 +44,17 @@ impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
     id
   }
 
+  fn visit_block_standalone(&mut self, block: &mut BlockExpression<'ast>) -> Result<(), ()> {
+    for stmt in block.body_mut() {
+      self.visit_stmt_mut(stmt)?;
+    }
+    Ok(())
+  }
+
   fn resolve_func(&mut self, func: &mut Function<'ast>) -> Result<(), ()> {
-    if let Some(block) = func.block_mut() {}
+    if let Some(block) = func.block_mut() {
+      self.visit_block_standalone(block)?;
+    }
 
     Ok(())
   }
@@ -89,7 +104,9 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
     block: &mut BlockExpression<'ast>,
     expr: &mut Expression<'ast>,
   ) -> Self::VisitReturn {
-    todo!()
+    let id = self.next_id();
+    _ = expr.id_mut().init(NodeId(id));
+    Ok(())
   }
 
   fn visit_literal_mut(
@@ -97,7 +114,9 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
     literal: &mut LiteralExpression,
     expr: &mut Expression<'ast>,
   ) -> Self::VisitReturn {
-    todo!()
+    let id = self.next_id();
+    _ = expr.id_mut().init(NodeId(id));
+    Ok(())
   }
 
   fn visit_assign_mut(
@@ -105,7 +124,9 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
     assign: &mut AssignExpression<'ast>,
     expr: &mut Expression<'ast>,
   ) -> Self::VisitReturn {
-    todo!()
+    let id = self.next_id();
+    _ = expr.id_mut().init(NodeId(id));
+    Ok(())
   }
 
   fn visit_binary_mut(
@@ -113,7 +134,9 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
     binary: &mut BinaryExpression<'ast>,
     expr: &mut Expression<'ast>,
   ) -> Self::VisitReturn {
-    todo!()
+    let id = self.next_id();
+    _ = expr.id_mut().init(NodeId(id));
+    Ok(())
   }
 
   fn visit_identifier_mut(
@@ -121,6 +144,34 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
     identifier: &mut IdentifierExpression,
     expr: &mut Expression<'ast>,
   ) -> Self::VisitReturn {
-    todo!()
+    let id = self.next_id();
+    _ = expr.id_mut().init(NodeId(id));
+    Ok(())
+  }
+}
+
+impl<'ast, 'resolve> StatementVisitorMut<'ast> for Resolver<'ast, 'resolve> {
+  type VisitReturn = Result<(), ()>;
+
+  fn visit_expression_mut(
+    &mut self,
+    expr: &mut Expression<'ast>,
+    statement: &mut Statement<'ast>,
+  ) -> Self::VisitReturn {
+    let id = self.next_id();
+    _ = statement.id_mut().init(NodeId(id));
+    self.visit_expr_mut(expr)?;
+    Ok(())
+  }
+
+  fn visit_variable_mut(
+    &mut self,
+    variable: &mut VariableStatement<'ast>,
+    statement: &mut Statement<'ast>,
+  ) -> Self::VisitReturn {
+    let id = self.next_id();
+    _ = statement.id_mut().init(NodeId(id));
+    self.visit_expr_mut(variable.initializer_mut())?;
+    Ok(())
   }
 }
