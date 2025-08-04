@@ -10,7 +10,11 @@ use sable_arena::{
   arena::Arena,
 };
 
-use sable_ast::{ast::Ast, expression::Expression, objects::function::FunctionParam};
+use sable_ast::{
+  ast::Ast,
+  expression::Expression,
+  objects::function::FunctionParam,
+};
 use sable_common::{
   file::{
     manager::Manager,
@@ -26,6 +30,7 @@ use sable_hir::{
   hir::item::Item,
   package::Package,
 };
+use sable_lowering::resolver::Resolver;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -120,15 +125,17 @@ fn main() {
     }
   }
 
-  /*let mut resolver = Resolver::new(&mut asts, &mut package, &mut writer);
+  let mut resolver = Resolver::new(&mut asts);
   match resolver.resolve() {
-    Ok(_) => println!("Resolution successful."),
+    Ok(_) => {
+      println!("Successfully resolved all ASTs.");
+    }
     Err(_) => {
-      eprintln!("Resolution failed. See errors above.");
+      eprintln!("Error resolving ASTs.");
       std::process::exit(1);
     }
-  };
-  */
+  }
+
   println!("{:#?}", asts);
   println!("{:#?}", package);
 }
