@@ -1,5 +1,14 @@
-use crate::expression::Expression;
-use getset::{Getters, MutGetters};
+use crate::expression::{
+  Expression,
+  ExpressionVisitor,
+  ExpressionVisitorMut,
+  VisitableExpr,
+  VisitableExprMut,
+};
+use getset::{
+  Getters,
+  MutGetters,
+};
 use typed_builder::TypedBuilder;
 
 macro_rules! binary_expr_factory {
@@ -22,6 +31,24 @@ macro_rules! binary_expr_factory {
         $(
           $name([<$name Expression>]<'ctx>),
         )*
+      }
+
+      impl<'ast> VisitableExpr<'ast> for BinaryExpression<'ast> {
+        fn accept<V>(&self, expr: &Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+        where
+          V: ExpressionVisitor<'ast>,
+        {
+          visitor.visit_binary(self, expr)
+        }
+      }
+
+      impl<'ast> VisitableExprMut<'ast> for BinaryExpression<'ast> {
+        fn accept_mut<V>(&mut self, expr: &mut Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+        where
+          V: ExpressionVisitorMut<'ast>,
+        {
+          visitor.visit_binary_mut(self, expr)
+        }
       }
     }
   };

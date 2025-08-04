@@ -34,3 +34,47 @@ pub enum StatementKind<'ctx> {
   Expression(Expression<'ctx>),
   Variable(VariableStatement<'ctx>),
 }
+
+pub trait StatementVisitor<'ctx> {
+  type VisitReturn;
+
+  fn visit_expression(
+    &mut self,
+    expr: &Expression<'ctx>,
+    statement: &Statement<'ctx>,
+  ) -> Self::VisitReturn;
+
+  fn visit_variable(
+    &mut self,
+    variable: &VariableStatement<'ctx>,
+    statement: &Statement<'ctx>,
+  ) -> Self::VisitReturn;
+}
+
+pub trait StatementVisitorMut<'ctx> {
+  type VisitReturn;
+
+  fn visit_expression_mut(
+    &mut self,
+    expr: &mut Expression<'ctx>,
+    statement: &mut Statement<'ctx>,
+  ) -> Self::VisitReturn;
+
+  fn visit_variable_mut(
+    &mut self,
+    variable: &mut VariableStatement<'ctx>,
+    statement: &mut Statement<'ctx>,
+  ) -> Self::VisitReturn;
+}
+
+pub trait VisitableStmt<'ast> {
+  fn accept<V>(&self, statement: &Statement<'ast>, visitor: &mut V) -> V::VisitReturn
+  where
+    V: StatementVisitor<'ast>;
+}
+
+pub trait VisitableStmtMut<'ast> {
+  fn accept_mut<V>(&mut self, statement: &mut Statement<'ast>, visitor: &mut V) -> V::VisitReturn
+  where
+    V: StatementVisitorMut<'ast>;
+}
