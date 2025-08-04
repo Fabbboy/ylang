@@ -1,10 +1,6 @@
 use crate::{
   NodeId,
-  expression::{
-    Expression,
-    VisitExpression,
-    VisitExpressionMut,
-  },
+  expression::Expression,
 };
 
 pub mod variable_statement;
@@ -37,44 +33,4 @@ pub struct Statement<'ctx> {
 pub enum StatementKind<'ctx> {
   Expression(Expression<'ctx>),
   Variable(VariableStatement<'ctx>),
-}
-
-pub trait VisitStatement<'ctx>
-where
-  Self: VisitExpression<'ctx>,
-{
-  fn visit_variable(
-    &mut self,
-    statement: &Statement<'ctx>,
-    variable_statement: &VariableStatement<'ctx>,
-  ) -> Self::Ret;
-
-  fn visit_statement(&mut self, statement: &Statement<'ctx>) -> Self::Ret {
-    match statement.kind() {
-      StatementKind::Expression(expression) => self.visit_expression(expression),
-      StatementKind::Variable(variable_statement) => {
-        self.visit_variable(statement, variable_statement)
-      }
-    }
-  }
-}
-
-pub trait VisitStatementMut<'ast>
-where
-  Self: VisitExpressionMut<'ast>,
-{
-  fn visit_variable(
-    &mut self,
-    stmt: &mut Statement<'ast>,
-    variable_statement: &mut VariableStatement<'ast>,
-  ) -> Self::Ret;
-
-  fn visit_statement(&mut self, statement: &mut Statement<'ast>) -> Self::Ret {
-    match statement.kind_mut() {
-      StatementKind::Expression(expression) => self.visit_expression(expression),
-      StatementKind::Variable(variable_statement) => {
-        self.visit_variable(statement, variable_statement)
-      }
-    }
-  }
 }

@@ -29,7 +29,6 @@ use sable_hir::{
   hir::item::Item,
   package::Package,
 };
-use sable_lowering::ast_lower::resolver::Resolver;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -124,8 +123,7 @@ fn main() {
     }
   }
 
-  
-  let mut resolver = Resolver::new(&mut asts, &mut package, &mut writer);
+  /*let mut resolver = Resolver::new(&mut asts, &mut package, &mut writer);
   match resolver.resolve() {
     Ok(_) => println!("Resolution successful."),
     Err(_) => {
@@ -133,7 +131,7 @@ fn main() {
       std::process::exit(1);
     }
   };
-  
+  */
   println!("{:#?}", asts);
   println!("{:#?}", package);
 }

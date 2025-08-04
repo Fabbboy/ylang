@@ -1,5 +1,4 @@
-#![allow(clippy::result_unit_err)]
-
+/*
 use std::{
   marker::PhantomData,
   mem,
@@ -198,3 +197,4 @@ where
     _ = id.init(NodeId(self.get_inc()));
   }
 }
+*/
