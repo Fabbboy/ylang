@@ -3,16 +3,19 @@ use crate::{
   located::Located,
   types::Type,
 };
-use getset::Getters;
-use typed_builder::TypedBuilder;
+use getset::{
+  Getters,
+  MutGetters,
+};
 use sable_common::interner::Entry;
+use typed_builder::TypedBuilder;
 
-#[derive(Debug, Getters, TypedBuilder)]
+#[derive(Debug, Getters, MutGetters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct VariableStatement<'ctx> {
   #[getset(get = "pub")]
   name: Located<'ctx, Entry>,
-  #[getset(get = "pub")]
+  #[getset(get = "pub", get_mut = "pub")]
   initializer: Expression<'ctx>,
   #[getset(get = "pub")]
   type_: Located<'ctx, Type<'ctx>>,

@@ -128,6 +128,7 @@ where
     location: &Location<'ast>,
   ) -> Self::Ret {
     _ = id.init(NodeId(self.get_inc()));
+    self.visit_expression(variable_statement.initializer_mut());
   }
 }
 
