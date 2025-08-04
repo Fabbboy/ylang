@@ -107,6 +107,9 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = expr.id_mut().init(NodeId(id));
+    for stmt in block.body_mut() {
+      self.visit_stmt_mut(stmt)?;
+    }
     Ok(())
   }
 
@@ -127,6 +130,7 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = expr.id_mut().init(NodeId(id));
+    self.visit_expr_mut(assign.value_mut())?;
     Ok(())
   }
 
@@ -137,6 +141,25 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = expr.id_mut().init(NodeId(id));
+    match binary {
+      BinaryExpression::Add(add_expression) => {
+        self.visit_expr_mut(add_expression.left_mut())?;
+        self.visit_expr_mut(add_expression.right_mut())?;
+      }
+      BinaryExpression::Subtract(sub_expression) => {
+        self.visit_expr_mut(sub_expression.left_mut())?;
+        self.visit_expr_mut(sub_expression.right_mut())?;
+      }
+      BinaryExpression::Multiply(mul_expression) => {
+        self.visit_expr_mut(mul_expression.left_mut())?;
+        self.visit_expr_mut(mul_expression.right_mut())?;
+      }
+      BinaryExpression::Divide(div_expression) => {
+        self.visit_expr_mut(div_expression.left_mut())?;
+        self.visit_expr_mut(div_expression.right_mut())?;
+      }
+    };
+
     Ok(())
   }
 
