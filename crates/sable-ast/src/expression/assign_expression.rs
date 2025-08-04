@@ -1,4 +1,7 @@
-use getset::{Getters, MutGetters};
+use getset::{
+  Getters,
+  MutGetters,
+};
 use typed_builder::TypedBuilder;
 
 use crate::{
@@ -13,5 +16,5 @@ pub struct AssignExpression<'ctx> {
   #[getset(get = "pub")]
   identifier: Located<'ctx, Entry>,
   #[getset(get = "pub", get_mut = "pub")]
-  value: &'ctx Expression<'ctx>,
+  value: &'ctx mut Expression<'ctx>,
 }

@@ -108,7 +108,6 @@ where
       }
     }
 
-    // Put it back
     self.asts = asts;
 
     match status {
@@ -122,17 +121,6 @@ impl<'src, 'hir, 'ast, 'lower, D> VisitStatementMut<'ast> for Resolver<'src, 'hi
 where
   D: Sink<'src>,
 {
-  type Ret = ();
-
-  fn visit_expression(
-    &mut self,
-    id: &mut Once<NodeId>,
-    expression: &mut Expression<'ast>,
-    location: &Location<'ast>,
-  ) -> Self::Ret {
-    _ = id.init(NodeId(self.get_inc()));
-  }
-
   fn visit_variable(
     &mut self,
     id: &mut Once<NodeId>,
@@ -177,8 +165,7 @@ where
     location: &Location<'ast>,
   ) -> Self::Ret {
     _ = id.init(NodeId(self.get_inc()));
-    let mut val = assign.value_mut();
-    self.visit_expression(val);
+    self.visit_expression(assign.value_mut());
   }
 
   fn visit_binary(
@@ -188,6 +175,24 @@ where
     location: &Location<'ast>,
   ) -> Self::Ret {
     _ = id.init(NodeId(self.get_inc()));
+    match binary {
+      BinaryExpression::Add(inner) => {
+        self.visit_expression(inner.left_mut());
+        self.visit_expression(inner.right_mut());
+      }
+      BinaryExpression::Subtract(inner) => {
+        self.visit_expression(inner.left_mut());
+        self.visit_expression(inner.right_mut());
+      }
+      BinaryExpression::Multiply(inner) => {
+        self.visit_expression(inner.left_mut());
+        self.visit_expression(inner.right_mut());
+      }
+      BinaryExpression::Divide(inner) => {
+        self.visit_expression(inner.left_mut());
+        self.visit_expression(inner.right_mut());
+      }
+    }
   }
 
   fn visit_identifier(
