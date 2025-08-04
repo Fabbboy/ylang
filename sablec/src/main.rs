@@ -124,9 +124,8 @@ fn main() {
     }
   }
 
-  println!("{:#?}", asts);
-
-  let mut resolver = Resolver::new(&asts, &mut package, &mut writer);
+  
+  let mut resolver = Resolver::new(&mut asts, &mut package, &mut writer);
   match resolver.resolve() {
     Ok(_) => println!("Resolution successful."),
     Err(_) => {
@@ -134,6 +133,7 @@ fn main() {
       std::process::exit(1);
     }
   };
-
+  
+  println!("{:#?}", asts);
   println!("{:#?}", package);
 }

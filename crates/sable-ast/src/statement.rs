@@ -54,23 +54,23 @@ pub trait VisitStatement<'ctx> {
   }
 }
 
-pub trait VisitStatementMut<'ctx> {
+pub trait VisitStatementMut<'ast> {
   type Ret;
 
   fn visit_expression(
     &mut self,
     id: &mut Once<NodeId>,
-    expression: &mut Expression<'ctx>,
-    location: &Location<'ctx>,
+    expression: &mut Expression<'ast>,
+    location: &Location<'ast>,
   ) -> Self::Ret;
   fn visit_variable(
     &mut self,
     id: &mut Once<NodeId>,
-    variable_statement: &mut VariableStatement<'ctx>,
-    location: &Location<'ctx>,
+    variable_statement: &mut VariableStatement<'ast>,
+    location: &Location<'ast>,
   ) -> Self::Ret;
 
-  fn visit_statement(&mut self, statement: &mut Statement<'ctx>) -> Self::Ret {
+  fn visit_statement(&mut self, statement: &mut Statement<'ast>) -> Self::Ret {
     let location = &statement.location;
     let id = &mut statement.id;
     match &mut statement.kind {

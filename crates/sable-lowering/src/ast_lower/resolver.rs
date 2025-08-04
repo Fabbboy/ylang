@@ -1,6 +1,10 @@
 #![allow(clippy::result_unit_err)]
 
-use std::marker::PhantomData;
+use core::slice;
+use std::{
+  marker::PhantomData,
+  mem,
+};
 
 use sable_ast::{
   NodeId,
@@ -13,11 +17,13 @@ use sable_ast::{
     IdentifierExpression,
     LiteralExpression,
     VisitExpression,
+    VisitExpressionMut,
   },
   objects::function::Function,
   statement::{
     VariableStatement,
     VisitStatement,
+    VisitStatementMut,
   },
 };
 use sable_common::{
@@ -25,9 +31,10 @@ use sable_common::{
   once::Once,
   writer::Sink,
 };
-use sable_hir::package::Package;
-
-use crate::ast_lower_error::AstLoweringError;
+use sable_hir::{
+  hir::item::Item,
+  package::Package,
+};
 
 enum ResolverStatus {
   Success,
@@ -38,7 +45,8 @@ pub struct Resolver<'src, 'hir, 'ast, 'lower, D>
 where
   D: Sink<'src>,
 {
-  asts: &'lower [&'lower mut Ast<'ast>],
+  asts: &'lower mut [&'ast mut Ast<'ast>],
+  id: usize,
   _package: &'lower mut Package<'hir>,
   _reporter: &'lower mut D,
   _marker: PhantomData<&'src ()>,
@@ -49,20 +57,33 @@ where
   D: Sink<'src>,
 {
   pub fn new(
-    asts: &'lower [&'lower mut Ast<'ast>],
+    asts: &'lower mut [&'ast mut Ast<'ast>],
     package: &'lower mut Package<'hir>,
     reporter: &'lower mut D,
   ) -> Self {
     Self {
       asts,
+      id: 0,
       _package: package,
       _reporter: reporter,
       _marker: PhantomData,
     }
   }
 
-  fn visit_func(&mut self, _func: &Function<'ast>) -> Result<(), ()> {
+  fn get_inc(&mut self) -> usize {
+    let id = self.id;
+    self.id += 1;
+    return id;
+  }
+
+  fn visit_func(&mut self, func: &mut Function<'ast>) -> Result<(), ()> {
     let status = ResolverStatus::Success;
+
+    if let Some(body) = func.block_mut() {
+      let mut dummy = Once::<NodeId>::Uninit;
+      let dummy_loc = Location::new(0..0, "dummy");
+      self.visit_block(&mut dummy, body, &dummy_loc);
+    }
 
     match status {
       ResolverStatus::Success => Ok(()),
@@ -70,8 +91,8 @@ where
     }
   }
 
-  fn visit_ast(&mut self, ast: &Ast<'ast>) -> Result<(), ()> {
-    for func in ast.funcs() {
+  fn visit_ast(&mut self, ast: &mut Ast<'ast>) -> Result<(), ()> {
+    for func in ast.funcs_mut() {
       self.visit_func(func)?;
     }
     Ok(())
@@ -79,12 +100,16 @@ where
 
   pub fn resolve(&mut self) -> Result<(), ()> {
     let mut status = ResolverStatus::Success;
+    let asts = mem::replace(&mut self.asts, &mut []);
 
-    for ast in self.asts.iter() {
+    for ast in asts.iter_mut() {
       if self.visit_ast(ast).is_err() {
         status = ResolverStatus::OhNo;
       }
     }
+
+    // Put it back
+    self.asts = asts;
 
     match status {
       ResolverStatus::Success => Ok(()),
@@ -93,79 +118,84 @@ where
   }
 }
 
-impl<'src, 'hir, 'ast, 'lower, D> VisitExpression<'ast> for Resolver<'src, 'hir, 'ast, 'lower, D>
+impl<'src, 'hir, 'ast, 'lower, D> VisitStatementMut<'ast> for Resolver<'src, 'hir, 'ast, 'lower, D>
 where
   D: Sink<'src>,
 {
-  type Ret = Result<(), AstLoweringError>;
-
-  fn visit_block(
-    &mut self,
-    _id: &Once<NodeId>,
-    _block: &BlockExpression<'ast>,
-    _location: &Location<'ast>,
-  ) -> Self::Ret {
-    todo!()
-  }
-
-  fn visit_literal(
-    &mut self,
-    _id: &Once<NodeId>,
-    _literal: &LiteralExpression,
-    _location: &Location<'ast>,
-  ) -> Self::Ret {
-    todo!()
-  }
-
-  fn visit_assign(
-    &mut self,
-    _id: &Once<NodeId>,
-    _assign: &AssignExpression<'ast>,
-    _location: &Location<'ast>,
-  ) -> Self::Ret {
-    todo!()
-  }
-
-  fn visit_binary(
-    &mut self,
-    _id: &Once<NodeId>,
-    _binary: &BinaryExpression<'ast>,
-    _location: &Location<'ast>,
-  ) -> Self::Ret {
-    todo!()
-  }
-
-  fn visit_identifier(
-    &mut self,
-    _id: &Once<NodeId>,
-    _identifier: &IdentifierExpression,
-    _location: &Location<'ast>,
-  ) -> Self::Ret {
-    todo!()
-  }
-}
-
-impl<'src, 'hir, 'ast, 'lower, D> VisitStatement<'ast> for Resolver<'src, 'hir, 'ast, 'lower, D>
-where
-  D: Sink<'src>,
-{
-  type Ret = Result<(), AstLoweringError>;
+  type Ret = ();
 
   fn visit_expression(
     &mut self,
-    _id: &Once<NodeId>,
-    _expression: &Expression<'ast>,
-    _location: &Location<'ast>,
+    id: &mut Once<NodeId>,
+    expression: &mut Expression<'ast>,
+    location: &Location<'ast>,
   ) -> Self::Ret {
-    todo!()
+    _ = id.init(NodeId(self.get_inc()));
   }
 
   fn visit_variable(
     &mut self,
-    _id: &Once<NodeId>,
-    _variable_statement: &VariableStatement<'ast>,
-    _location: &Location<'ast>,
+    id: &mut Once<NodeId>,
+    variable_statement: &mut VariableStatement<'ast>,
+    location: &Location<'ast>,
   ) -> Self::Ret {
-    todo!()
-  } // modifys ast and package does not have to return
+    _ = id.init(NodeId(self.get_inc()));
+  }
+}
+
+impl<'src, 'hir, 'ast, 'lower, D> VisitExpressionMut<'ast> for Resolver<'src, 'hir, 'ast, 'lower, D>
+where
+  D: Sink<'src>,
+{
+  type Ret = ();
+
+  fn visit_block(
+    &mut self,
+    id: &mut Once<NodeId>,
+    block: &mut BlockExpression<'ast>,
+    location: &Location<'ast>,
+  ) -> Self::Ret {
+    _ = id.init(NodeId(self.get_inc()));
+    for stmt in block.body_mut().iter_mut() {
+      self.visit_statement(stmt);
+    }
+  }
+
+  fn visit_literal(
+    &mut self,
+    id: &mut Once<NodeId>,
+    literal: &mut LiteralExpression,
+    location: &Location<'ast>,
+  ) -> Self::Ret {
+    _ = id.init(NodeId(self.get_inc()));
+  }
+
+  fn visit_assign(
+    &mut self,
+    id: &mut Once<NodeId>,
+    assign: &mut AssignExpression<'ast>,
+    location: &Location<'ast>,
+  ) -> Self::Ret {
+    _ = id.init(NodeId(self.get_inc()));
+    let mut val = assign.value_mut();
+    self.visit_expression(val);
+  }
+
+  fn visit_binary(
+    &mut self,
+    id: &mut Once<NodeId>,
+    binary: &mut BinaryExpression<'ast>,
+    location: &Location<'ast>,
+  ) -> Self::Ret {
+    _ = id.init(NodeId(self.get_inc()));
+  }
+
+  fn visit_identifier(
+    &mut self,
+    id: &mut Once<NodeId>,
+    identifier: &mut IdentifierExpression,
+    location: &Location<'ast>,
+  ) -> Self::Ret {
+    _ = id.init(NodeId(self.get_inc()));
+  }
 }
