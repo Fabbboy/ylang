@@ -49,6 +49,13 @@ pub trait StatementVisitor<'ctx> {
     variable: &VariableStatement<'ctx>,
     statement: &Statement<'ctx>,
   ) -> Self::VisitReturn;
+
+  fn visit_stmt(&mut self, statement: &Statement<'ctx>) -> Self::VisitReturn {
+    match &statement.kind {
+      StatementKind::Expression(expr) => self.visit_expression(expr, statement),
+      StatementKind::Variable(variable) => self.visit_variable(variable, statement),
+    }
+  }
 }
 
 pub trait StatementVisitorMut<'ctx> {
@@ -65,6 +72,13 @@ pub trait StatementVisitorMut<'ctx> {
     variable: &mut VariableStatement<'ctx>,
     statement: &mut Statement<'ctx>,
   ) -> Self::VisitReturn;
+
+  fn visit_stmt_mut(&mut self, statement: &mut Statement<'ctx>) -> Self::VisitReturn {
+    match &mut statement.kind {
+      StatementKind::Expression(expr) => self.visit_expression_mut(expr, statement),
+      StatementKind::Variable(variable) => self.visit_variable_mut(variable, statement),
+    }
+  }
 }
 
 pub trait VisitableStmt<'ast> {

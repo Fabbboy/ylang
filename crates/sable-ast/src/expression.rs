@@ -71,6 +71,15 @@ pub trait ExpressionVisitor<'ast> {
     identifier: &IdentifierExpression,
     expr: &Expression<'ast>,
   ) -> Self::VisitReturn;
+  fn visit_expr(&mut self, expr: &Expression<'ast>) -> Self::VisitReturn {
+    match &expr.kind {
+      ExpressionKind::Block(block) => self.visit_block(block, expr),
+      ExpressionKind::Literal(literal) => self.visit_literal(literal, expr),
+      ExpressionKind::Assign(assign) => self.visit_assign(assign, expr),
+      ExpressionKind::Binary(binary) => self.visit_binary(binary, expr),
+      ExpressionKind::Identifier(identifier) => self.visit_identifier(identifier, expr),
+    }
+  }
 }
 
 pub trait ExpressionVisitorMut<'ast> {
@@ -101,6 +110,15 @@ pub trait ExpressionVisitorMut<'ast> {
     identifier: &mut IdentifierExpression,
     expr: &mut Expression<'ast>,
   ) -> Self::VisitReturn;
+  fn visit_expr_mut(&mut self, expr: &mut Expression<'ast>) -> Self::VisitReturn {
+    match &mut expr.kind {
+      ExpressionKind::Block(block) => self.visit_block_mut(block, expr),
+      ExpressionKind::Literal(literal) => self.visit_literal_mut(literal, expr),
+      ExpressionKind::Assign(assign) => self.visit_assign_mut(assign, expr),
+      ExpressionKind::Binary(binary) => self.visit_binary_mut(binary, expr),
+      ExpressionKind::Identifier(identifier) => self.visit_identifier_mut(identifier, expr),
+    }
+  }
 }
 
 pub trait VisitableExpr<'ast> {
