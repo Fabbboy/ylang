@@ -10,15 +10,10 @@ use core::{
 
 use super::arena::Arena;
 
+#[derive(Debug)]
 pub struct TypedArena<T> {
   inner: Arena,
   _marker: PhantomData<fn() -> T>,
-}
-
-impl<T> core::fmt::Debug for TypedArena<T> {
-  fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-    f.debug_struct("TypedArena").finish_non_exhaustive()
-  }
 }
 
 impl<T> TypedArena<T> {
