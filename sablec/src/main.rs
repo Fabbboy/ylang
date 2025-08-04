@@ -9,24 +9,8 @@ use sable_arena::{
   TypedArena,
   arena::Arena,
 };
-use sable_ast::{
-  ast::Ast,
-  expression::{
-    Expression,
-    ExpressionVisitorMut,
-    assign_expression::AssignExpression,
-    binary_expression::BinaryExpression,
-    block_expression::BlockExpression,
-    identifier_expression::IdentifierExpression,
-    literal_expression::LiteralExpression,
-  },
-  objects::function::FunctionParam,
-  statement::{
-    Statement,
-    StatementVisitorMut,
-    variable_statement::VariableStatement,
-  },
-};
+
+use sable_ast::{ast::Ast, expression::Expression, objects::function::FunctionParam};
 use sable_common::{
   file::{
     manager::Manager,
