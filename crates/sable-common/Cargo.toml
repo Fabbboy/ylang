@@ -11,6 +11,7 @@ indexmap = { workspace = true }
 serde = { workspace = true, optional = true, features = ["derive"] }
 
 sable-arena = { workspace = true }
+heaped = { workspace = true }
 
 [features]
 default = []

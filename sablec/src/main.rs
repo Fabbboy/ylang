@@ -3,10 +3,7 @@ use clap::Parser as ClapParser;
 use heaped::arena::dropless::DroplessArena;
 //TODO: Remove sable-arena and replace with heaped arenas
 // TODO: Use DroplessArena and TypedArena<T>
-use sable_arena::{
-  TypedArena,
-  arena::Arena,
-};
+use sable_arena::TypedArena;
 use std::{
   io,
   sync::Arc,
