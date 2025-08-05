@@ -1,13 +1,7 @@
-use std::{
-  cell::RefCell,
-  hash::Hash,
-};
+use std::{cell::RefCell, hash::Hash};
 
 use indexmap::IndexSet;
-use sable_arena::{
-  TypedArena,
-  arena::Arena,
-};
+use sable_arena::{TypedArena, arena::Arena};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -46,7 +40,7 @@ impl<'intern> StrInterner<'intern> {
 
 pub struct Interner<'intern, T>
 where
-  T: Sized + Eq + Hash,
+  T: Eq + Hash + Copy,
 {
   inner: &'intern TypedArena<T>,
   index: RefCell<IndexSet<&'intern T>>,
@@ -54,7 +48,7 @@ where
 
 impl<'intern, T> Interner<'intern, T>
 where
-  T: Sized + Eq + Hash,
+  T: Eq + Hash + Copy,
 {
   pub fn new(arena: &'intern TypedArena<T>) -> Self {
     Self {
@@ -83,7 +77,7 @@ where
 mod tests {
   use super::*;
 
-  #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+  #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
   struct Point {
     x: i32,
     y: i32,

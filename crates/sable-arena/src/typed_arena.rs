@@ -1,9 +1,5 @@
 use core::{
-  alloc::{
-    AllocError,
-    Allocator,
-    Layout,
-  },
+  alloc::{AllocError, Allocator, Layout},
   marker::PhantomData,
   ptr::NonNull,
 };
@@ -32,8 +28,18 @@ impl<T> TypedArena<T> {
     self.inner.alloc(value)
   }
 
-  pub fn alloc_copy(&self, value: &T) -> &mut T {
+  pub fn alloc_copy(&self, value: &T) -> &mut T
+  where
+    T: Copy,
+  {
     self.inner.alloc_copy(value)
+  }
+
+  pub fn alloc_clone(&self, value: &T) -> &mut T
+  where
+    T: Clone,
+  {
+    self.inner.alloc_clone(value)
   }
 
   pub fn alloc_slice_with(&self, len: usize, f: impl FnMut(usize) -> T) -> &mut [T] {
@@ -56,6 +62,10 @@ impl<T> TypedArena<T> {
 
   pub fn alloc_str(&self, s: &str) -> &mut str {
     self.inner.alloc_str(s)
+  }
+
+  pub fn clear(&self) {
+    self.inner.clear();
   }
 
   pub fn as_untyped(&self) -> &Arena {
