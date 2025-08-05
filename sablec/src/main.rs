@@ -4,7 +4,6 @@ use sable_arena::{
   TypedArena,
   arena::Arena,
 };
-use sable_lowering::scope::Symbol;
 use std::{
   io,
   sync::Arc,
@@ -30,11 +29,14 @@ use sable_hir::{
   hir::item::Item,
   package::Package,
 };
-use sable_lowering::{
-  resolver::Resolver,
-  scope::Scope,
+use sable_lowering::resolver::Resolver;
+use sable_middle::{
+  context::Context,
+  scope::{
+    Scope,
+    Symbol,
+  },
 };
-use sable_middle::context::Context;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -83,22 +85,33 @@ where
   }
 }
 
+fn resolve_asts<'ast, 'resolve>(
+  asts: &'resolve mut [&'ast mut Ast<'ast>],
+  context: &'resolve mut Context<'resolve, 'ast>,
+) -> Result<(), ()> {
+  let mut resolver = Resolver::new(asts, context);
+  resolver.resolve()
+}
+
 fn main() {
-  let file_arena: TypedArena<Source> = TypedArena::new();
-  let asts_arena: TypedArena<Ast> = TypedArena::new();
-  let item_arena: TypedArena<Item> = TypedArena::new();
+  let args = Args::parse();
+
   let str_intern_arena = Arena::new();
   let str_intern = StrInterner::new(&str_intern_arena);
+
+  let file_arena: TypedArena<Source> = TypedArena::new(); // outlives everything 
+  let mut manager = Manager::new(&file_arena); // outlives everything 
+
   let scope_arena: TypedArena<Scope> = TypedArena::new();
   let symbol_arena: TypedArena<Symbol> = TypedArena::new();
-
-  let args = Args::parse();
-  let mut manager = Manager::new(&file_arena);
-  let context = Context::new(&str_intern, &scope_arena, &symbol_arena);
+  let mut context = Context::new(&str_intern, &scope_arena, &symbol_arena);
+  let item_arena: TypedArena<Item> = TypedArena::new();
   let package = Package::new(&item_arena);
 
-  let mut ctxs = vec![];
   let mut sources = vec![];
+  let mut ctxs = vec![];
+  let asts_arena: TypedArena<Ast> = TypedArena::new();
+
   for filename in args.input {
     let source_code = match std::fs::read_to_string(&filename) {
       Ok(content) => content,
@@ -132,16 +145,10 @@ fn main() {
     }
   }
 
-  let mut resolver = Resolver::new(&mut asts);
-  match resolver.resolve() {
-    Ok(_) => {
-      println!("Successfully resolved all ASTs.");
-    }
-    Err(_) => {
-      eprintln!("Error resolving ASTs.");
-      std::process::exit(1);
-    }
-  }
+  resolve_asts(&mut asts, &mut context).unwrap_or_else(|_| {
+    eprintln!("Failed to resolve ASTs.");
+    std::process::exit(1);
+  });
 
   println!("{:#?}", asts);
   println!("{:#?}", package);

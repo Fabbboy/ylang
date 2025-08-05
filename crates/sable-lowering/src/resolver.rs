@@ -19,6 +19,7 @@ use sable_ast::{
     VariableStatement,
   },
 };
+use sable_middle::context::Context;
 
 enum Status {
   Ok,
@@ -28,13 +29,18 @@ enum Status {
 pub struct Resolver<'ast, 'resolve> {
   asts: &'resolve mut [&'ast mut Ast<'ast>],
   id: Cell<usize>,
+  context: &'resolve mut Context<'resolve, 'ast>,
 }
 
 impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
-  pub fn new(asts: &'resolve mut [&'ast mut Ast<'ast>]) -> Self {
+  pub fn new(
+    asts: &'resolve mut [&'ast mut Ast<'ast>],
+    context: &'resolve mut Context<'resolve, 'ast>,
+  ) -> Self {
     Resolver {
       asts,
       id: Cell::new(0),
+      context,
     }
   }
 

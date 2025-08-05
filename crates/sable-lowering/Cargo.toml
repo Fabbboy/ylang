@@ -8,5 +8,7 @@ sable-common = { workspace = true }
 sable-ast = { workspace = true }
 sable-hir = { workspace = true }
 sable-arena = { workspace = true }
+sable-middle = { workspace = true }
 
 getset = { workspace = true }
+indexmap = { workspace = true }

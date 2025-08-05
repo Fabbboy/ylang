@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 sable-common = { workspace = true }
-sable-lowering = { workspace = true }
 sable-arena = { workspace = true }
 
 indexmap = { workspace = true }

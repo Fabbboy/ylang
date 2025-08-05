@@ -319,10 +319,12 @@ name = "sable-lowering"
 version = "0.1.0"
 dependencies = [
  "getset",
+ "indexmap",
  "sable-arena",
  "sable-ast",
  "sable-common",
  "sable-hir",
+ "sable-middle",
 ]
 
 [[package]]
@@ -333,7 +335,6 @@ dependencies = [
  "indexmap",
  "sable-arena",
  "sable-common",
- "sable-lowering",
 ]
 
 [[package]]
