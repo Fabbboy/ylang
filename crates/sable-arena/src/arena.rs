@@ -5,20 +5,10 @@ extern crate alloc;
 
 use alloc::boxed::Box;
 use core::{
-  alloc::{
-    AllocError,
-    Allocator,
-    Layout,
-  },
+  alloc::{AllocError, Allocator, Layout},
   cell::RefCell,
-  mem::{
-    self,
-    MaybeUninit,
-  },
-  ptr::{
-    self,
-    NonNull,
-  },
+  mem::{self, MaybeUninit},
+  ptr::{self, NonNull},
   slice,
 };
 
@@ -203,19 +193,28 @@ impl Arena {
     }
   }
 
-  pub fn alloc_copy<T: ?Sized>(&self, value: &T) -> &mut T {
+  pub fn alloc_copy<T: Copy>(&self, value: &T) -> &mut T {
     self.try_alloc_copy(value).expect("Arena allocation failed")
   }
 
-  pub fn try_alloc_copy<T: ?Sized>(&self, value: &T) -> Option<&mut T> {
-    let layout = Layout::for_value(value);
+  pub fn try_alloc_copy<T: Copy>(&self, value: &T) -> Option<&mut T> {
+    let layout = Layout::new::<T>();
     let ptr = self.try_alloc_raw(layout)?;
     unsafe {
-      ptr::copy_nonoverlapping(value as *const T as *const u8, ptr.as_ptr(), layout.size());
-      let meta = ptr::metadata(value);
-      let raw = ptr::from_raw_parts_mut(ptr.as_ptr() as *mut (), meta);
-      Some(&mut *raw)
+      let dst = ptr.as_ptr() as *mut T;
+      ptr::write(dst, *value);
+      Some(&mut *dst)
     }
+  }
+
+  pub fn alloc_clone<T: Clone>(&self, value: &T) -> &mut T {
+    self
+      .try_alloc_clone(value)
+      .expect("Arena allocation failed")
+  }
+
+  pub fn try_alloc_clone<T: Clone>(&self, value: &T) -> Option<&mut T> {
+    self.try_alloc(value.clone())
   }
 
   pub fn alloc_slice_default<T>(&self, len: usize) -> &mut [T]
@@ -350,14 +349,12 @@ impl Arena {
         old_layout.size(),
         new_layout.size(),
         new_layout.align(),
-      ) &&
-        chunk.try_grow_in_place(
-          ptr,
-          old_layout.size(),
-          new_layout.size(),
-          new_layout.align(),
-        )
-      {
+      ) && chunk.try_grow_in_place(
+        ptr,
+        old_layout.size(),
+        new_layout.size(),
+        new_layout.align(),
+      ) {
         return Some(ptr);
       }
     }
@@ -714,10 +711,7 @@ mod tests {
 
   #[test]
   fn test_std_allocator_api() {
-    use std::{
-      rc::Rc,
-      sync::Arc,
-    };
+    use std::{rc::Rc, sync::Arc};
 
     let arena = Arena::new();
 
