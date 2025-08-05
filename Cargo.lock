@@ -141,7 +141,7 @@ checksum = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5"
 [[package]]
 name = "heaped"
 version = "0.1.0"
-source = "git+https://github.com/fabbboy/heaped.git?branch=master#c9982c0ec230cb8e41c6a2f0da97332dd2fc34f6"
+source = "git+https://github.com/fabbboy/heaped.git?branch=master#cdc53663f6fd4cd3256f0947875688b9acab888d"
 
 [[package]]
 name = "heck"
@@ -363,7 +363,6 @@ version = "0.1.0"
 dependencies = [
  "ariadne",
  "clap",
- "heaped",
  "sable-arena",
  "sable-ast",
  "sable-common",
