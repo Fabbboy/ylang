@@ -16,19 +16,19 @@ use sable_common::writer::Reportable;
 pub const MAX_INLINE_KINDS: usize = 8;
 
 #[derive(Debug)]
-pub struct UnexpectedTokenError<'ctx> {
+pub struct UnexpectedTokenError<'src> {
   expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>,
-  found: Token<'ctx>,
+  found: Token<'src>,
 }
 
-impl<'ctx> UnexpectedTokenError<'ctx> {
-  pub fn new(expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>, found: Token<'ctx>) -> Self {
+impl<'src> UnexpectedTokenError<'src> {
+  pub fn new(expected: SmallVec<[TokenKind; MAX_INLINE_KINDS]>, found: Token<'src>) -> Self {
     Self { expected, found }
   }
 }
 
-impl<'ctx> Reportable<'ctx> for UnexpectedTokenError<'ctx> {
-  fn report(&self) -> Report<'_, Span<'ctx>> {
+impl<'src> Reportable<'src> for UnexpectedTokenError<'src> {
+  fn report(&self) -> Report<'_, Span<'src>> {
     let span: Span = (
       *self.found.location().filename(),
       self.found.location().range().clone(),

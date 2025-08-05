@@ -8,30 +8,30 @@ use ariadne::{
 };
 use std::collections::HashMap;
 
-pub struct ErrorCache<'ctx> {
-  files: HashMap<FileId<'ctx>, AriadneSource<FileId<'ctx>>>,
+pub struct ErrorCache<'src> {
+  files: HashMap<FileId<'src>, AriadneSource<FileId<'src>>>,
 }
 
-impl<'ctx> ErrorCache<'ctx> {
+impl<'src> ErrorCache<'src> {
   pub fn new() -> Self {
     Self {
       files: HashMap::new(),
     }
   }
 
-  pub fn add_file(&mut self, source: &Source<'ctx>) {
+  pub fn add_file(&mut self, source: &Source<'src>) {
     self
       .files
       .insert(*source.filename(), AriadneSource::from(*source.content()));
   }
 }
 
-impl<'ctx> Cache<FileId<'ctx>> for ErrorCache<'ctx> {
-  type Storage = FileId<'ctx>;
+impl<'src> Cache<FileId<'src>> for ErrorCache<'src> {
+  type Storage = FileId<'src>;
 
   fn fetch(
     &mut self,
-    id: &FileId<'ctx>,
+    id: &FileId<'src>,
   ) -> Result<&AriadneSource<Self::Storage>, impl std::fmt::Debug> {
     self
       .files
@@ -39,12 +39,12 @@ impl<'ctx> Cache<FileId<'ctx>> for ErrorCache<'ctx> {
       .ok_or_else(|| format!("unknown file: {}", id))
   }
 
-  fn display<'a>(&self, id: &'a FileId<'ctx>) -> Option<impl std::fmt::Display + 'a> {
+  fn display<'a>(&self, id: &'a FileId<'src>) -> Option<impl std::fmt::Display + 'a> {
     Some(id)
   }
 }
 
-impl<'ctx> Default for ErrorCache<'ctx> {
+impl<'src> Default for ErrorCache<'src> {
   fn default() -> Self {
     Self::new()
   }

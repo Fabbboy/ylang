@@ -10,20 +10,20 @@ use crate::scope::{
 };
 
 #[derive(Debug, Getters)]
-pub struct Context<'ctx, 'src> {
+pub struct Context<'ast, 'src> {
   #[getset(get = "pub")]
-  intern: &'ctx StrInterner<'src>,
+  intern: &'ast StrInterner<'src>,
   #[getset(get = "pub")]
-  scopes: IndexMap<ScopeId, &'ctx mut Scope<'ctx>>,
-  scope_arena: &'ctx TypedArena<Scope<'ctx>>,
-  symbol_arena: &'ctx TypedArena<Symbol>,
+  scopes: IndexMap<ScopeId, &'ast mut Scope<'ast>>,
+  scope_arena: &'ast TypedArena<Scope<'ast>>,
+  symbol_arena: &'ast TypedArena<Symbol>,
 }
 
-impl<'ctx, 'src> Context<'ctx, 'src> {
+impl<'ast, 'src> Context<'ast, 'src> {
   pub fn new(
-    intern: &'ctx StrInterner<'src>,
-    scope_arena: &'ctx TypedArena<Scope<'ctx>>,
-    symbol_arena: &'ctx TypedArena<Symbol>,
+    intern: &'ast StrInterner<'src>,
+    scope_arena: &'ast TypedArena<Scope<'ast>>,
+    symbol_arena: &'ast TypedArena<Symbol>,
   ) -> Self {
     let mut scopes = IndexMap::new();
     let global = scope_arena.alloc(Scope::new(ScopeId(scopes.len()), None));

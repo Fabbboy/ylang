@@ -13,19 +13,19 @@ use crate::{
 };
 
 #[derive(Getters, MutGetters, Debug)]
-pub struct Ast<'ctx> {
+pub struct Ast<'ast, 'src> {
   #[getset(get_mut = "pub", get = "pub")]
-  funcs: Vec<Function<'ctx>>,
+  funcs: Vec<Function<'ast, 'src>>,
   #[getset(get = "pub")]
-  expr_arena: &'ctx TypedArena<Expression<'ctx>>,
+  expr_arena: &'ast TypedArena<Expression<'ast, 'src>>,
   #[getset(get = "pub")]
-  param_arena: &'ctx TypedArena<FunctionParam<'ctx>>,
+  param_arena: &'ast TypedArena<FunctionParam<'src>>,
 }
 
-impl<'ctx> Ast<'ctx> {
+impl<'ast, 'src> Ast<'ast, 'src> {
   pub fn new(
-    expr_arena: &'ctx TypedArena<Expression<'ctx>>,
-    param_arena: &'ctx TypedArena<FunctionParam<'ctx>>,
+    expr_arena: &'ast TypedArena<Expression<'ast, 'src>>,
+    param_arena: &'ast TypedArena<FunctionParam<'src>>,
   ) -> Self {
     Ast {
       funcs: Vec::new(),
@@ -36,7 +36,7 @@ impl<'ctx> Ast<'ctx> {
 }
 
 #[cfg(feature = "serde")]
-impl<'ctx> serde::Serialize for Ast<'ctx> {
+impl<'ast, 'src> serde::Serialize for Ast<'ast, 'src> {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where
     S: serde::Serializer,

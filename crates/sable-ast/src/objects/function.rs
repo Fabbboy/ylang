@@ -19,15 +19,15 @@ pub const MAX_INLINE_PARAMS: usize = 6;
 
 #[derive(Getters, Setters, TypedBuilder, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct FunctionParam<'ctx> {
+pub struct FunctionParam<'src> {
   #[getset(get = "pub", set = "pub")]
-  name: Located<'ctx, Entry>,
+  name: Located<'src, Entry>,
   #[getset(get = "pub")]
-  type_: Located<'ctx, Type<'ctx>>,
+  type_: Located<'src, Type<'src>>,
 }
 
-impl<'ctx> From<Located<'ctx, TypeNamePair<'ctx>>> for FunctionParam<'ctx> {
-  fn from(pair: Located<'ctx, TypeNamePair<'ctx>>) -> Self {
+impl<'src> From<Located<'src, TypeNamePair<'src>>> for FunctionParam<'src> {
+  fn from(pair: Located<'src, TypeNamePair<'src>>) -> Self {
     Self {
       name: Located::builder()
         .value(*pair.value().name())
@@ -43,13 +43,13 @@ impl<'ctx> From<Located<'ctx, TypeNamePair<'ctx>>> for FunctionParam<'ctx> {
 
 #[derive(Getters, MutGetters, TypedBuilder, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct Function<'ctx> {
+pub struct Function<'ast, 'src> {
   #[getset(get = "pub")]
-  name: Located<'ctx, Entry>,
+  name: Located<'src, Entry>,
   #[getset(get = "pub")]
-  params: &'ctx [FunctionParam<'ctx>],
+  params: &'ast [FunctionParam<'src>],
   #[getset(get = "pub")]
-  return_type: Located<'ctx, Type<'ctx>>,
+  return_type: Located<'src, Type<'src>>,
   #[getset(get = "pub", get_mut = "pub")]
-  block: Option<BlockExpression<'ctx>>,
+  block: Option<BlockExpression<'ast, 'src>>,
 }

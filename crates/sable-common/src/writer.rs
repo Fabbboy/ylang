@@ -4,36 +4,36 @@ use std::io;
 
 use crate::cache::ErrorCache;
 
-pub trait Sink<'ctx> {
+pub trait Sink<'src> {
   type Error: std::fmt::Debug;
-  fn report(&mut self, report: Report<'_, Span<'ctx>>) -> Result<(), Self::Error>;
+  fn report(&mut self, report: Report<'_, Span<'src>>) -> Result<(), Self::Error>;
 }
 
-pub trait Reportable<'ctx> {
-  fn report(&self) -> Report<'_, Span<'ctx>>;
+pub trait Reportable<'src> {
+  fn report(&self) -> Report<'_, Span<'src>>;
 }
 
-pub struct ReportWriter<'w, 'ctx, O> {
-  cache: &'w mut ErrorCache<'ctx>,
+pub struct ReportWriter<'w, 'src, O> {
+  cache: &'w mut ErrorCache<'src>,
   out: &'w mut O,
 }
 
-impl<'w, 'ctx, O> ReportWriter<'w, 'ctx, O>
+impl<'w, 'src, O> ReportWriter<'w, 'src, O>
 where
   O: io::Write,
 {
-  pub fn new(cache: &'w mut ErrorCache<'ctx>, out: &'w mut O) -> Self {
+  pub fn new(cache: &'w mut ErrorCache<'src>, out: &'w mut O) -> Self {
     Self { cache, out }
   }
 }
 
-impl<'w, 'ctx, O> Sink<'ctx> for ReportWriter<'w, 'ctx, O>
+impl<'w, 'src, O> Sink<'src> for ReportWriter<'w, 'src, O>
 where
   O: io::Write,
 {
   type Error = io::Error;
 
-  fn report(&mut self, report: Report<Span<'ctx>>) -> Result<(), Self::Error> {
+  fn report(&mut self, report: Report<Span<'src>>) -> Result<(), Self::Error> {
     report.write(&mut *self.cache, &mut *self.out)
   }
 }

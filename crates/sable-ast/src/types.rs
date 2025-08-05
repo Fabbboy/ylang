@@ -7,27 +7,27 @@ use sable_common::interner::Entry;
 
 #[derive(Clone, Debug, PartialEq, Eq, Default, TypedBuilder, Getters, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct Path<'ctx> {
+pub struct Path<'src> {
   #[getset(get = "pub")]
-  segments: Vec<Located<'ctx, Entry>>,
+  segments: Vec<Located<'src, Entry>>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Default, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub enum Type<'ctx> {
+pub enum Type<'src> {
   #[default]
   Infer,
-  Path(Path<'ctx>),
-  Pointer(Box<Type<'ctx>>),
+  Path(Path<'src>),
+  Pointer(Box<Type<'src>>),
 }
 
 #[derive(TypedBuilder, Getters)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct TypeNamePair<'ctx> {
+pub struct TypeNamePair<'src> {
   #[getset(get = "pub")]
   name: Entry,
   #[getset(get = "pub")]
-  type_: Type<'ctx>,
+  type_: Type<'src>,
   #[getset(get = "pub")]
-  location: Location<'ctx>,
+  location: Location<'src>,
 }

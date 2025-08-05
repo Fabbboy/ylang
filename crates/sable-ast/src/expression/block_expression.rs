@@ -16,24 +16,28 @@ use typed_builder::TypedBuilder;
 
 #[derive(Getters, MutGetters, TypedBuilder, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct BlockExpression<'ctx> {
+pub struct BlockExpression<'ast, 'src> {
   #[getset(get = "pub", get_mut = "pub")]
-  body: Vec<Statement<'ctx>>,
+  body: Vec<Statement<'ast, 'src>>,
 }
 
-impl<'ast> VisitableExpr<'ast> for BlockExpression<'ast> {
-  fn accept<V>(&self, expr: &Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+impl<'ast, 'src> VisitableExpr<'ast, 'src> for BlockExpression<'ast, 'src> {
+  fn accept<V>(&self, expr: &Expression<'ast, 'src>, visitor: &mut V) -> V::VisitReturn
   where
-    V: ExpressionVisitor<'ast>,
+    V: ExpressionVisitor<'ast, 'src>,
   {
     visitor.visit_block(self, expr)
   }
 }
 
-impl<'ast> VisitableExprMut<'ast> for BlockExpression<'ast> {
-  fn accept_mut<V>(&mut self, expr: &mut Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+impl<'ast, 'src> VisitableExprMut<'ast, 'src> for BlockExpression<'ast, 'src> {
+  fn accept_mut<V>(
+    &mut self,
+    expr: &mut Expression<'ast, 'src>,
+    visitor: &mut V,
+  ) -> V::VisitReturn
   where
-    V: ExpressionVisitorMut<'ast>,
+    V: ExpressionVisitorMut<'ast, 'src>,
   {
     visitor.visit_block_mut(self, expr)
   }

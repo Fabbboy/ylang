@@ -53,18 +53,18 @@ struct Args {
   input: Vec<String>,
 }
 
-struct ParseCtx<'ast> {
-  expr_arena: TypedArena<Expression<'ast>>,
-  param_arena: TypedArena<FunctionParam<'ast>>,
+struct ParseCtx<'ast, 'src> {
+  expr_arena: TypedArena<Expression<'ast, 'src>>,
+  param_arena: TypedArena<FunctionParam<'src>>,
 }
 
 fn parse_file<'src, 'ast, D>(
   source: Arc<Source<'src>, &'src TypedArena<Source<'src>>>,
-  asts_arena: &'ast TypedArena<Ast<'ast>>,
-  ctx: &'ast ParseCtx<'ast>,
+  asts_arena: &'ast TypedArena<Ast<'ast, 'src>>,
+  ctx: &'ast ParseCtx<'ast, 'src>,
   str_intern: &'ast StrInterner<'src>,
   writer: &mut D,
-) -> Result<&'ast mut Ast<'ast>, ()>
+) -> Result<&'ast mut Ast<'ast, 'src>, ()>
 where
   D: Sink<'src>,
   'src: 'ast,
@@ -85,9 +85,9 @@ where
   }
 }
 
-fn resolve_asts<'ast, 'resolve>(
-  asts: &'resolve mut [&'ast mut Ast<'ast>],
-  context: &'resolve mut Context<'resolve, 'ast>,
+fn resolve_asts<'ast, 'src, 'resolve>(
+  asts: &'resolve mut [&'ast mut Ast<'ast, 'src>],
+  context: &'resolve mut Context<'resolve, 'src>,
 ) -> Result<(), ()> {
   let mut resolver = Resolver::new(asts, context);
   resolver.resolve()
@@ -110,7 +110,7 @@ fn main() {
 
   let mut sources = vec![];
   let mut ctxs = vec![];
-  let asts_arena: TypedArena<Ast> = TypedArena::new();
+  let asts_arena = TypedArena::new();
 
   for filename in args.input {
     let source_code = match std::fs::read_to_string(&filename) {

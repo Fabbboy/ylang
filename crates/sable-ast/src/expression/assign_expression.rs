@@ -18,26 +18,30 @@ use sable_common::interner::Entry;
 
 #[derive(Debug, MutGetters, TypedBuilder, Getters)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct AssignExpression<'ctx> {
+pub struct AssignExpression<'ast, 'src> {
   #[getset(get = "pub")]
-  identifier: Located<'ctx, Entry>,
+  identifier: Located<'src, Entry>,
   #[getset(get = "pub", get_mut = "pub")]
-  value: &'ctx mut Expression<'ctx>,
+  value: &'ast mut Expression<'ast, 'src>,
 }
 
-impl<'ast> VisitableExpr<'ast> for AssignExpression<'ast> {
-  fn accept<V>(&self, expr: &Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+impl<'ast, 'src> VisitableExpr<'ast, 'src> for AssignExpression<'ast, 'src> {
+  fn accept<V>(&self, expr: &Expression<'ast, 'src>, visitor: &mut V) -> V::VisitReturn
   where
-    V: ExpressionVisitor<'ast>,
+    V: ExpressionVisitor<'ast, 'src>,
   {
     visitor.visit_assign(self, expr)
   }
 }
 
-impl<'ast> VisitableExprMut<'ast> for AssignExpression<'ast> {
-  fn accept_mut<V>(&mut self, expr: &mut Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+impl<'ast, 'src> VisitableExprMut<'ast, 'src> for AssignExpression<'ast, 'src> {
+  fn accept_mut<V>(
+    &mut self,
+    expr: &mut Expression<'ast, 'src>,
+    visitor: &mut V,
+  ) -> V::VisitReturn
   where
-    V: ExpressionVisitorMut<'ast>,
+    V: ExpressionVisitorMut<'ast, 'src>,
   {
     visitor.visit_assign_mut(self, expr)
   }

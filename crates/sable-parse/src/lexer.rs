@@ -17,17 +17,17 @@ const KEYWORDS: phf::Map<&'static str, TokenKind> = phf::phf_map! {
   "var" =>  TokenKind::Var,
 };
 
-pub struct Lexer<'ctx> {
-  source: Arc<Source<'ctx>, &'ctx TypedArena<Source<'ctx>>>,
+pub struct Lexer<'src> {
+  source: Arc<Source<'src>, &'src TypedArena<Source<'src>>>,
 
   pos: usize,
   start: usize,
 
-  next: Option<Token<'ctx>>,
+  next: Option<Token<'src>>,
 }
 
-impl<'ctx> Lexer<'ctx> {
-  pub fn new(source: Arc<Source<'ctx>, &'ctx TypedArena<Source<'ctx>>>) -> Self {
+impl<'src> Lexer<'src> {
+  pub fn new(source: Arc<Source<'src>, &'src TypedArena<Source<'src>>>) -> Self {
     Self {
       source,
 
@@ -51,17 +51,17 @@ impl<'ctx> Lexer<'ctx> {
   }
 
   #[inline]
-  fn make_location(&self) -> Location<'ctx> {
+  fn make_location(&self) -> Location<'src> {
     Location::new(self.start..self.pos, self.source.filename())
   }
 
   #[inline]
-  fn make_lexeme(&self) -> &'ctx str {
+  fn make_lexeme(&self) -> &'src str {
     &self.source.content()[self.start..self.pos]
   }
 
   #[inline]
-  fn make_token(&self, kind: TokenKind, data: Option<TokenData>) -> Token<'ctx> {
+  fn make_token(&self, kind: TokenKind, data: Option<TokenData>) -> Token<'src> {
     Token::new(kind, data, self.make_lexeme(), self.make_location())
   }
 
@@ -73,7 +73,7 @@ impl<'ctx> Lexer<'ctx> {
     false
   }
 
-  fn skip_trivial(&mut self) -> Option<Token<'ctx>> {
+  fn skip_trivial(&mut self) -> Option<Token<'src>> {
     loop {
       match self.get_char(0) {
         Some(' ' | '\t' | '\r' | '\n') => self.advance(),
@@ -115,7 +115,7 @@ impl<'ctx> Lexer<'ctx> {
     None
   }
 
-  fn lex_identifier(&mut self) -> Token<'ctx> {
+  fn lex_identifier(&mut self) -> Token<'src> {
     while self.get_char(0).is_some() {
       if self.check(0, |c| c.is_ascii_alphanumeric() || c == '_') {
         self.advance();
@@ -132,7 +132,7 @@ impl<'ctx> Lexer<'ctx> {
     self.make_token(TokenKind::Identifier, None)
   }
 
-  fn lex_number(&mut self) -> Token<'ctx> {
+  fn lex_number(&mut self) -> Token<'src> {
     let lex_num = |lexer: &mut Self| {
       while let Some(c) = lexer.get_char(0) {
         if c.is_ascii_digit() {
@@ -169,7 +169,7 @@ impl<'ctx> Lexer<'ctx> {
     }
   }
 
-  fn lex(&mut self) -> Token<'ctx> {
+  fn lex(&mut self) -> Token<'src> {
     if let Some(token) = self.skip_trivial() {
       return token;
     }
@@ -205,7 +205,7 @@ impl<'ctx> Lexer<'ctx> {
     )
   }
 
-  pub fn peek(&mut self) -> Token<'ctx> {
+  pub fn peek(&mut self) -> Token<'src> {
     if self.next.is_none() {
       self.next = Some(self.lex());
     }
@@ -218,8 +218,8 @@ impl<'ctx> Lexer<'ctx> {
   }
 }
 
-impl<'ctx> Iterator for Lexer<'ctx> {
-  type Item = Token<'ctx>;
+impl<'src> Iterator for Lexer<'src> {
+  type Item = Token<'src>;
 
   fn next(&mut self) -> Option<Self::Item> {
     if self.next.is_none() {

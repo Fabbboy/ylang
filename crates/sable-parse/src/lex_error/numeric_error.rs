@@ -9,17 +9,17 @@ use sable_common::{
 };
 
 #[derive(Debug)]
-pub struct NumericError<'ctx> {
-  pub lexeme: &'ctx str,
-  pub location: Location<'ctx>,
+pub struct NumericError<'src> {
+  pub lexeme: &'src str,
+  pub location: Location<'src>,
 }
 
-impl<'ctx> NumericError<'ctx> {
-  pub fn new(lexeme: &'ctx str, location: Location<'ctx>) -> Self {
+impl<'src> NumericError<'src> {
+  pub fn new(lexeme: &'src str, location: Location<'src>) -> Self {
     Self { lexeme, location }
   }
 
-  pub fn report(&self) -> ariadne::Report<'_, Span<'ctx>> {
+  pub fn report(&self) -> ariadne::Report<'_, Span<'src>> {
     let span = (*self.location.filename(), self.location.range().clone());
 
     Report::build(ReportKind::Error, span.clone())

@@ -26,16 +26,16 @@ enum Status {
   Error,
 }
 
-pub struct Resolver<'ast, 'resolve> {
-  asts: &'resolve mut [&'ast mut Ast<'ast>],
+pub struct Resolver<'ast, 'src, 'resolve> {
+  asts: &'resolve mut [&'ast mut Ast<'ast, 'src>],
   id: Cell<usize>,
-  context: &'resolve mut Context<'resolve, 'ast>,
+  context: &'resolve mut Context<'resolve, 'src>,
 }
 
-impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
+impl<'ast, 'src, 'resolve> Resolver<'ast, 'src, 'resolve> {
   pub fn new(
-    asts: &'resolve mut [&'ast mut Ast<'ast>],
-    context: &'resolve mut Context<'resolve, 'ast>,
+    asts: &'resolve mut [&'ast mut Ast<'ast, 'src>],
+    context: &'resolve mut Context<'resolve, 'src>,
   ) -> Self {
     Resolver {
       asts,
@@ -51,14 +51,14 @@ impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
   }
 
   // Used for blocks that are not part of an expression and do not carry an ID nor a Expression object.
-  fn visit_block(&mut self, block: &mut BlockExpression<'ast>) -> Result<(), ()> {
+  fn visit_block(&mut self, block: &mut BlockExpression<'ast, 'src>) -> Result<(), ()> {
     for stmt in block.body_mut() {
       <Self as StatementVisitorMut>::visit_stmt_mut(self, stmt)?;
     }
     Ok(())
   }
 
-  fn resolve_func(&mut self, func: &mut Function<'ast>) -> Result<(), ()> {
+  fn resolve_func(&mut self, func: &mut Function<'ast, 'src>) -> Result<(), ()> {
     if let Some(block) = func.block_mut() {
       self.visit_block(block)?;
     }
@@ -66,7 +66,7 @@ impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
     Ok(())
   }
 
-  fn resolve_ast(&mut self, ast: &mut Ast<'ast>) -> Result<(), ()> {
+  fn resolve_ast(&mut self, ast: &mut Ast<'ast, 'src>) -> Result<(), ()> {
     let mut status = Status::Ok;
     for funcs in ast.funcs_mut() {
       if let Err(_) = self.resolve_func(funcs) {
@@ -103,13 +103,13 @@ impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
   }
 }
 
-impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
+impl<'ast, 'src, 'resolve> ExpressionVisitorMut<'ast, 'src> for Resolver<'ast, 'src, 'resolve> {
   type VisitReturn = Result<(), ()>;
 
   fn visit_block_mut(
     &mut self,
-    block: &mut BlockExpression<'ast>,
-    expr: &mut Expression<'ast>,
+    block: &mut BlockExpression<'ast, 'src>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = expr.id_mut().init(NodeId(id));
@@ -122,7 +122,7 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
   fn visit_literal_mut(
     &mut self,
     literal: &mut LiteralExpression,
-    expr: &mut Expression<'ast>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = expr.id_mut().init(NodeId(id));
@@ -131,8 +131,8 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
 
   fn visit_assign_mut(
     &mut self,
-    assign: &mut AssignExpression<'ast>,
-    expr: &mut Expression<'ast>,
+    assign: &mut AssignExpression<'ast, 'src>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = expr.id_mut().init(NodeId(id));
@@ -142,8 +142,8 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
 
   fn visit_binary_mut(
     &mut self,
-    binary: &mut BinaryExpression<'ast>,
-    expr: &mut Expression<'ast>,
+    binary: &mut BinaryExpression<'ast, 'src>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = expr.id_mut().init(NodeId(id));
@@ -156,7 +156,7 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
   fn visit_identifier_mut(
     &mut self,
     identifier: &mut IdentifierExpression,
-    expr: &mut Expression<'ast>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = expr.id_mut().init(NodeId(id));
@@ -164,13 +164,13 @@ impl<'ast, 'resolve> ExpressionVisitorMut<'ast> for Resolver<'ast, 'resolve> {
   }
 }
 
-impl<'ast, 'resolve> StatementVisitorMut<'ast> for Resolver<'ast, 'resolve> {
+impl<'ast, 'src, 'resolve> StatementVisitorMut<'ast, 'src> for Resolver<'ast, 'src, 'resolve> {
   type VisitReturn = Result<(), ()>;
 
   fn visit_expression_mut(
     &mut self,
-    expr: &mut Expression<'ast>,
-    statement: &mut Statement<'ast>,
+    expr: &mut Expression<'ast, 'src>,
+    statement: &mut Statement<'ast, 'src>,
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = statement.id_mut().init(NodeId(id));
@@ -180,8 +180,8 @@ impl<'ast, 'resolve> StatementVisitorMut<'ast> for Resolver<'ast, 'resolve> {
 
   fn visit_variable_mut(
     &mut self,
-    variable: &mut VariableStatement<'ast>,
-    statement: &mut Statement<'ast>,
+    variable: &mut VariableStatement<'ast, 'src>,
+    statement: &mut Statement<'ast, 'src>,
   ) -> Self::VisitReturn {
     let id = self.next_id();
     _ = statement.id_mut().init(NodeId(id));

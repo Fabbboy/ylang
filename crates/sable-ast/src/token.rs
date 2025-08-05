@@ -56,23 +56,23 @@ pub enum TokenData {
 
 #[derive(Getters, Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
-pub struct Token<'ctx> {
+pub struct Token<'src> {
   #[getset(get = "pub")]
   kind: TokenKind,
   #[getset(get = "pub")]
   data: Option<TokenData>,
   #[getset(get = "pub")]
-  lexeme: &'ctx str,
+  lexeme: &'src str,
   #[getset(get = "pub")]
-  location: Location<'ctx>,
+  location: Location<'src>,
 }
 
-impl<'ctx> Token<'ctx> {
+impl<'src> Token<'src> {
   pub fn new(
     kind: TokenKind,
     data: Option<TokenData>,
-    lexeme: &'ctx str,
-    location: Location<'ctx>,
+    lexeme: &'src str,
+    location: Location<'src>,
   ) -> Self {
     Self {
       kind,

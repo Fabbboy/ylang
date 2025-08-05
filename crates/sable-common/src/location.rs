@@ -6,15 +6,15 @@ use crate::file::FileId;
 
 #[derive(Getters, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct Location<'ctx> {
+pub struct Location<'src> {
   #[getset(get = "pub")]
   range: Range<usize>,
   #[getset(get = "pub")]
-  filename: FileId<'ctx>,
+  filename: FileId<'src>,
 }
 
-impl<'ctx> Location<'ctx> {
-  pub fn new(range: Range<usize>, filename: FileId<'ctx>) -> Self {
+impl<'src> Location<'src> {
+  pub fn new(range: Range<usize>, filename: FileId<'src>) -> Self {
     Self { range, filename }
   }
 

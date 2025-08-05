@@ -23,11 +23,11 @@ use sable_common::{
 
 #[derive(Debug, Getters, MutGetters, TypedBuilder)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub struct Expression<'ast> {
+pub struct Expression<'ast, 'src> {
   #[getset(get = "pub")]
-  location: Location<'ast>,
+  location: Location<'src>,
   #[getset(get = "pub", get_mut = "pub")]
-  kind: ExpressionKind<'ast>,
+  kind: ExpressionKind<'ast, 'src>,
   #[getset(get = "pub", get_mut = "pub")]
   #[builder(default)]
   id: Once<NodeId>,
@@ -35,43 +35,43 @@ pub struct Expression<'ast> {
 
 #[derive(Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
-pub enum ExpressionKind<'ast> {
-  Block(BlockExpression<'ast>),
+pub enum ExpressionKind<'ast, 'src> {
+  Block(BlockExpression<'ast, 'src>),
   Literal(LiteralExpression),
-  Assign(AssignExpression<'ast>),
-  Binary(BinaryExpression<'ast>),
+  Assign(AssignExpression<'ast, 'src>),
+  Binary(BinaryExpression<'ast, 'src>),
   Identifier(IdentifierExpression),
 }
 
-pub trait ExpressionVisitor<'ast> {
+pub trait ExpressionVisitor<'ast, 'src> {
   type VisitReturn;
 
   fn visit_block(
     &mut self,
-    block: &BlockExpression<'ast>,
-    expr: &Expression<'ast>,
+    block: &BlockExpression<'ast, 'src>,
+    expr: &Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
   fn visit_literal(
     &mut self,
     literal: &LiteralExpression,
-    expr: &Expression<'ast>,
+    expr: &Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
   fn visit_assign(
     &mut self,
-    assign: &AssignExpression<'ast>,
-    expr: &Expression<'ast>,
+    assign: &AssignExpression<'ast, 'src>,
+    expr: &Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
   fn visit_binary(
     &mut self,
-    binary: &BinaryExpression<'ast>,
-    expr: &Expression<'ast>,
+    binary: &BinaryExpression<'ast, 'src>,
+    expr: &Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
   fn visit_identifier(
     &mut self,
     identifier: &IdentifierExpression,
-    expr: &Expression<'ast>,
+    expr: &Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
-  fn visit_expr(&mut self, expr: &Expression<'ast>) -> Self::VisitReturn {
+  fn visit_expr(&mut self, expr: &Expression<'ast, 'src>) -> Self::VisitReturn {
     match &expr.kind {
       ExpressionKind::Block(block) => self.visit_block(block, expr),
       ExpressionKind::Literal(literal) => self.visit_literal(literal, expr),
@@ -82,41 +82,41 @@ pub trait ExpressionVisitor<'ast> {
   }
 }
 
-pub trait ExpressionVisitorMut<'ast> {
+pub trait ExpressionVisitorMut<'ast, 'src> {
   type VisitReturn;
 
   fn visit_block_mut(
     &mut self,
-    block: &mut BlockExpression<'ast>,
-    expr: &mut Expression<'ast>,
+    block: &mut BlockExpression<'ast, 'src>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
   fn visit_literal_mut(
     &mut self,
     literal: &mut LiteralExpression,
-    expr: &mut Expression<'ast>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
   fn visit_assign_mut(
     &mut self,
-    assign: &mut AssignExpression<'ast>,
-    expr: &mut Expression<'ast>,
+    assign: &mut AssignExpression<'ast, 'src>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
   fn visit_binary_mut(
     &mut self,
-    binary: &mut BinaryExpression<'ast>,
-    expr: &mut Expression<'ast>,
+    binary: &mut BinaryExpression<'ast, 'src>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
   fn visit_identifier_mut(
     &mut self,
     identifier: &mut IdentifierExpression,
-    expr: &mut Expression<'ast>,
+    expr: &mut Expression<'ast, 'src>,
   ) -> Self::VisitReturn;
-  fn visit_expr_mut(&mut self, expr: &mut Expression<'ast>) -> Self::VisitReturn {
+  fn visit_expr_mut(&mut self, expr: &mut Expression<'ast, 'src>) -> Self::VisitReturn {
     // SAFETY: We create a raw pointer so that we can obtain simultaneous
     // mutable references to both the expression and its kind. This mirrors
     // the intent of the visitor API while working around the borrow checker,
     // and is safe because the pointer originates from `expr` and is not used
     // after the match statement completes.
-    let expr_ptr: *mut Expression<'ast> = expr;
+    let expr_ptr: *mut Expression<'ast, 'src> = expr;
     unsafe {
       match &mut (*expr_ptr).kind {
         ExpressionKind::Block(block) => self.visit_block_mut(block, &mut *expr_ptr),
@@ -131,14 +131,18 @@ pub trait ExpressionVisitorMut<'ast> {
   }
 }
 
-pub trait VisitableExpr<'ast> {
-  fn accept<V>(&self, expr: &Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+pub trait VisitableExpr<'ast, 'src> {
+  fn accept<V>(&self, expr: &Expression<'ast, 'src>, visitor: &mut V) -> V::VisitReturn
   where
-    V: ExpressionVisitor<'ast>;
+    V: ExpressionVisitor<'ast, 'src>;
 }
 
-pub trait VisitableExprMut<'ast> {
-  fn accept_mut<V>(&mut self, expr: &mut Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+pub trait VisitableExprMut<'ast, 'src> {
+  fn accept_mut<V>(
+    &mut self,
+    expr: &mut Expression<'ast, 'src>,
+    visitor: &mut V,
+  ) -> V::VisitReturn
   where
-    V: ExpressionVisitorMut<'ast>;
+    V: ExpressionVisitorMut<'ast, 'src>;
 }

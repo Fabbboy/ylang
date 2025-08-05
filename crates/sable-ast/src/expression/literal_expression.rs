@@ -16,19 +16,23 @@ pub enum LiteralExpression {
   Float(FloatExpression),
 }
 
-impl<'ast> VisitableExpr<'ast> for LiteralExpression {
-  fn accept<V>(&self, expr: &Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+impl<'ast, 'src> VisitableExpr<'ast, 'src> for LiteralExpression {
+  fn accept<V>(&self, expr: &Expression<'ast, 'src>, visitor: &mut V) -> V::VisitReturn
   where
-    V: ExpressionVisitor<'ast>,
+    V: ExpressionVisitor<'ast, 'src>,
   {
     visitor.visit_literal(self, expr)
   }
 }
 
-impl<'ast> VisitableExprMut<'ast> for LiteralExpression {
-  fn accept_mut<V>(&mut self, expr: &mut Expression<'ast>, visitor: &mut V) -> V::VisitReturn
+impl<'ast, 'src> VisitableExprMut<'ast, 'src> for LiteralExpression {
+  fn accept_mut<V>(
+    &mut self,
+    expr: &mut Expression<'ast, 'src>,
+    visitor: &mut V,
+  ) -> V::VisitReturn
   where
-    V: ExpressionVisitorMut<'ast>,
+    V: ExpressionVisitorMut<'ast, 'src>,
   {
     visitor.visit_literal_mut(self, expr)
   }

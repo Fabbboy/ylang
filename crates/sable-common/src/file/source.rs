@@ -4,15 +4,15 @@ use sable_arena::TypedArena;
 use crate::file::FileId;
 
 #[derive(Getters)]
-pub struct Source<'ctx> {
+pub struct Source<'src> {
   #[getset(get = "pub")]
-  content: &'ctx str,
+  content: &'src str,
   #[getset(get = "pub")]
-  filename: FileId<'ctx>,
+  filename: FileId<'src>,
 }
 
-impl<'ctx> Source<'ctx> {
-  pub fn new(content: &str, filename: &str, arena: &'ctx TypedArena<Source<'ctx>>) -> Self {
+impl<'src> Source<'src> {
+  pub fn new(content: &str, filename: &str, arena: &'src TypedArena<Source<'src>>) -> Self {
     Self {
       content: arena.alloc_str(content),
       filename: arena.alloc_str(filename),
