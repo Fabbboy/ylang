@@ -1,5 +1,8 @@
 #![feature(allocator_api)]
 use clap::Parser as ClapParser;
+use heaped::arena::dropless::DroplessArena;
+//TODO: Remove sable-arena and replace with heaped arenas
+// TODO: Use DroplessArena and TypedArena<T>
 use sable_arena::{
   TypedArena,
   arena::Arena,
@@ -96,7 +99,7 @@ fn resolve_asts<'ast, 'src, 'resolve>(
 fn main() {
   let args = Args::parse();
 
-  let str_intern_arena = Arena::new();
+  let str_intern_arena = DroplessArena::new(4096); // DO NOT REMOVE WE ARE REPLACEING SABLE ARENA WITH HEAPED ARENA
   let str_intern = StrInterner::new(&str_intern_arena);
 
   let file_arena: TypedArena<Source> = TypedArena::new(); // outlives everything 
