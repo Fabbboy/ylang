@@ -3,7 +3,6 @@ use getset::{
   MutGetters,
 };
 use sable_arena::TypedArena;
-use sable_common::interner::StrInterner;
 
 use crate::hir::{
   item::Item,
@@ -16,19 +15,13 @@ pub struct Package<'hir> {
   item_arena: &'hir TypedArena<Item<'hir>>,
   #[getset(get_mut = "pub", get = "pub")]
   mods: Vec<Module<'hir>>,
-  #[getset(get = "pub")]
-  strintern: &'hir StrInterner<'hir>,
 }
 
 impl<'hir> Package<'hir> {
-  pub fn new(
-    item_arena: &'hir TypedArena<Item<'hir>>,
-    strintern: &'hir StrInterner<'hir>,
-  ) -> Self {
+  pub fn new(item_arena: &'hir TypedArena<Item<'hir>>) -> Self {
     Self {
       item_arena,
       mods: Vec::new(),
-      strintern,
     }
   }
 }

@@ -1,13 +1,13 @@
 #![feature(allocator_api)]
-use std::{
-  io,
-  sync::Arc,
-};
-
 use clap::Parser as ClapParser;
 use sable_arena::{
   TypedArena,
   arena::Arena,
+};
+use sable_lowering::scope::Symbol;
+use std::{
+  io,
+  sync::Arc,
 };
 
 use sable_ast::{
@@ -30,7 +30,11 @@ use sable_hir::{
   hir::item::Item,
   package::Package,
 };
-use sable_lowering::resolver::Resolver;
+use sable_lowering::{
+  resolver::Resolver,
+  scope::Scope,
+};
+use sable_middle::context::Context;
 use sable_parse::{
   lexer::Lexer,
   parser::Parser,
@@ -85,10 +89,13 @@ fn main() {
   let item_arena: TypedArena<Item> = TypedArena::new();
   let str_intern_arena = Arena::new();
   let str_intern = StrInterner::new(&str_intern_arena);
+  let scope_arena: TypedArena<Scope> = TypedArena::new();
+  let symbol_arena: TypedArena<Symbol> = TypedArena::new();
 
   let args = Args::parse();
   let mut manager = Manager::new(&file_arena);
-  let package = Package::new(&item_arena, &str_intern);
+  let context = Context::new(&str_intern, &scope_arena, &symbol_arena);
+  let package = Package::new(&item_arena);
 
   let mut ctxs = vec![];
   let mut sources = vec![];

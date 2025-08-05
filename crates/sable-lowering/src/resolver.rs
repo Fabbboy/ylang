@@ -47,7 +47,7 @@ impl<'ast, 'resolve> Resolver<'ast, 'resolve> {
   // Used for blocks that are not part of an expression and do not carry an ID nor a Expression object.
   fn visit_block(&mut self, block: &mut BlockExpression<'ast>) -> Result<(), ()> {
     for stmt in block.body_mut() {
-      self.visit_stmt_mut(stmt)?;
+      <Self as StatementVisitorMut>::visit_stmt_mut(self, stmt)?;
     }
     Ok(())
   }
