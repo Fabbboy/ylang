@@ -1,10 +1,7 @@
 #![feature(allocator_api)]
 use clap::Parser as ClapParser;
-use heaped::arena::dropless::DroplessArena;
-use sable_arena::{
-  TypedArena,
-  arena::Arena,
-};
+use heaped::arena::DroplessArena;
+use sable_arena::TypedArena;
 use std::{
   io,
   sync::Arc,

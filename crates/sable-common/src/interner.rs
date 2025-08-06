@@ -3,12 +3,8 @@ use std::{
   hash::Hash,
 };
 
-use heaped::arena::dropless::DroplessArena;
+use heaped::arena::{DroplessArena, TypedArena};
 use indexmap::IndexSet;
-use sable_arena::{
-  TypedArena,
-  arena::Arena,
-};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -47,7 +43,7 @@ impl<'intern> StrInterner<'intern> {
 
 pub struct Interner<'intern, T>
 where
-  T: Sized + Eq + Hash,
+  T: Sized + Eq + Hash + Clone,
 {
   inner: &'intern TypedArena<T>,
   index: RefCell<IndexSet<&'intern T>>,
@@ -55,7 +51,7 @@ where
 
 impl<'intern, T> Interner<'intern, T>
 where
-  T: Sized + Eq + Hash,
+  T: Sized + Eq + Hash + Clone,
 {
   pub fn new(arena: &'intern TypedArena<T>) -> Self {
     Self {
@@ -69,7 +65,7 @@ where
     if let Some(existing_index) = index.get_index_of(value) {
       Entry(existing_index)
     } else {
-      let copy = self.inner.alloc_copy(value);
+      let copy = self.inner.alloc(value.clone());
       let (new_index, _) = index.insert_full(copy);
       Entry(new_index)
     }
@@ -92,7 +88,7 @@ mod tests {
 
   #[test]
   fn test_intern() {
-    let arena = TypedArena::<Point>::new();
+    let arena = TypedArena::<Point>::new(1024);
     let interner = Interner::new(&arena);
 
     let point = Point { x: 1, y: 2 };
@@ -102,7 +98,7 @@ mod tests {
 
   #[test]
   fn test_str_intern() {
-    let arena = Arena::new();
+    let arena = DroplessArena::new(1024);
     let interner = StrInterner::new(&arena);
 
     let symbol = interner.intern("hello");
@@ -111,7 +107,7 @@ mod tests {
 
   #[test]
   fn test_get_non_existent() {
-    let arena = Arena::new();
+    let arena = DroplessArena::new(1024);
     let interner = StrInterner::new(&arena);
 
     let symbol = interner.intern("hello");
