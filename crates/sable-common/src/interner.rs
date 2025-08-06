@@ -3,6 +3,7 @@ use std::{
   hash::Hash,
 };
 
+use heaped::arena::dropless::DroplessArena;
 use indexmap::IndexSet;
 use sable_arena::{
   TypedArena,
@@ -16,12 +17,12 @@ pub struct Entry(pub usize);
 #[derive(Debug)]
 pub struct StrInterner<'intern> {
   // SAFETY: we garantee only str's are allocated in this arena
-  inner: &'intern Arena,
+  inner: &'intern DroplessArena,
   indexed: RefCell<IndexSet<&'intern str>>,
 }
 
 impl<'intern> StrInterner<'intern> {
-  pub fn new(arena: &'intern Arena) -> Self {
+  pub fn new(arena: &'intern DroplessArena) -> Self {
     Self {
       inner: arena,
       indexed: RefCell::new(IndexSet::new()),

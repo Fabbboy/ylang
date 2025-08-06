@@ -1,5 +1,6 @@
 #![feature(allocator_api)]
 use clap::Parser as ClapParser;
+use heaped::arena::dropless::DroplessArena;
 use sable_arena::{
   TypedArena,
   arena::Arena,
@@ -96,7 +97,7 @@ fn resolve_asts<'ast, 'src, 'resolve>(
 fn main() {
   let args = Args::parse();
 
-  let str_intern_arena = Arena::new();
+  let str_intern_arena = DroplessArena::new(4096);
   let str_intern = StrInterner::new(&str_intern_arena);
 
   let file_arena: TypedArena<Source> = TypedArena::new(); // outlives everything 

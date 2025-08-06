@@ -12,6 +12,8 @@ sable-hir = { workspace = true }
 sable-lowering = { workspace = true }
 sable-middle = { workspace = true }
 
+heaped = { workspace = true }
+
 ariadne = { workspace = true }
 
 clap = { workspace = true, features = ["derive"] }
