@@ -141,7 +141,7 @@ checksum = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5"
 [[package]]
 name = "heaped"
 version = "0.1.0"
-source = "git+https://github.com/fabbboy/heaped.git?branch=master#29a18fba65f37a45f36bde3bc7ac61655f922b51"
+source = "git+https://github.com/fabbboy/heaped.git?branch=master#3d35b7ad2dbcc00d1f2bc562c276396ef5af25aa"
 
 [[package]]
 name = "heck"
